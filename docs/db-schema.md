@@ -182,7 +182,6 @@ CREATE TABLE products (
     dimensions      JSONB,
     weight_kg       NUMERIC(8,2),
     color           VARCHAR(50),
-    style           VARCHAR(50),
     -- Search
     tags            TEXT[],
     search_vector   TSVECTOR,
@@ -194,7 +193,6 @@ CREATE TABLE products (
 
 CREATE INDEX idx_products_search ON products USING GIN (search_vector);
 CREATE INDEX idx_products_tags ON products USING GIN (tags);
-CREATE INDEX idx_products_style ON products (style);
 ```
 
 ### product_images

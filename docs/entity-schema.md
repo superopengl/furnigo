@@ -200,7 +200,6 @@ system:       { text: string, event: string }
 | dimensions | JSONB | `{ width, depth, height, unit }` |
 | weight_kg | decimal | optional |
 | color | string | optional |
-| style | string | optional (e.g. `modern`, `classic`, `scandinavian`) |
 | tags | string[] | categories and keywords for search and filtering (e.g. `living_room`, `dining`, `modern`, `oak`) |
 | is_active | boolean | default true; inactive products hidden from clients |
 
