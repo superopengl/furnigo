@@ -6,6 +6,19 @@
 
 ---
 
+## Common Fields
+
+Every entity has these computed fields. They are system-managed and not set by application code.
+
+| Field | Type | Rules |
+|-------|------|-------|
+| created_at | timestamp | set on insert; never modified |
+| updated_at | timestamp | set on insert; auto-updated on every modification |
+
+These fields are omitted from individual entity tables below for brevity.
+
+---
+
 ## User
 
 ### Fields

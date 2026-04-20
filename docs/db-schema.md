@@ -33,7 +33,8 @@ CREATE TABLE invitation_codes (
     use_count       INTEGER NOT NULL DEFAULT 0,
     expires_at      TIMESTAMPTZ,
     is_active       BOOLEAN DEFAULT true,
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE INDEX idx_invitation_codes_code ON invitation_codes (code);
@@ -74,7 +75,8 @@ CREATE TABLE auth_tokens (
     expires_at      TIMESTAMPTZ NOT NULL,
     last_used_at    TIMESTAMPTZ,
     revoked_at      TIMESTAMPTZ,
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE INDEX idx_auth_tokens_user ON auth_tokens (user_id);
@@ -95,12 +97,11 @@ CREATE TABLE otp_codes (
     max_attempts    INTEGER NOT NULL DEFAULT 5,
     expires_at      TIMESTAMPTZ NOT NULL,
     verified_at     TIMESTAMPTZ,
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE INDEX idx_otp_codes_lookup ON otp_codes (identifier, purpose, created_at DESC);
-```
-```
 
 ### conversations
 A chat thread. Each order/inquiry gets its own conversation.
@@ -133,6 +134,8 @@ CREATE TABLE conversation_participants (
     joined_at       TIMESTAMPTZ NOT NULL DEFAULT now(),
     last_read_at    TIMESTAMPTZ,
     is_muted        BOOLEAN DEFAULT false,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
     PRIMARY KEY (conversation_id, user_id)
 );
 ```
@@ -155,6 +158,7 @@ CREATE TABLE messages (
     ai_cost_cents   INTEGER,
     -- Metadata
     created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
     is_deleted      BOOLEAN DEFAULT false
 );
 
@@ -211,7 +215,9 @@ CREATE TABLE product_images (
     url         VARCHAR(500) NOT NULL,
     thumbnail_url VARCHAR(500),
     sort_order  INTEGER DEFAULT 0,
-    is_primary  BOOLEAN DEFAULT false
+    is_primary  BOOLEAN DEFAULT false,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 ```
 
@@ -232,7 +238,8 @@ CREATE TABLE manufacturers (
     rating          NUMERIC(2,1),
     is_verified     BOOLEAN DEFAULT false,
     is_active       BOOLEAN DEFAULT true,
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 ```
 
@@ -276,7 +283,9 @@ CREATE TABLE order_items (
     product_id  UUID NOT NULL REFERENCES products(id),
     quantity    INTEGER NOT NULL DEFAULT 1,
     unit_price  INTEGER NOT NULL,
-    notes       TEXT
+    notes       TEXT,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 ```
 
@@ -347,7 +356,8 @@ CREATE TABLE promotions (
     starts_at       TIMESTAMPTZ NOT NULL,
     ends_at         TIMESTAMPTZ NOT NULL,
     is_active       BOOLEAN DEFAULT true,
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 ```
 
