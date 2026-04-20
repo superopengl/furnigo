@@ -110,14 +110,7 @@ A chat thread. Each order/inquiry gets its own conversation.
 CREATE TABLE conversations (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     title           VARCHAR(255),
-    type            VARCHAR(20) NOT NULL CHECK (type IN ('inquiry', 'order', 'trip', 'support')),
-    status          VARCHAR(20) NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'archived', 'closed')),
     order_id        UUID REFERENCES orders(id),
-    trip_id         UUID REFERENCES trips(id),
-    -- AI state
-    ai_enabled      BOOLEAN DEFAULT true,
-    ai_summary      TEXT,
-    ai_summary_at   TIMESTAMPTZ,
     created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
 );

@@ -117,20 +117,10 @@ These fields are omitted from individual entity tables below for brevity.
 |-------|------|-------|
 | id | UUID | system-generated |
 | title | string | optional; auto-generated from first message if not set |
-| type | enum | `inquiry`, `order`, `trip`, `support` |
-| status | enum | `active`, `archived`, `closed` |
-| order_id | UUID | optional; links to Order when type=`order` |
-| trip_id | UUID | optional; links to Trip when type=`trip` |
-| ai_enabled | boolean | default true; admin can disable per conversation |
-| ai_summary | text | latest AI-generated summary |
-| ai_summary_at | timestamp | when summary was last generated |
+| order_id | UUID | optional; links to Order |
 
 ### Business Rules
-- A `closed` conversation cannot receive new messages
-- An `archived` conversation is read-only but visible
-- Only admins can close or re-open a conversation
-- `ai_enabled=false` suppresses all AI responses in that thread
-- `order_id` and `trip_id` are mutually exclusive
+- A conversation must always have at least one `client` participant
 
 ---
 
