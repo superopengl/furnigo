@@ -317,7 +317,6 @@ POST   /orders                 — Create order (from cart or conversation)
 GET    /orders/:id             — Get order detail
 PUT    /orders/:id             — Update order
 PUT    /orders/:id/status      — Update order status (agent only)
-POST   /orders/:id/pay         — Initiate payment
 ```
 
 ### POST /orders

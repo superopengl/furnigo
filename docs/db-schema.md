@@ -141,7 +141,7 @@ CREATE TABLE messages (
     sender_id       UUID REFERENCES users(id),
     sender_role     VARCHAR(20) NOT NULL CHECK (sender_role IN ('client', 'assistant', 'agent', 'system')),
     -- Content
-    content_type    VARCHAR(20) NOT NULL CHECK (content_type IN ('text', 'image', 'voice', 'product_card', 'order_card', 'payment_link', 'summary', 'system')),
+    content_type    VARCHAR(20) NOT NULL CHECK (content_type IN ('text', 'image', 'voice', 'product_card', 'order_card', 'summary', 'system')),
     content         JSONB NOT NULL,
     -- AI metadata (only for assistant messages)
     ai_model        VARCHAR(50),

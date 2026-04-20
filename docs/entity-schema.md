@@ -154,7 +154,7 @@ These fields are omitted from individual entity tables below for brevity.
 | conversation_id | UUID | references Conversation |
 | sender_id | UUID | references User; null for system messages |
 | sender_role | enum | `client`, `assistant`, `agent`, `system` |
-| content_type | enum | `text`, `image`, `voice`, `product_card`, `order_card`, `payment_link`, `summary`, `system` |
+| content_type | enum | `text`, `image`, `voice`, `product_card`, `order_card`, `summary`, `system` |
 | content | JSONB | shape depends on content_type (see below) |
 | ai_model | string | only set when sender_role=`assistant` |
 | ai_tokens_used | integer | only set when sender_role=`assistant` |
@@ -168,7 +168,6 @@ image:        { url: string, thumbnail_url: string, caption?: string }
 voice:        { url: string, duration_seconds: number }
 product_card: { product_id: string, name: string, price: number, image_url: string }
 order_card:   { order_id: string, status: string, eta?: string }
-payment_link: { order_id: string, amount: number, url: string, expires_at: string }
 summary:      { text: string, message_count: number }
 system:       { text: string, event: string }
 ```

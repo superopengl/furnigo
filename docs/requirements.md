@@ -61,7 +61,6 @@ The core UX is a WeChat-style group chat thread per order/inquiry:
 - AI-generated conversation summaries (catch up on long threads)
 - Promotional messages and product cards
 - Order status cards (inline in chat)
-- Payment links and receipts
 - Seamless handoff between AI and human agents
 
 ## Authentication & Access
@@ -86,7 +85,7 @@ The core UX is a WeChat-style group chat thread per order/inquiry:
 ### Human Agent
 - As an agent, I want to see the AI's conversation summary before I join a thread
 - As an agent, I want to be notified when a client needs human assistance
-- As an agent, I want to send product cards and payment links in chat
+- As an agent, I want to send product cards in chat
 - As an agent, I want to update order status from the field (factory, warehouse, delivery)
 
 ### Admin

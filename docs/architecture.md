@@ -102,7 +102,6 @@
 - **Local LLM (Ollama)** — Simple responses (greetings, FAQs, translations)
 - **AWS S3** — Image and file storage
 - **AWS SES / SNS** — Email and push notifications
-- **Payment gateway** — TBD (Stripe or local AU provider)
 - **Shipping API** — Integration with freight forwarders
 
 ## Deployment (AWS)
