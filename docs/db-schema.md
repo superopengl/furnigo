@@ -52,9 +52,7 @@ CREATE TABLE users (
     avatar_url      VARCHAR(500),
     locale          VARCHAR(10) DEFAULT 'en-AU',
     invitation_code_id UUID REFERENCES invitation_codes(id),
-    -- Agent-specific fields
-    agent_type      VARCHAR(20) CHECK (agent_type IN ('salesperson', 'tour_guide', 'driver', 'support', NULL)),
-    is_available    BOOLEAN DEFAULT true,
+    is_active       BOOLEAN DEFAULT true,
     -- Metadata
     created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at      TIMESTAMPTZ NOT NULL DEFAULT now(),

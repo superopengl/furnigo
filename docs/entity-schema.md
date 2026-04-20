@@ -19,15 +19,13 @@
 | avatar_url | string | optional |
 | locale | string | default `en-AU` |
 | invitation_code_id | UUID | required for clients; null for agents/admins |
-| agent_type | enum | `salesperson`, `tour_guide`, `driver`, `support`; only set when role=`agent` |
-| is_available | boolean | only relevant when role=`agent`; default true |
+| is_active | boolean | default true; soft deactivation for all roles |
 
 ### Business Rules
 - At least one of `email` or `phone` must be present
-- `agent_type` must be null when role is `client` or `admin`
 - `invitation_code_id` is required for role=`client`, null for `agent` and `admin`
 - A user cannot change their own role
-- Deactivation is soft — users are never hard deleted
+- Deactivation is soft — set `is_active=false`, never hard delete
 
 ---
 
