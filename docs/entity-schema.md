@@ -184,29 +184,30 @@ system:       { text: string, event: string }
 
 ## Product
 
+Products are inspiration references, not exact purchase listings. Prices are indicative ranges only — actual selection and pricing happens in-person during factory/shop visits in Foshan.
+
 ### Fields
 | Field | Type | Rules |
 |-------|------|-------|
 | id | UUID | system-generated |
-| manufacturer_id | UUID | references Manufacturer |
+| manufacturer_id | UUID | optional; references Manufacturer |
 | name | string | required; English |
 | name_zh | string | optional; Simplified Chinese |
 | description | text | optional |
 | description_zh | text | optional |
-| factory_price | integer | AUD cents; what Furnigo pays |
-| retail_price | integer | AUD cents; what client pays |
+| price_min | integer | AUD cents; indicative lower bound; optional |
+| price_max | integer | AUD cents; indicative upper bound; optional |
 | material | string | optional |
-| dimensions | JSONB | `{ width, depth, height, unit }` |
-| weight_kg | decimal | optional |
+| dimensions | JSONB | optional; `{ width, depth, height, unit }` |
 | color | string | optional |
-| tags | string[] | categories and keywords for search and filtering (e.g. `living_room`, `dining`, `modern`, `oak`) |
-| is_active | boolean | default true; inactive products hidden from clients |
+| tags | string[] | categories and keywords (e.g. `living_room`, `dining`, `modern`, `oak`) |
+| is_active | boolean | default true |
 
 ### Business Rules
-- `retail_price` must be >= `factory_price`
-- A product must have at least one image to be visible to clients
-- Deactivated products remain on existing orders but cannot be added to new ones
-- `tags` must have at least one entry
+- `price_max` must be >= `price_min` when both are set
+- Both price fields are optional — a product may have no price guidance at all
+- Images are optional; products without images can still be shared in chat
+- `tags` should have at least one entry for discoverability
 - Full-text search covers `name`, `name_zh`, `description`, `tags`
 
 ---

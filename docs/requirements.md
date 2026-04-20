@@ -2,31 +2,32 @@
 
 ## Overview
 
-Furnigo is a mobile platform that helps Australian residents purchase home furniture directly from manufacturers in Foshan, China. It combines AI-assisted product discovery with full-service logistics — from factory visits to doorstep delivery and setup.
+Furnigo helps Australian residents buy home furniture from Foshan, China. The core service is arranging overseas trips where clients visit local shops and factories in person. Products are browsed in-app as inspiration and general guidance — actual selection, pricing, and purchasing happens on the ground during the trip. Prices shown are indicative ranges only, not fixed retail prices.
 
 ## Target Users
 
-- **Clients:** Australian residents looking for quality home furniture at factory-direct prices
+- **Clients:** Australian residents looking for quality home furniture sourced from Foshan, China
 - **Human Agents:** Salespeople, tour guides, drivers, customer service reps operating in both Australia and China
 - **Admins:** Internal Furnigo staff managing the platform via the admin portal
 
 ## Core Services
 
-### 1. Product Discovery & Advice
-- Browse furniture catalogues from Foshan manufacturers
-- AI assistant provides personalized recommendations based on room type, style, budget
-- Photo-based search (upload a photo, find similar products)
-- Price comparison across manufacturers
+### 1. Product Inspiration
+- Browse a curated (not exhaustive) selection of furniture examples from Foshan
+- Products serve as style and price-range references, not exact purchase listings
+- AI assistant helps clients articulate their style preferences and budget
+- Agents share relevant product examples in chat during trip planning
 
-### 2. Overseas Trip Arrangement
+### 2. Overseas Trip Arrangement (Core Service)
 - Arrange trips to Foshan furniture markets for clients
 - Flight and hotel booking assistance
-- Factory visit scheduling
+- Factory and shop visit scheduling
 - Tour guide assignment
 - Itinerary planning
+- All actual product selection and pricing happens in-person during the trip
 
 ### 3. Purchase Guidance
-- In-factory purchase support (on-site or remote)
+- In-factory purchase support during the trip
 - Quality inspection guidance
 - Price negotiation tips
 - Order consolidation from multiple factories
@@ -76,9 +77,9 @@ The core UX is a WeChat-style group chat thread per order/inquiry:
 - As a client, I want to register using an invitation code I received from a Furnigo agent
 - As a client, I want to sign in with my phone number or email via OTP (no password)
 - As a client, I want to stay signed in on my phone without re-authenticating frequently
-- As a client, I want to describe my furniture needs and get AI recommendations
-- As a client, I want to see promotions relevant to my style preferences
-- As a client, I want to track my order from factory to my front door
+- As a client, I want to browse furniture examples for style and price-range inspiration
+- As a client, I want to describe my needs and get AI suggestions on what to look for on my trip
+- As a client, I want to track my order (placed during my trip) from factory to my front door
 - As a client, I want to chat with a human agent when the AI can't help
 - As a client, I want summaries of long chat threads so I can catch up quickly
 

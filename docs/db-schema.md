@@ -167,18 +167,17 @@ Furniture products from Foshan manufacturers.
 ```sql
 CREATE TABLE products (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    manufacturer_id UUID NOT NULL REFERENCES manufacturers(id),
+    manufacturer_id UUID REFERENCES manufacturers(id),
     name            VARCHAR(255) NOT NULL,
     name_zh         VARCHAR(255),
     description     TEXT,
     description_zh  TEXT,
-    -- Pricing (in AUD cents)
-    factory_price   INTEGER NOT NULL,
-    retail_price    INTEGER NOT NULL,
+    -- Indicative price range (AUD cents); both optional
+    price_min       INTEGER,
+    price_max       INTEGER,
     -- Attributes
     material        VARCHAR(100),
     dimensions      JSONB,
-    weight_kg       NUMERIC(8,2),
     color           VARCHAR(50),
     -- Search
     tags            TEXT[],
@@ -186,7 +185,8 @@ CREATE TABLE products (
     -- Status
     is_active       BOOLEAN DEFAULT true,
     created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CONSTRAINT products_price_range_check CHECK (price_max IS NULL OR price_min IS NULL OR price_max >= price_min)
 );
 
 CREATE INDEX idx_products_search ON products USING GIN (search_vector);
