@@ -9,8 +9,6 @@ invitation_codes ─< users ─┬─< conversations_participants >─┬─ con
                            │     │                            │
                            │     └─< shipments                │
                            │                                  │
-                           ├─< trips                          │
-                           │                                  │
                            └─< auth_tokens                    │
                                                               │
 products ─< product_images                                    │
@@ -305,33 +303,6 @@ CREATE TABLE shipments (
 );
 ```
 
-### trips
-Overseas trip to Foshan for factory visits.
-
-```sql
-CREATE TABLE trips (
-    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    client_id       UUID NOT NULL REFERENCES users(id),
-    guide_id        UUID REFERENCES users(id),
-    status          VARCHAR(20) NOT NULL DEFAULT 'planning' CHECK (status IN (
-        'planning', 'booked', 'in_progress', 'completed', 'cancelled'
-    )),
-    -- Dates
-    departure_date  DATE,
-    return_date     DATE,
-    -- Details
-    itinerary       JSONB,
-    factory_visits  JSONB,
-    hotel_details   JSONB,
-    flight_details  JSONB,
-    -- Financials (AUD cents)
-    estimated_cost  INTEGER,
-    actual_cost     INTEGER,
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-```
-
 ### promotions
 
 ```sql
@@ -364,7 +335,4 @@ CREATE INDEX idx_orders_status ON orders (status);
 CREATE INDEX idx_shipments_order ON shipments (order_id);
 CREATE INDEX idx_shipments_tracking ON shipments (tracking_number);
 
--- Trip lookups
-CREATE INDEX idx_trips_client ON trips (client_id);
-CREATE INDEX idx_trips_guide ON trips (guide_id);
 ```

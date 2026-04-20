@@ -387,34 +387,6 @@ PUT    /shipments/:id/status   — Update shipment status (agent only)
 
 ---
 
-## Trips
-
-```
-GET    /trips                  — List user's trips
-POST   /trips                  — Create trip plan
-GET    /trips/:id              — Get trip detail
-PUT    /trips/:id              — Update trip
-PUT    /trips/:id/status       — Update trip status
-```
-
-### POST /trips
-
-```json
-// Request
-{
-  "departure_date": "2026-07-01",
-  "return_date": "2026-07-05",
-  "factory_visits": [
-    { "manufacturer_id": "uuid", "preferred_date": "2026-07-02" },
-    { "manufacturer_id": "uuid", "preferred_date": "2026-07-03" }
-  ],
-  "needs_hotel": true,
-  "needs_guide": true
-}
-```
-
----
-
 ## Promotions
 
 ```

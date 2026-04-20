@@ -323,37 +323,6 @@ pending → container_loaded → in_transit_sea → arrived_au_port
 
 ---
 
-## Trip
-
-### Status Lifecycle
-```
-planning → booked → in_progress → completed
-```
-Terminal state: `cancelled`
-
-### Fields
-| Field | Type | Rules |
-|-------|------|-------|
-| id | UUID | system-generated |
-| client_id | UUID | references User (role=client) |
-| guide_id | UUID | references User (agent_type=tour_guide); optional |
-| status | enum | see lifecycle above |
-| departure_date | date | required before status moves past `planning` |
-| return_date | date | must be after departure_date |
-| itinerary | JSONB | daily schedule |
-| factory_visits | JSONB | array of `{ manufacturer_id, date, notes }` |
-| hotel_details | JSONB | optional |
-| flight_details | JSONB | optional |
-| estimated_cost | integer | AUD cents |
-| actual_cost | integer | AUD cents; set on completion |
-
-### Business Rules
-- `return_date` must be after `departure_date`
-- A guide must be assigned before status can move to `booked`
-- `actual_cost` is set when status moves to `completed`
-
----
-
 ## Promotion
 
 ### Fields
