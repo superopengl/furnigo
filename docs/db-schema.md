@@ -174,8 +174,6 @@ CREATE TABLE products (
     name_zh         VARCHAR(255),
     description     TEXT,
     description_zh  TEXT,
-    category        VARCHAR(50) NOT NULL,
-    subcategory     VARCHAR(50),
     -- Pricing (in AUD cents)
     factory_price   INTEGER NOT NULL,
     retail_price    INTEGER NOT NULL,
@@ -195,7 +193,7 @@ CREATE TABLE products (
 );
 
 CREATE INDEX idx_products_search ON products USING GIN (search_vector);
-CREATE INDEX idx_products_category ON products (category, subcategory);
+CREATE INDEX idx_products_tags ON products USING GIN (tags);
 CREATE INDEX idx_products_style ON products (style);
 ```
 

@@ -194,8 +194,6 @@ system:       { text: string, event: string }
 | name_zh | string | optional; Simplified Chinese |
 | description | text | optional |
 | description_zh | text | optional |
-| category | string | required (e.g. `living_room`, `dining`, `bedroom`, `office`) |
-| subcategory | string | optional |
 | factory_price | integer | AUD cents; what Furnigo pays |
 | retail_price | integer | AUD cents; what client pays |
 | material | string | optional |
@@ -203,13 +201,14 @@ system:       { text: string, event: string }
 | weight_kg | decimal | optional |
 | color | string | optional |
 | style | string | optional (e.g. `modern`, `classic`, `scandinavian`) |
-| tags | string[] | for search and filtering |
+| tags | string[] | categories and keywords for search and filtering (e.g. `living_room`, `dining`, `modern`, `oak`) |
 | is_active | boolean | default true; inactive products hidden from clients |
 
 ### Business Rules
 - `retail_price` must be >= `factory_price`
 - A product must have at least one image to be visible to clients
 - Deactivated products remain on existing orders but cannot be added to new ones
+- `tags` must have at least one entry
 - Full-text search covers `name`, `name_zh`, `description`, `tags`
 
 ---
