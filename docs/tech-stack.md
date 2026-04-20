@@ -113,10 +113,27 @@ furnigo/
 └── turbo.json
 ```
 
+## Payment Services
+
+| Concern | Choice |
+|---------|--------|
+| Client payments (AUD) | Stripe — card payments, BPAY, PayID, bank transfer |
+| Supplier payouts (AUD → CNY) | Airwallex — AU-founded, built for AU-Asia cross-border |
+
+**Flow:**
+```
+Client pays in AUD  →  Stripe  →  Furnigo AUD account
+                                         ↓
+                          Airwallex (AUD → CNY)
+                                         ↓
+                          Foshan supplier paid in CNY
+```
+
 ## Key Decisions Log
 
 - **Fastify over Express** — Better performance for concurrent WebSocket + streaming connections
 - **Drizzle over Prisma** — Schema is hand-designed; Drizzle's SQL-close syntax avoids Prisma magic
 - **No LangChain** — Agent has 7 well-defined tools; direct Claude API calls are simpler to debug
 - **LM Studio (dev) / Ollama (prod)** — Both expose OpenAI-compatible API, same gateway code works for both
+- **Stripe for client payments, Airwallex for supplier payouts** — Stripe handles AUD collection; Airwallex handles AUD→CNY cross-border to Foshan suppliers
 - **BullMQ from day one** — OTP expiry, async AI responses, push notifications all need a queue
