@@ -5,7 +5,7 @@
 ```
 invitation_codes ─< users ─┬─< conversations_participants >─┬─ conversations ─< messages
                            │                                  │
-                           ├─< orders ─< order_items          │
+                           ├─< orders ─< order_items          ├─< wishlist_items
                            │     │                            │
                            │     └─< shipments                │
                            │                                  │
@@ -141,7 +141,7 @@ CREATE TABLE messages (
     sender_id       UUID REFERENCES users(id),
     sender_role     VARCHAR(20) NOT NULL CHECK (sender_role IN ('client', 'assistant', 'agent', 'system')),
     -- Content
-    content_type    VARCHAR(20) NOT NULL CHECK (content_type IN ('text', 'image', 'voice', 'product_card', 'order_card', 'summary', 'system')),
+    content_type    VARCHAR(20) NOT NULL CHECK (content_type IN ('text', 'image', 'voice', 'product_card', 'order_card', 'wishlist_item', 'wishlist_summary', 'summary', 'system')),
     content         JSONB NOT NULL,
     -- AI metadata (only for assistant messages)
     ai_model        VARCHAR(50),
@@ -159,6 +159,32 @@ CREATE TABLE messages (
 -- Product card: {"product_id": "uuid", "name": "Oak Dining Table", "price": 150000, "image_url": "..."}
 -- Order card:   {"order_id": "uuid", "status": "shipped", "eta": "2026-05-15"}
 -- Summary:      {"text": "Summary of 47 messages: Client is looking for...", "message_count": 47}
+```
+
+### wishlist_items
+Items a client spots and saves during their Foshan shopping trip.
+
+```sql
+CREATE TABLE wishlist_items (
+    id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    conversation_id     UUID NOT NULL REFERENCES conversations(id),
+    client_id           UUID NOT NULL REFERENCES users(id),
+    name                VARCHAR(255),
+    notes               TEXT,
+    photo_urls          TEXT[],
+    price_cny           INTEGER,
+    price_aud_estimate  INTEGER,
+    quantity            INTEGER NOT NULL DEFAULT 1,
+    status              VARCHAR(20) NOT NULL DEFAULT 'considering' CHECK (status IN ('considering', 'decided', 'removed')),
+    created_at          TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at          TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CONSTRAINT wishlist_items_content_check CHECK (
+        name IS NOT NULL OR notes IS NOT NULL OR (photo_urls IS NOT NULL AND array_length(photo_urls, 1) > 0)
+    )
+);
+
+CREATE INDEX idx_wishlist_items_conversation ON wishlist_items (conversation_id, status);
+CREATE INDEX idx_wishlist_items_client ON wishlist_items (client_id);
 ```
 
 ### products

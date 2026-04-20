@@ -309,6 +309,66 @@ Note: The AI assistant response arrives via WebSocket, not in this HTTP response
 
 ---
 
+## Wishlist
+
+```
+GET    /conversations/:id/wishlist          — List wishlist items for a conversation
+POST   /conversations/:id/wishlist          — Add a wishlist item
+PUT    /conversations/:id/wishlist/:itemId  — Update item (name, notes, price, quantity, status)
+DELETE /conversations/:id/wishlist/:itemId  — Remove item (sets status to removed)
+GET    /conversations/:id/wishlist/summary  — AI-generated summary with cost estimates
+```
+
+### POST /conversations/:id/wishlist
+
+```json
+// Request
+{
+  "name": "Grey linen sofa",
+  "notes": "Seen at Factory A, 3-seater, light grey fabric",
+  "photo_urls": ["https://cdn.furnigo.com.au/uploads/uuid.jpg"],
+  "price_cny": 3800,
+  "quantity": 1
+}
+
+// Response
+{
+  "success": true,
+  "data": {
+    "id": "uuid",
+    "name": "Grey linen sofa",
+    "notes": "Seen at Factory A, 3-seater, light grey fabric",
+    "photo_urls": ["https://cdn.furnigo.com.au/uploads/uuid.jpg"],
+    "price_cny": 3800,
+    "price_aud_estimate": 87000,
+    "quantity": 1,
+    "status": "considering"
+  }
+}
+```
+
+### GET /conversations/:id/wishlist/summary
+
+```json
+{
+  "success": true,
+  "data": {
+    "items": [
+      { "id": "uuid", "name": "Grey linen sofa", "quantity": 1, "price_aud_estimate": 87000, "status": "considering" },
+      { "id": "uuid", "name": "Oak dining table", "quantity": 1, "price_aud_estimate": 120000, "status": "decided" },
+      { "id": "uuid", "name": "Bedside tables", "quantity": 2, "price_aud_estimate": 35000, "status": "considering" }
+    ],
+    "subtotal_aud_estimate": 277000,
+    "shipping_estimate_aud": 85000,
+    "total_estimate_aud": 362000,
+    "item_count": 4,
+    "ai_narrative": "You have 4 items on your wishlist. Based on the prices discussed, the estimated total including shipping to Melbourne is around $3,620 AUD. The oak dining table is already confirmed. Let me know if you'd like to adjust quantities or remove anything."
+  }
+}
+```
+
+---
+
 ## Orders
 
 ```

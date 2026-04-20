@@ -18,6 +18,14 @@ Furnigo helps Australian residents buy home furniture from Foshan, China. The co
 - AI assistant helps clients articulate their style preferences and budget
 - Agents share relevant product examples in chat during trip planning
 
+### 2. In-Trip Shopping Assistant (Key Use Case)
+- While visiting shops and factories in Foshan, clients use the app as a live shopping journal
+- Client takes a photo of an item they like and posts it in the conversation with a memo
+- Client can add wishlist items with photo, notes, price discussed, and quantity
+- AI can summarize the full wishlist at any point during or after the trip
+- AI provides total cost estimation including item prices and estimated shipping to Australia
+- Agents can add notes or advice directly against wishlist items in chat
+
 ### 2. Overseas Trip Arrangement (Core Service)
 - Arrange trips to Foshan furniture markets for clients
 - Flight and hotel booking assistance
@@ -79,6 +87,8 @@ The core UX is a WeChat-style group chat thread per order/inquiry:
 - As a client, I want to stay signed in on my phone without re-authenticating frequently
 - As a client, I want to browse furniture examples for style and price-range inspiration
 - As a client, I want to describe my needs and get AI suggestions on what to look for on my trip
+- As a client, I want to take a photo of an item in a shop and add it to my wishlist with a memo
+- As a client, I want to ask the AI to summarize my wishlist and show a total cost estimate including shipping
 - As a client, I want to track my order (placed during my trip) from factory to my front door
 - As a client, I want to chat with a human agent when the AI can't help
 - As a client, I want summaries of long chat threads so I can catch up quickly

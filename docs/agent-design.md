@@ -176,6 +176,35 @@ The AI assistant has access to these tools:
 }
 ```
 
+### add_wishlist_item
+```json
+{
+  "name": "add_wishlist_item",
+  "description": "Add an item to the client's wishlist from a photo or memo posted in chat. Use when a client posts a photo of something they like or says they want to remember an item.",
+  "parameters": {
+    "conversation_id": "string — UUID",
+    "name": "string — optional label for the item",
+    "notes": "string — optional memo or description",
+    "photo_urls": ["string — optional array of image URLs from the message"],
+    "price_cny": "integer — optional CNY price if mentioned",
+    "quantity": "integer — default 1"
+  }
+}
+```
+
+### get_wishlist_summary
+```json
+{
+  "name": "get_wishlist_summary",
+  "description": "Retrieve all wishlist items for a conversation and calculate total cost estimates including shipping. Use when a client asks to review their shopping list, see totals, or requests a summary of what they have collected.",
+  "parameters": {
+    "conversation_id": "string — UUID",
+    "include_removed": "boolean — default false",
+    "destination_postcode": "string — optional AU postcode for shipping estimate"
+  }
+}
+```
+
 ### calculate_shipping_estimate
 ```json
 {
