@@ -45,7 +45,7 @@
 |---------|--------|
 | Language | TypeScript everywhere |
 | Monorepo | pnpm workspaces |
-| Local services | Docker Compose (PostgreSQL) |
+| Local services | Host PostgreSQL |
 | Testing — API | Vitest + Supertest |
 | Testing — E2E mobile | Flutter integration tests |
 | Linting | ESLint + Prettier + Husky |
@@ -110,7 +110,6 @@ furnigo/
 │
 ├── docs/                           — Design docs, API spec, schema
 ├── business-model/                 — Business strategy, go-to-market
-├── docker-compose.yml
 ├── pnpm-workspace.yaml
 └── .github/workflows/
 ```

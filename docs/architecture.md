@@ -79,7 +79,7 @@ Production:
 └── Sentry — Error monitoring
 
 Development:
-├── Docker Compose — Local PostgreSQL
+├── Host PostgreSQL (localhost:5432, schema: furnigo)
 └── Local Fastify dev server
 ```
 
