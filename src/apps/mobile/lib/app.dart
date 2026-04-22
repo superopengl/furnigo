@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'router.dart';
 import 'theme/theme.dart';
 
-class FurnigoApp extends StatelessWidget {
+class FurnigoApp extends ConsumerWidget {
   const FurnigoApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(routerProvider);
+
     return MaterialApp.router(
       title: 'Furnigo',
       theme: AppTheme.light,
