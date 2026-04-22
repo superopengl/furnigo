@@ -1,4 +1,8 @@
+import { config } from "dotenv";
 import { z } from "zod";
+
+// Walk up from any package to find .env at repo root
+config({ path: new URL("../../../../.env", import.meta.url).pathname });
 
 const envSchema = z.object({
   DATABASE_URL: z.string().url(),
