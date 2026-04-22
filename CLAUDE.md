@@ -9,8 +9,8 @@ Furniture selling platform connecting Australian home buyers with Foshan (China)
 - **Backend:** Node.js / Fastify REST API + Socket.io WebSocket
 - **ORM:** Drizzle ORM + Drizzle Kit migrations
 - **Database:** PostgreSQL (RDS in prod)
-- **Cloud:** AWS (ECS Fargate, RDS, S3, SES)
-- **Monorepo:** pnpm workspaces + Turborepo
+- **Cloud:** Railway (API), Neon (PostgreSQL), Cloudflare R2 (storage), AWS SES (email)
+- **Monorepo:** pnpm workspaces
 
 ## Key Docs
 
@@ -21,6 +21,17 @@ Furniture selling platform connecting Australian home buyers with Foshan (China)
 - [API Design](docs/api.md) — REST endpoints, request/response contracts
 - [Tech Stack](docs/tech-stack.md) — Full framework choices and decision rationale
 - [Color Palette](docs/color-palette.md) — UX design color tokens
+
+## Project Structure
+
+All code lives under `src/`. Root level is for docs, config, and non-code resources.
+
+- `src/apps/mobile/` — Flutter app (Dart, standalone, not in pnpm workspace)
+- `src/apps/api/` — Fastify backend (TypeScript, pnpm workspace member)
+- `src/apps/admin/` — Next.js admin portal (TypeScript, pnpm workspace member)
+- `src/packages/db/` — Drizzle schema + migrations (shared by api and admin)
+- `src/packages/types/` — Shared TypeScript types
+- `src/packages/config/` — Shared env validation (Zod)
 
 ## Conventions
 

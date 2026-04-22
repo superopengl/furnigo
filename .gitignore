@@ -9,8 +9,6 @@ build/
 .next/
 out/
 
-# Turbo
-.turbo/
 
 # Environment variables
 .env
@@ -43,26 +41,16 @@ Thumbs.db
 coverage/
 .vitest/
 
-# Expo / React Native
-.expo/
-.expo-shared/
-ios/
-android/
-*.jks
-*.p8
-*.p12
-*.key
-*.mobileprovision
-*.orig.*
+# Flutter
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+*.iml
 
 # Next.js
 .next/
 next-env.d.ts
 
-# AWS
-.aws/
-cdk.out/
-cdk.context.json
 
 # Docker
 .dockerignore

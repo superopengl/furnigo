@@ -19,8 +19,8 @@
               └───┬─────────────┘
                   │
                   ▼
-    ┌─────────────────┐
-    │ PostgreSQL (RDS) │
+    ┌──────────────────┐
+    │ PostgreSQL (Neon) │
     └──────────────────┘
 ```
 
@@ -30,7 +30,6 @@
 - **Purpose:** Client and agent-facing mobile application
 - **Key features:**
   - Chat interface (WeChat-style group chats)
-  - Order tracking
   - Push notifications
   - Image/voice message support
 - **State management:** Riverpod
@@ -42,7 +41,6 @@
 - **Key features:**
   - User management (clients + agents)
   - Live chat monitoring and intervention
-  - Order and shipment management
 - **Auth:** Email + password with session cookies (separate from client OTP flow)
 
 ### 3. Fastify API Server
@@ -60,30 +58,29 @@
   - Rate limiting
   - Request validation (Zod)
 
-### 4. PostgreSQL Database
+### 4. PostgreSQL Database (Neon)
 - **Purpose:** Persistent storage for all application data
 - **Key considerations:**
   - JSONB columns for flexible chat message content (text, images, cards)
-  - Row-level security for multi-tenant data isolation
+  - Managed by Neon — free tier, connection pooling built in
 
 ### 5. External Services
-- **AWS S3** — Image and file storage
+- **Cloudflare R2** — Image and file storage (S3-compatible, no egress fees)
 - **AWS SES** — Email (OTP, notifications)
 
-## Deployment (AWS)
+## Deployment
 
 ```
 Production:
-├── ECS Fargate — API Server containers
-├── RDS PostgreSQL — Managed database
-├── S3 — Static assets, uploaded images
-├── CloudFront — CDN for assets
-├── ALB — Load balancer with SSL termination
-└── CloudWatch — Logging and monitoring
+├── Railway — Fastify API server
+├── Neon — Managed PostgreSQL
+├── Cloudflare R2 — File storage
+├── AWS SES — Email
+└── Sentry — Error monitoring
 
 Development:
-├── Docker Compose — All services locally
-└── Local PostgreSQL
+├── Docker Compose — Local PostgreSQL
+└── Local Fastify dev server
 ```
 
 ## Data Flow: Chat Message

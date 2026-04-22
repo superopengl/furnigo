@@ -1,0 +1,12 @@
+{
+  "name": "furnigo",
+  "private": true,
+  "scripts": {
+    "dev:api": "pnpm --filter @furnigo/api dev",
+    "dev:admin": "pnpm --filter @furnigo/admin dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "db:generate": "pnpm --filter @furnigo/db generate",
+    "db:migrate": "pnpm --filter @furnigo/db migrate"
+  }
+}
