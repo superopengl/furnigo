@@ -23,6 +23,8 @@ export async function buildApp() {
     }
   });
 
+  app.get("/healthcheck", () => "OK");
+
   // Routes
   await app.register(authRoutes, { prefix: "/v1/auth" });
   await app.register(userRoutes, { prefix: "/v1/users" });
