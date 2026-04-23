@@ -12,7 +12,7 @@ export async function buildApp() {
   const app = Fastify({ logger: true });
 
   await app.register(cors, { origin: true });
-  await app.register(jwt, { secret: env.JWT_SECRET });
+  await app.register(jwt, { secret: env.FURNIGO_API_AUTH_JWT_SECRET });
 
   // Auth decorator
   app.decorate("authenticate", async (request: any, reply: any) => {
