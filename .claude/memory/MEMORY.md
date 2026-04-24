@@ -2,3 +2,4 @@
 - [Jun's dev background](user_background.md) — React/Node/Postgres expert, new to Flutter
 - [FURNIGO_ env prefix](feedback_env_prefix.md) — All env vars must use the FURNIGO_ prefix
 - [Prefer spreading syntax](feedback_spreading_syntax.md) — Use spread over imperative push/assign
+- [Two environments](project_two_envs.md) — Only dev and prod, no staging

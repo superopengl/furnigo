@@ -1,8 +1,14 @@
 import { config } from "dotenv";
 import { z } from "zod";
 
-// Walk up from any package to find .env at repo root
-config({ path: new URL("../../../../.env", import.meta.url).pathname });
+// Walk up from any package to find .env files at repo root
+const root = new URL("../../../../", import.meta.url).pathname;
+const nodeEnv = process.env.NODE_ENV || "development";
+const envFile = nodeEnv === "production" ? ".env.production" : ".env.development";
+
+// Load environment-specific file first, then shared .env as fallback
+config({ path: `${root}${envFile}` });
+config({ path: `${root}.env` });
 
 const envSchema = z.object({
   FURNIGO_OLTP_DATABASE_URL: z.string().url(),
