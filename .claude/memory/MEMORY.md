@@ -1,0 +1,2 @@
+- [Business idea review](business-idea-review.md) — Feasibility assessment, phased approach, non-Chinese client strategy
+- [Jun's dev background](user_background.md) — React/Node/Postgres expert, new to Flutter
