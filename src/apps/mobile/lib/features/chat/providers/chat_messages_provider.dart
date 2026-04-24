@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../shared/models/message_model.dart';
 import '../../../shared/services/message_cache.dart';
@@ -7,6 +8,7 @@ import '../services/chat_service.dart';
 final chatMessagesProvider = StateNotifierProvider.family<
     ChatMessagesNotifier, List<MessageModel>, String>(
   (ref, chatId) => ChatMessagesNotifier(
+    ref,
     ref.read(chatServiceProvider),
     ref.read(socketServiceProvider),
     ref.read(messageCacheProvider),
@@ -14,14 +16,21 @@ final chatMessagesProvider = StateNotifierProvider.family<
   ),
 );
 
+/// Tracks who is currently typing in a given chat.
+final typingUsersProvider = StateProvider.family<Set<String>, String>(
+  (ref, chatId) => {},
+);
+
 class ChatMessagesNotifier extends StateNotifier<List<MessageModel>> {
+  final Ref _ref;
   final ChatService _chatService;
   final SocketService _socketService;
   final MessageCache _messageCache;
   final String chatId;
+  Timer? _typingDebounce;
 
   ChatMessagesNotifier(
-      this._chatService, this._socketService, this._messageCache, this.chatId)
+      this._ref, this._chatService, this._socketService, this._messageCache, this.chatId)
       : super([]) {
     _load();
     _listen();
@@ -66,8 +75,36 @@ class ChatMessagesNotifier extends StateNotifier<List<MessageModel>> {
         if (!state.any((m) => m.id == message.id)) {
           state = [...state, message];
         }
+        // Clear typing indicator for this sender
+        final senderId = msg['senderId'] as String?;
+        if (senderId != null) {
+          _ref.read(typingUsersProvider(chatId).notifier).update(
+            (s) => s.difference({senderId}),
+          );
+        }
       }
     });
+    _socketService.onTyping((data) {
+      if (data['chatId'] != chatId) return;
+      final userId = data['userId'] as String;
+      _ref.read(typingUsersProvider(chatId).notifier).update(
+        (s) => {...s, userId},
+      );
+      // Auto-clear after 3 seconds
+      Future.delayed(const Duration(seconds: 3), () {
+        if (mounted) {
+          _ref.read(typingUsersProvider(chatId).notifier).update(
+            (s) => s.difference({userId}),
+          );
+        }
+      });
+    });
+  }
+
+  void sendTyping() {
+    if (_typingDebounce?.isActive ?? false) return;
+    _socketService.sendTyping(chatId);
+    _typingDebounce = Timer(const Duration(seconds: 2), () {});
   }
 
   Future<void> send(String text) async {
@@ -81,6 +118,7 @@ class ChatMessagesNotifier extends StateNotifier<List<MessageModel>> {
 
   @override
   void dispose() {
+    _typingDebounce?.cancel();
     _socketService.leaveChat(chatId);
     super.dispose();
   }

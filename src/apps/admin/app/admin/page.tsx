@@ -7,7 +7,6 @@ import {
   SearchOutlined,
   LogoutOutlined,
   ReloadOutlined,
-  UserOutlined,
 } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
@@ -43,6 +42,15 @@ interface ChatListItem {
   participants: Participant[];
   lastMessage: Message | null;
 }
+
+const getInitials = (displayName: string | null, email: string) => {
+  if (displayName) {
+    const parts = displayName.trim().split(/\s+/);
+    if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    return parts[0][0].toUpperCase();
+  }
+  return email[0].toUpperCase();
+};
 
 const getRoleColor = (role: string) => {
   if (role === "client") return colors.secondary;
@@ -146,15 +154,15 @@ function ChatsContent() {
             <div key={p.userId} style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <Avatar
                 size={24}
-                icon={<UserOutlined />}
                 style={{
                   backgroundColor: `${getRoleColor(p.role)}25`,
                   color: getRoleColor(p.role),
-                  fontSize: 12,
+                  fontSize: 11,
+                  fontWeight: 600,
                   flexShrink: 0,
                 }}
               >
-                {(p.displayName?.[0] || p.email[0]).toUpperCase()}
+                {getInitials(p.displayName, p.email)}
               </Avatar>
               <div style={{ minWidth: 0 }}>
                 <Text style={{ fontSize: 13, color: dk.text, display: "block", lineHeight: 1.3 }} ellipsis>

@@ -35,6 +35,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     _controller.addListener(() {
       final len = _controller.text.length;
       if (len != _charCount) setState(() => _charCount = len);
+      if (_activeChatId != null && _controller.text.isNotEmpty) {
+        ref.read(chatMessagesProvider(_activeChatId!).notifier).sendTyping();
+      }
     });
     ref.read(authStoreProvider).getUserId().then((id) {
       if (mounted) setState(() => _currentUserId = id);
@@ -291,6 +294,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             child: _buildMessageArea(
                 effectiveChatId, messages, chatsAsync.isLoading, topPadding),
           ),
+          if (effectiveChatId != null) _buildTypingIndicator(effectiveChatId),
           _buildInputBar(),
         ],
       ),
@@ -339,6 +343,27 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           isMe: msg.senderId == _currentUserId,
         );
       },
+    );
+  }
+
+  Widget _buildTypingIndicator(String chatId) {
+    final typingUsers = ref.watch(typingUsersProvider(chatId));
+    // Filter out self
+    final others = typingUsers.where((id) => id != _currentUserId).toSet();
+    if (others.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(left: 24, bottom: 4),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          others.length == 1 ? 'Someone is typing...' : 'Multiple people are typing...',
+          style: const TextStyle(
+            fontSize: 12,
+            color: AppColors.textSecondary,
+            fontStyle: FontStyle.italic,
+          ),
+        ),
+      ),
     );
   }
 

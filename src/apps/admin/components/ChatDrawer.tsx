@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useCallback, useState } from "react";
+import { useEffect, useRef, useCallback, useState, useMemo } from "react";
 import { Drawer, Spin, Typography, Button, Tag } from "antd";
 import { CloseOutlined, ReloadOutlined } from "@ant-design/icons";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -32,6 +32,7 @@ export function ChatDrawer({ chatId, onClose }: ChatDrawerProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const [loadingOlder, setLoadingOlder] = useState(false);
+  const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set());
 
   const { data: chat, isLoading } = useQuery({
     queryKey: ["admin-chat", chatId],
@@ -73,11 +74,31 @@ export function ChatDrawer({ chatId, onClose }: ChatDrawerProps) {
 
     socket.on("message:new", handleNewMessage);
 
+    const typingTimers = new Map<string, ReturnType<typeof setTimeout>>();
+    const handleTyping = (data: { chatId: string; userId: string }) => {
+      if (data.chatId !== chatId || data.userId === user?.id) return;
+      setTypingUsers((prev) => new Set(prev).add(data.userId));
+      // Clear existing timer for this user
+      if (typingTimers.has(data.userId)) clearTimeout(typingTimers.get(data.userId)!);
+      typingTimers.set(data.userId, setTimeout(() => {
+        setTypingUsers((prev) => {
+          const next = new Set(prev);
+          next.delete(data.userId);
+          return next;
+        });
+        typingTimers.delete(data.userId);
+      }, 3000));
+    };
+    socket.on("typing", handleTyping);
+
     return () => {
       socket.off("message:new", handleNewMessage);
+      socket.off("typing", handleTyping);
+      typingTimers.forEach(clearTimeout);
+      setTypingUsers(new Set());
       socket.emit("leave", chatId);
     };
-  }, [chatId, queryClient]);
+  }, [chatId, queryClient, user?.id]);
 
   // Load older messages on scroll to top
   const handleScroll = async () => {
@@ -188,6 +209,15 @@ export function ChatDrawer({ chatId, onClose }: ChatDrawerProps) {
           </>
         )}
       </div>
+
+      {/* Typing indicator */}
+      {typingUsers.size > 0 && (
+        <div style={{ padding: "4px 20px", flexShrink: 0 }}>
+          <Text style={{ fontSize: 12, color: colors.textSecondary, fontStyle: "italic" }}>
+            {typingUsers.size === 1 ? "Someone is typing..." : "Multiple people are typing..."}
+          </Text>
+        </div>
+      )}
 
       {/* Input */}
       {chatId && (

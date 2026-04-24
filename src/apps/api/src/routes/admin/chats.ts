@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { db, chat, chatParticipant, message, user } from "@furnigo/db";
 import { eq, desc, and } from "drizzle-orm";
+import { getIO } from "../../ws/getIO";
 
 export async function adminChatRoutes(app: FastifyInstance) {
   // Middleware: require agent or admin role
@@ -78,6 +79,21 @@ export async function adminChatRoutes(app: FastifyInstance) {
         userId,
         role: "agent",
       });
+
+      // Notify connected clients
+      const io = getIO();
+      if (io) {
+        const [joined] = await db
+          .select({ displayName: user.displayName, email: user.email })
+          .from(user)
+          .where(eq(user.id, userId))
+          .limit(1);
+
+        io.to(chatId).emit("participant:joined", {
+          chatId,
+          user: { userId, role: "agent", displayName: joined?.displayName, email: joined?.email },
+        });
+      }
     }
 
     const participants = await db

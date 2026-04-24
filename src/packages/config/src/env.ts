@@ -25,6 +25,8 @@ const envSchema = z.object({
   FURNIGO_SES_FROM_EMAIL: z.string().email().optional(),
 
   FURNIGO_OTP_BYPASS_DOMAIN: z.string().optional(),
+
+  FURNIGO_WS_URL: z.string().url().optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;

@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthContext, type AuthUser } from "@/lib/auth";
 import { ErrorContext, setGlobalShowError } from "@/lib/error";
 import { api, getToken, setToken, clearToken } from "@/lib/api";
-import { disconnectSocket } from "@/lib/socket";
+import { connectSocket, disconnectSocket } from "@/lib/socket";
 import { theme } from "@/lib/theme";
 import { ErrorBanner } from "./ErrorBanner";
 import { ErrorBoundary } from "./ErrorBoundary";
@@ -46,6 +46,7 @@ export function Providers({ children }: { children: ReactNode }) {
           displayName: res.data.displayName,
           role: res.data.role,
         });
+        connectSocket();
       } else {
         clearToken();
       }
@@ -59,6 +60,7 @@ export function Providers({ children }: { children: ReactNode }) {
   const login = useCallback((u: AuthUser, token: string) => {
     setToken(token);
     setUser(u);
+    connectSocket();
   }, []);
 
   const logout = useCallback(() => {

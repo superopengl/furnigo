@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import { Button, Input, Upload, Dropdown } from "antd";
 import {
   SendOutlined,
@@ -11,6 +11,7 @@ import {
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 import { api } from "@/lib/api";
+import { getSocket } from "@/lib/socket";
 import { colors } from "@/lib/theme";
 
 interface MessageInputProps {
@@ -23,6 +24,14 @@ export function MessageInput({ chatId, onSent }: MessageInputProps) {
   const [sending, setSending] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const uploadTypeRef = useRef<"image" | "attachment" | "video">("image");
+  const lastTypingSent = useRef(0);
+
+  const emitTyping = useCallback(() => {
+    const now = Date.now();
+    if (now - lastTypingSent.current < 2000) return;
+    lastTypingSent.current = now;
+    try { getSocket().emit("typing", { chatId }); } catch {}
+  }, [chatId]);
 
   const sendTextMessage = async () => {
     const trimmed = text.trim();
@@ -135,7 +144,7 @@ export function MessageInput({ chatId, onSent }: MessageInputProps) {
 
       <Input.TextArea
         value={text}
-        onChange={(e) => setText(e.target.value)}
+        onChange={(e) => { setText(e.target.value); if (e.target.value) emitTyping(); }}
         onPressEnter={(e) => {
           if (!e.shiftKey) {
             e.preventDefault();
