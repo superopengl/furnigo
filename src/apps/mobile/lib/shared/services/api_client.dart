@@ -5,7 +5,7 @@ import '../../config/env.dart';
 
 final apiClientProvider = Provider<Dio>((ref) {
   final dio = Dio(BaseOptions(
-    baseUrl: '${Env.apiBaseUrl}/v1',
+    baseUrl: Env.apiBaseUrl,
     connectTimeout: const Duration(seconds: 10),
     receiveTimeout: const Duration(seconds: 10),
     headers: {'Content-Type': 'application/json'},

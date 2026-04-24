@@ -4,7 +4,7 @@
   "scripts": {
     "dev:api": "pnpm --filter @furnigo/api dev",
     "dev:admin": "pnpm --filter @furnigo/admin dev",
-    "dev:mobile": "cd src/apps/mobile && flutter run",
+    "dev:mobile": "bash scripts/run-mobile.sh",
     "build": "pnpm -r build",
     "lint": "pnpm -r lint",
     "db:generate": "pnpm --filter @furnigo/db generate",

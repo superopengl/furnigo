@@ -3,3 +3,4 @@
 - [FURNIGO_ env prefix](feedback_env_prefix.md) — All env vars must use the FURNIGO_ prefix
 - [Prefer spreading syntax](feedback_spreading_syntax.md) — Use spread over imperative push/assign
 - [Two environments](project_two_envs.md) — Only dev and prod, no staging
+- [API/WS URL conventions](feedback_api_ws_urls.md) — BASE_URL→/api, WS_URL→/ws; update if paths change

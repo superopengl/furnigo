@@ -37,10 +37,10 @@ export async function buildApp() {
   app.get("/healthcheck", () => "OK");
 
   // Routes
-  await app.register(authRoutes, { prefix: "/auth" });
-  await app.register(userRoutes, { prefix: "/users" });
-  await app.register(chatRoutes, { prefix: "/chats" });
-  await app.register(messageRoutes, { prefix: "/chats" });
+  await app.register(authRoutes, { prefix: "/api/auth" });
+  await app.register(userRoutes, { prefix: "/api/users" });
+  await app.register(chatRoutes, { prefix: "/api/chats" });
+  await app.register(messageRoutes, { prefix: "/api/chats" });
 
   app.get("/info", () => ({
     success: true,
