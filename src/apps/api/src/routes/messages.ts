@@ -2,7 +2,7 @@ import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { db, message, chatParticipant } from "@furnigo/db";
 import { eq, and, lt, desc } from "drizzle-orm";
-import { getIO } from "../ws/handlers";
+import { getIO } from "../ws/getIO";
 
 const sendSchema = z.object({
   contentType: z.enum(["text", "image", "attachment", "video", "tool"]),

@@ -7,7 +7,9 @@ import {
   timestamp,
   jsonb,
   primaryKey,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 
 export const schema = pgSchema("furnigo");
 
@@ -25,7 +27,7 @@ export const user = schema.table("user", {
 
 export const otpCode = schema.table("otp_code", {
   id: uuid("id").defaultRandom().primaryKey(),
-  email: text("email").notNull(),
+  email: text("email").unique().notNull(),
   code: varchar("code", { length: 6 }).notNull(),
   expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
   verifiedAt: timestamp("verified_at", { withTimezone: true }),

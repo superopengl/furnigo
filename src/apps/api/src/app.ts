@@ -6,10 +6,12 @@ import { authRoutes } from "./routes/auth";
 import { userRoutes } from "./routes/users";
 import { chatRoutes } from "./routes/chats";
 import { messageRoutes } from "./routes/messages";
-import { setupSocket } from "./ws/handlers";
+import { setupSocket } from "./ws/setupSocket";
 
 export async function buildApp() {
-  const app = Fastify({ logger: true });
+  const app = Fastify({
+    logger: { level: env.NODE_ENV === "development" ? "debug" : "info" },
+  });
 
   let routes: { method: string; path: string }[] = [];
   app.addHook("onRoute", (routeOptions) => {
@@ -21,6 +23,15 @@ export async function buildApp() {
         .map((method) => ({ method, path: routeOptions.url })),
     ];
   });
+
+  if (env.NODE_ENV === "development") {
+    app.addHook("onRequest", async (request) => {
+      app.log.debug(`→ ${request.method} ${request.url}`);
+    });
+    app.addHook("onSend", async (request, reply, payload) => {
+      app.log.debug({ statusCode: reply.statusCode, body: payload }, `← ${request.method} ${request.url}`);
+    });
+  }
 
   await app.register(cors, { origin: true });
   await app.register(jwt, { secret: env.FURNIGO_API_AUTH_JWT_SECRET });

@@ -1,17 +1,14 @@
 import { Server } from "socket.io";
 import type { FastifyInstance } from "fastify";
-
-let io: Server | null = null;
-
-export function getIO(): Server | null {
-  return io;
-}
+import { setIO } from "./getIO";
 
 export function setupSocket(app: FastifyInstance) {
-  io = new Server(app.server, {
+  const io = new Server(app.server, {
     cors: { origin: "*" },
     path: "/ws",
   });
+
+  setIO(io);
 
   io.use((socket, next) => {
     const token = socket.handshake.auth?.token || socket.handshake.query?.token;
@@ -32,7 +29,6 @@ export function setupSocket(app: FastifyInstance) {
   io.on("connection", (socket) => {
     app.log.info({ userId: socket.data.userId }, "WebSocket connected");
 
-    // Join chat rooms
     socket.on("join", (chatId: string) => {
       socket.join(chatId);
     });
@@ -41,7 +37,6 @@ export function setupSocket(app: FastifyInstance) {
       socket.leave(chatId);
     });
 
-    // Typing indicator
     socket.on("typing", (data: { chatId: string }) => {
       socket.to(data.chatId).emit("typing", {
         chatId: data.chatId,
