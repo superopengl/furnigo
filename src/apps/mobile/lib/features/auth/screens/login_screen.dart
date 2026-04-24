@@ -135,7 +135,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   border: OutlineInputBorder(),
                 ),
                 keyboardType: TextInputType.emailAddress,
-                enabled: !_otpId != null,
+                enabled: _otpId == null,
               ),
               if (_otpId != null) ...[
                 const SizedBox(height: 16),
@@ -177,7 +177,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 const SizedBox(height: 8),
                 Text(_error!, style: TextStyle(color: AppColors.error)),
               ],
-              if (!_otpId != null) ...[
+              if (_otpId == null) ...[
                 const SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,
