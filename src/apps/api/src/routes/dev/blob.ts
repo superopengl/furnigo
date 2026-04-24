@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import { readFile } from "fs/promises";
-import { join } from "path";
+import { basename, join } from "path";
 import mime from "mime";
 import { DEV_UPLOAD_DIR } from "@furnigo/config";
 
@@ -13,8 +13,10 @@ export async function devBlobRoutes(app: FastifyInstance) {
     }
 
     try {
-      const data = await readFile(join(DEV_UPLOAD_DIR, filePath));
-      return reply.type(mime.getType(filePath) ?? "application/octet-stream").send(data);
+      const fullFilePath = join(DEV_UPLOAD_DIR, filePath);
+      const fileName = basename(fullFilePath);
+      const data = await readFile(fullFilePath);
+      return reply.type(mime.getType(fileName) ?? "application/octet-stream").send(data);
     } catch {
       return reply.code(404).send({ success: false, error: { code: "NOT_FOUND", message: "File not found" } });
     }
