@@ -143,12 +143,15 @@ export function MessageInput({ chatId, onSent }: MessageInputProps) {
           }
         }}
         placeholder="Type a message..."
-        autoSize={{ minRows: 1, maxRows: 4 }}
+        maxLength={2000}
+        showCount={{ formatter: ({ count, maxLength }) => <span style={{ fontSize: 11, color: colors.textSecondary }}>{count}/{maxLength}</span> }}
+        autoSize={{ minRows: 1 }}
         style={{
           borderRadius: 20,
           resize: "none",
           border: `1px solid ${colors.border}`,
           padding: "8px 16px",
+          color: colors.text,
         }}
       />
 
