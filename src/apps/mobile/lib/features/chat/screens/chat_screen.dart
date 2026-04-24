@@ -239,7 +239,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         ? ref.watch(chatMessagesProvider(effectiveChatId))
         : <MessageModel>[];
 
-    // Auto-scroll when a new message is appended (not when older messages load)
+    // Auto-scroll on initial load and when a new message is appended
     if (effectiveChatId != null) {
       ref.listen<List<MessageModel>>(
         chatMessagesProvider(effectiveChatId),
@@ -250,6 +250,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           }
         },
       );
+    }
+    // Scroll to bottom when messages are already cached on build
+    if (messages.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
     }
 
     final activeChat = effectiveChatId != null && chats != null
