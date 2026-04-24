@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { Button, Typography } from "antd";
-import { ArrowRightOutlined, CustomerServiceOutlined, ShopOutlined, GlobalOutlined } from "@ant-design/icons";
+import { ArrowRightOutlined, CustomerServiceOutlined, ShopOutlined, GlobalOutlined, AppleOutlined, AndroidOutlined } from "@ant-design/icons";
 import { colors } from "@/lib/theme";
 
 const { Title, Text, Paragraph } = Typography;
@@ -120,6 +120,18 @@ export default function HomePage() {
           0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.5; }
           50% { transform: translate(-10px, -15px) scale(1.1); opacity: 1; }
         }
+        .download-btn {
+          transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .download-btn:hover {
+          transform: translateY(-4px) scale(1.04);
+          box-shadow: 0 16px 48px rgba(0,0,0,0.18), 0 4px 12px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.3) !important;
+          border-color: rgba(255, 255, 255, 0.35) !important;
+          background: rgba(255, 255, 255, 0.14) !important;
+        }
+        .download-btn:active {
+          transform: translateY(-1px) scale(1.01);
+        }
       `}</style>
 
       {/* Header */}
@@ -159,7 +171,7 @@ export default function HomePage() {
           onClick={() => router.push("/admin/login")}
           style={{ color: colors.textSecondary, fontSize: 14 }}
         >
-          Admin Login <ArrowRightOutlined />
+          Admin Portal <ArrowRightOutlined />
         </Button>
       </header>
 
@@ -222,40 +234,51 @@ export default function HomePage() {
           to customs clearance and setup — we handle everything.
         </Paragraph>
 
-        <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
-          <Button
-            type="primary"
-            size="large"
-            onClick={() => router.push("/admin/login")}
+        <div style={{ display: "flex", gap: 20, justifyContent: "center", flexWrap: "wrap" }}>
+          <a
+            href="#"
+            className="download-btn"
             style={{
-              borderRadius: 12,
-              height: 50,
-              padding: "0 32px",
-              fontWeight: 600,
-              background: `linear-gradient(135deg, ${colors.secondary}, ${colors.accent})`,
-              border: "none",
-              boxShadow: `0 4px 24px ${colors.secondary}30`,
-            }}
-          >
-            Get Started
-          </Button>
-          <Button
-            size="large"
-            onClick={() => router.push("/admin/login")}
-            style={{
-              borderRadius: 12,
-              height: 50,
-              padding: "0 32px",
-              fontWeight: 500,
-              background: "rgba(255,255,255,0.7)",
-              backdropFilter: "blur(12px)",
-              WebkitBackdropFilter: "blur(12px)",
-              border: `1px solid ${colors.border}`,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 8,
+              padding: "20px 36px",
+              borderRadius: 16,
+              background: "rgba(255, 255, 255, 0.08)",
+              backdropFilter: "blur(20px)",
+              WebkitBackdropFilter: "blur(20px)",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
               color: colors.text,
+              textDecoration: "none",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.2)",
             }}
           >
-            Admin Portal
-          </Button>
+            <AppleOutlined style={{ fontSize: 32, color: colors.text }} />
+            <span style={{ fontSize: 14, fontWeight: 600 }}>App Store</span>
+          </a>
+          <a
+            href="#"
+            className="download-btn"
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 8,
+              padding: "20px 36px",
+              borderRadius: 16,
+              background: "rgba(255, 255, 255, 0.08)",
+              backdropFilter: "blur(20px)",
+              WebkitBackdropFilter: "blur(20px)",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
+              color: colors.text,
+              textDecoration: "none",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.2)",
+            }}
+          >
+            <AndroidOutlined style={{ fontSize: 32, color: colors.text }} />
+            <span style={{ fontSize: 14, fontWeight: 600 }}>Google Play</span>
+          </a>
         </div>
       </section>
 

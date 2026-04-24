@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Input, Typography, App, Space, Spin } from "antd";
 import { MailOutlined, LoadingOutlined, ArrowLeftOutlined } from "@ant-design/icons";
@@ -18,9 +18,15 @@ export default function LoginPage() {
   const [otpId, setOtpId] = useState("");
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { user, isLoading, login } = useAuth();
   const { message } = App.useApp();
   const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoading && user) {
+      router.replace("/admin");
+    }
+  }, [user, isLoading, router]);
 
   const handleSendOtp = async () => {
     if (!email.trim()) return;
@@ -73,13 +79,21 @@ export default function LoginPage() {
         { id: u.id, email: u.email, displayName: u.display_name, role: u.role },
         token,
       );
-      router.replace("/admin/chats");
+      router.replace("/admin");
     } catch {
       message.error("Verification failed");
     } finally {
       setLoading(false);
     }
   };
+
+  if (isLoading || user) {
+    return (
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", background: "#0f0d0b" }}>
+        <Spin size="large" />
+      </div>
+    );
+  }
 
   return (
     <div
@@ -338,6 +352,26 @@ export default function LoginPage() {
           boxShadow: "0 24px 80px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.06), inset 0 -1px 0 rgba(255, 255, 255, 0.02)",
         }}
       >
+        {/* Loading overlay */}
+        {loading && (
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              borderRadius: 24,
+              background: "rgba(15, 13, 11, 0.6)",
+              backdropFilter: "blur(4px)",
+              WebkitBackdropFilter: "blur(4px)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 10,
+            }}
+          >
+            <Spin indicator={<LoadingOutlined style={{ fontSize: 32, color: colors.accent }} spin />} />
+          </div>
+        )}
+
         {/* Logo */}
         <div style={{ marginBottom: 8 }}>
           <div
@@ -412,9 +446,6 @@ export default function LoginPage() {
                 size="large"
               />
             </div>
-            {loading && (
-              <Spin indicator={<LoadingOutlined style={{ color: colors.accent }} />} />
-            )}
             <Button
               type="link"
               size="small"
