@@ -130,12 +130,8 @@ export async function chatRoutes(app: FastifyInstance) {
       });
     }
 
-    await db.insert(chatParticipant).values({
-      chatId,
-      userId: body.userId,
-      role: body.role,
-    });
+    await db.insert(chatParticipant).values({ chatId, ...body });
 
-    return { success: true, data: { chatId, userId: body.userId, role: body.role } };
+    return { success: true, data: { chatId, ...body } };
   });
 }

@@ -80,8 +80,7 @@ export async function messageRoutes(app: FastifyInstance) {
         chatId,
         senderId: userId,
         senderRole: participant.role,
-        contentType: body.contentType,
-        content: body.content,
+        ...body,
         label: body.label ?? null,
       })
       .returning();
