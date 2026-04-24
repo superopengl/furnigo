@@ -17,7 +17,7 @@ export async function createOtp(email: string) {
     .onConflictDoUpdate({
       target: otpCode.email,
       targetWhere: sql`verified_at IS NULL`,
-      set: { code, expiresAt, updatedAt: new Date() },
+      set: { code, expiresAt, verifiedAt: null, updatedAt: new Date() },
     })
     .returning({ id: otpCode.id });
 
