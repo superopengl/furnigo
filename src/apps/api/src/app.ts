@@ -1,11 +1,13 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
 import jwt from "@fastify/jwt";
+import multipart from "@fastify/multipart";
 import { env } from "@furnigo/config";
 import { authRoutes } from "./routes/auth";
 import { userRoutes } from "./routes/users";
 import { chatRoutes } from "./routes/chats";
 import { messageRoutes } from "./routes/messages";
+import { uploadRoutes } from "./routes/uploads";
 import { setupSocket } from "./ws/setupSocket";
 
 export async function buildApp() {
@@ -45,6 +47,7 @@ export async function buildApp() {
 
   await app.register(cors, { origin: true });
   await app.register(jwt, { secret: env.FURNIGO_API_AUTH_JWT_SECRET });
+  await app.register(multipart, { limits: { fileSize: 10 * 1024 * 1024 } });
 
   // Auth decorator
   app.decorate("authenticate", async (request: any, reply: any) => {
@@ -62,6 +65,7 @@ export async function buildApp() {
   await app.register(userRoutes, { prefix: "/api/users" });
   await app.register(chatRoutes, { prefix: "/api/chats" });
   await app.register(messageRoutes, { prefix: "/api/chats" });
+  await app.register(uploadRoutes, { prefix: "/api/uploads" });
 
   app.get("/info", () => ({
     success: true,

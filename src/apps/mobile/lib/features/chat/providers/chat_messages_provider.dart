@@ -43,6 +43,11 @@ class ChatMessagesNotifier extends StateNotifier<List<MessageModel>> {
     await _chatService.sendMessage(chatId, text: text);
   }
 
+  Future<void> sendImage(String filePath) async {
+    final url = await _chatService.uploadImage(filePath);
+    await _chatService.sendImage(chatId, url: url);
+  }
+
   @override
   void dispose() {
     _socketService.leaveChat(chatId);

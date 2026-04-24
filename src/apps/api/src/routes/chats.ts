@@ -7,6 +7,10 @@ const createSchema = z.object({
   title: z.string().optional(),
 });
 
+const updateSchema = z.object({
+  title: z.string().min(1).optional(),
+});
+
 const addParticipantSchema = z.object({
   userId: z.string().uuid(),
   role: z.enum(["client", "agent"]),
@@ -56,6 +60,34 @@ export async function chatRoutes(app: FastifyInstance) {
         participants: [{ userId: id, role: "client" }],
       },
     };
+  });
+
+  // Update chat
+  app.put("/:id", { onRequest: [app.authenticate] }, async (request, reply) => {
+    const { id: userId } = request.user as { id: string };
+    const { id: chatId } = request.params as { id: string };
+    const body = updateSchema.parse(request.body);
+
+    const [participant] = await db
+      .select()
+      .from(chatParticipant)
+      .where(and(eq(chatParticipant.chatId, chatId), eq(chatParticipant.userId, userId)))
+      .limit(1);
+
+    if (!participant) {
+      return reply.code(403).send({
+        success: false,
+        error: { code: "FORBIDDEN", message: "Not a participant of this chat" },
+      });
+    }
+
+    const [updated] = await db
+      .update(chat)
+      .set(body)
+      .where(eq(chat.id, chatId))
+      .returning();
+
+    return { success: true, data: updated };
   });
 
   // Get chat by ID

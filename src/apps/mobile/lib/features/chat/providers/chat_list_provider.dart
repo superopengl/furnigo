@@ -13,9 +13,15 @@ class ChatListNotifier extends AsyncNotifier<List<ChatModel>> {
   }
 
   Future<ChatModel> createChat({String? title}) async {
-    final chat = await ref.read(chatServiceProvider).createChat(title: title);
+    final effectiveTitle = (title != null && title.isNotEmpty) ? title : 'New chat';
+    final chat = await ref.read(chatServiceProvider).createChat(title: effectiveTitle);
     ref.invalidateSelf();
     return chat;
+  }
+
+  Future<void> updateTitle(String chatId, String title) async {
+    await ref.read(chatServiceProvider).updateChat(chatId, title: title);
+    ref.invalidateSelf();
   }
 
   void refresh() => ref.invalidateSelf();

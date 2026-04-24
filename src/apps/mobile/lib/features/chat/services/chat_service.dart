@@ -24,6 +24,14 @@ class ChatService {
     return ChatModel.fromJson(res.data['data'] as Map<String, dynamic>);
   }
 
+  Future<ChatModel> updateChat(String chatId, {String? title}) async {
+    final res = await _dio.put('/chats/$chatId', data: {
+      // ignore: use_null_aware_elements
+      if (title != null) 'title': title,
+    });
+    return ChatModel.fromJson(res.data['data'] as Map<String, dynamic>);
+  }
+
   Future<List<MessageModel>> getMessages(String chatId, {String? cursor}) async {
     final params = <String, dynamic>{'limit': '50'};
     if (cursor != null) params['cursor'] = cursor;
@@ -37,6 +45,22 @@ class ChatService {
     final res = await _dio.post('/chats/$chatId/messages', data: {
       'contentType': 'text',
       'content': {'text': text},
+    });
+    return MessageModel.fromJson(res.data['data'] as Map<String, dynamic>);
+  }
+
+  Future<String> uploadImage(String filePath) async {
+    final formData = FormData.fromMap({
+      'file': await MultipartFile.fromFile(filePath),
+    });
+    final res = await _dio.post('/uploads', data: formData);
+    return res.data['data']['url'] as String;
+  }
+
+  Future<MessageModel> sendImage(String chatId, {required String url}) async {
+    final res = await _dio.post('/chats/$chatId/messages', data: {
+      'contentType': 'image',
+      'content': {'url': url},
     });
     return MessageModel.fromJson(res.data['data'] as Map<String, dynamic>);
   }

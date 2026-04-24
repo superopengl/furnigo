@@ -103,6 +103,7 @@ PUT    /users/me               — Update profile
 ```
 GET    /chats                    — List user's chats
 POST   /chats                    — Create new chat
+PUT    /chats/:id                — Update chat (e.g. title)
 GET    /chats/:id                — Get chat with recent messages
 GET    /chats/:id/messages       — Get messages (paginated, cursor-based)
 POST   /chats/:id/messages       — Send a message
@@ -129,6 +130,28 @@ POST   /chats/:id/participants   — Add participant (agent joins)
       { "user_id": "uuid", "role": "client" }
     ],
     "ai_enabled": true
+  }
+}
+```
+
+### PUT /chats/:id
+
+Update a chat. Caller must be a participant.
+
+```json
+// Request
+{
+  "title": "New chat 2"
+}
+
+// Response
+{
+  "success": true,
+  "data": {
+    "id": "uuid",
+    "title": "New chat 2",
+    "created_at": "2026-04-20T10:00:00Z",
+    "updated_at": "2026-04-24T12:00:00Z"
   }
 }
 ```

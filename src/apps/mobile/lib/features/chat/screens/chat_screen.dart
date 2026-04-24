@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../theme/colors.dart';
 import '../../../shared/models/message_model.dart';
 import '../../../shared/providers/auth_store.dart';
@@ -42,6 +43,45 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     }
   }
 
+  void _showEditTitleDialog(String? currentTitle) {
+    final chatId = _activeChatId;
+    if (chatId == null) return;
+
+    final editController = TextEditingController(text: currentTitle ?? '');
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Edit chat title'),
+        content: TextField(
+          controller: editController,
+          autofocus: true,
+          decoration: const InputDecoration(
+            hintText: 'Enter chat title',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              final newTitle = editController.text.trim();
+              Navigator.pop(context);
+              if (newTitle.isNotEmpty) {
+                ref
+                    .read(chatListProvider.notifier)
+                    .updateTitle(chatId, newTitle);
+              }
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    ).then((_) => editController.dispose());
+  }
+
   void _scrollToBottom() {
     Future.delayed(const Duration(milliseconds: 100), () {
       if (_scrollController.hasClients) {
@@ -58,6 +98,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
 
+    final chatId = await _ensureChatId();
+    ref.read(chatMessagesProvider(chatId).notifier).send(text);
+    _controller.clear();
+    _scrollToBottom();
+  }
+
+  Future<String> _ensureChatId() async {
     var chatId = _activeChatId;
     if (chatId == null) {
       final chats = ref.read(chatListProvider).valueOrNull;
@@ -65,15 +112,53 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         chatId = chats.first.id;
       }
     }
-
     if (chatId == null) {
       final chat = await ref.read(chatListProvider.notifier).createChat();
       chatId = chat.id;
     }
-
     setState(() => _activeChatId = chatId);
-    ref.read(chatMessagesProvider(chatId).notifier).send(text);
-    _controller.clear();
+    return chatId;
+  }
+
+  void _showAttachmentOptions() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Photo Library'),
+              onTap: () {
+                Navigator.pop(context);
+                _pickAndSendImage(ImageSource.gallery);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Camera'),
+              onTap: () {
+                Navigator.pop(context);
+                _pickAndSendImage(ImageSource.camera);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _pickAndSendImage(ImageSource source) async {
+    final image = await ImagePicker().pickImage(
+      source: source,
+      maxWidth: 1200,
+      imageQuality: 70,
+    );
+    if (image == null) return;
+
+    final chatId = await _ensureChatId();
+    await ref.read(chatMessagesProvider(chatId).notifier).sendImage(image.path);
     _scrollToBottom();
   }
 
@@ -110,14 +195,31 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         ? ref.watch(chatMessagesProvider(effectiveChatId))
         : <MessageModel>[];
 
+    final activeChat = effectiveChatId != null && chats != null
+        ? chats.where((c) => c.id == effectiveChatId).firstOrNull
+        : null;
+    final chatTitle = activeChat?.title;
+
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
+        centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.format_list_bulleted),
           onPressed: () => _scaffoldKey.currentState?.openDrawer(),
         ),
-        title: const Text('Chat'),
+        actions: const [SizedBox(width: 48)],
+        title: GestureDetector(
+          onTap: effectiveChatId != null
+              ? () => _showEditTitleDialog(chatTitle)
+              : null,
+          child: Text(
+            chatTitle ?? 'Untitled chat',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+          ),
+        ),
       ),
       drawer: ChatDrawer(
         activeChatId: effectiveChatId,
@@ -177,6 +279,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         top: false,
         child: Row(
           children: [
+            IconButton(
+              icon: const Icon(Icons.add, color: AppColors.textSecondary),
+              onPressed: _showAttachmentOptions,
+            ),
             Expanded(
               child: TextField(
                 controller: _controller,
