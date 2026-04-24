@@ -76,7 +76,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         height: 80,
                         decoration: BoxDecoration(
                           color: AppColors.surface,
-                          borderRadius: BorderRadius.circular(24),
+                          shape: BoxShape.circle,
                           border: Border.all(color: AppColors.glassBorder),
                           image: user.avatarUrl != null
                               ? DecorationImage(
