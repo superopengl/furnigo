@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../theme/colors.dart';
@@ -22,73 +23,105 @@ class ChatDrawer extends ConsumerWidget {
     final chatsAsync = ref.watch(chatListProvider);
 
     return Drawer(
-      child: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-              child: Row(
+      backgroundColor: Colors.transparent,
+      child: ClipRRect(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 28, sigmaY: 28),
+          child: Container(
+            color: AppColors.glassLight,
+            child: SafeArea(
+              child: Column(
                 children: [
-                  IconButton(
-                    icon: const Icon(Icons.settings_outlined,
-                        color: AppColors.textSecondary),
-                    onPressed: () {
-                      Navigator.pop(context);
-                      onSettings();
-                    },
+                  // Header
+                  Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    child: Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.settings_outlined,
+                              size: 22, color: AppColors.textSecondary),
+                          onPressed: () {
+                            Navigator.pop(context);
+                            onSettings();
+                          },
+                        ),
+                        const Spacer(),
+                        IconButton(
+                          icon: const Icon(Icons.edit_square,
+                              size: 22, color: AppColors.primary),
+                          onPressed: () {
+                            Navigator.pop(context);
+                            onNewChat();
+                          },
+                        ),
+                      ],
+                    ),
                   ),
-                  const Spacer(),
-                  IconButton(
-                    icon: const Icon(Icons.add, color: AppColors.primary),
-                    onPressed: () {
-                      Navigator.pop(context);
-                      onNewChat();
-                    },
+                  // Chat list
+                  Expanded(
+                    child: chatsAsync.when(
+                      loading: () => const Center(
+                          child:
+                              CircularProgressIndicator(strokeWidth: 2)),
+                      error: (err, _) =>
+                          Center(child: Text('Error: $err')),
+                      data: (chats) => chats.isEmpty
+                          ? Center(
+                              child: Text(
+                                'No chats yet',
+                                style: TextStyle(
+                                    color: AppColors.textSecondary,
+                                    fontSize: 14),
+                              ),
+                            )
+                          : ListView.builder(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8),
+                              itemCount: chats.length,
+                              itemBuilder: (context, index) {
+                                final chat = chats[index];
+                                final isActive =
+                                    chat.id == activeChatId;
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 1),
+                                  child: ListTile(
+                                    dense: true,
+                                    title: Text(
+                                      chat.title ?? 'Untitled chat',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: isActive
+                                            ? FontWeight.w600
+                                            : FontWeight.normal,
+                                        color: isActive
+                                            ? AppColors.text
+                                            : AppColors.textSecondary,
+                                      ),
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius:
+                                          BorderRadius.circular(10),
+                                    ),
+                                    selectedTileColor: AppColors.glassDark,
+                                    selected: isActive,
+                                    onTap: () {
+                                      Navigator.pop(context);
+                                      onChatSelected(chat.id);
+                                    },
+                                  ),
+                                );
+                              },
+                            ),
+                    ),
                   ),
                 ],
               ),
             ),
-            const Divider(height: 1, color: AppColors.border),
-            Expanded(
-              child: chatsAsync.when(
-                loading: () =>
-                    const Center(child: CircularProgressIndicator()),
-                error: (err, _) => Center(child: Text('Error: $err')),
-                data: (chats) => chats.isEmpty
-                    ? const Center(
-                        child: Text(
-                          'No chats yet',
-                          style: TextStyle(color: AppColors.textSecondary),
-                        ),
-                      )
-                    : ListView.builder(
-                        itemCount: chats.length,
-                        itemBuilder: (context, index) {
-                          final chat = chats[index];
-                          final isActive = chat.id == activeChatId;
-                          return ListTile(
-                            title: Text(
-                              chat.title ?? 'Untitled chat',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontWeight: isActive
-                                    ? FontWeight.bold
-                                    : FontWeight.normal,
-                              ),
-                            ),
-                            selected: isActive,
-                            selectedTileColor: AppColors.surface,
-                            onTap: () {
-                              Navigator.pop(context);
-                              onChatSelected(chat.id);
-                            },
-                          );
-                        },
-                      ),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

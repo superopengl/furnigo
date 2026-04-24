@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -70,9 +71,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         return Align(
           alignment: Alignment.topCenter,
           child: Material(
-            color: Theme.of(context).scaffoldBackgroundColor,
-            borderRadius: const BorderRadius.vertical(
-                bottom: Radius.circular(16)),
+            color: AppColors.background,
+            borderRadius:
+                const BorderRadius.vertical(bottom: Radius.circular(20)),
             child: SafeArea(
               bottom: false,
               child: Padding(
@@ -90,7 +91,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       autofocus: true,
                       decoration: const InputDecoration(
                         hintText: 'Enter chat title',
-                        border: OutlineInputBorder(),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -161,22 +161,28 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            const SizedBox(height: 8),
             ListTile(
-              leading: const Icon(Icons.photo_library),
+              leading: const Icon(Icons.photo_library_outlined),
               title: const Text('Photo Library'),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
               onTap: () {
                 Navigator.pop(context);
                 _pickAndSendImage(ImageSource.gallery);
               },
             ),
             ListTile(
-              leading: const Icon(Icons.camera_alt),
+              leading: const Icon(Icons.camera_alt_outlined),
               title: const Text('Camera'),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
               onTap: () {
                 Navigator.pop(context);
                 _pickAndSendImage(ImageSource.camera);
               },
             ),
+            const SizedBox(height: 8),
           ],
         ),
       ),
@@ -192,7 +198,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     if (image == null) return;
 
     final chatId = await _ensureChatId();
-    await ref.read(chatMessagesProvider(chatId).notifier).sendImage(image.path);
+    await ref
+        .read(chatMessagesProvider(chatId).notifier)
+        .sendImage(image.path);
     _scrollToBottom();
   }
 
@@ -200,9 +208,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
       builder: (context) => SizedBox(
         height: MediaQuery.of(context).size.height * 0.85,
         child: const ProfileScreen(),
@@ -233,9 +238,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         ? chats.where((c) => c.id == effectiveChatId).firstOrNull
         : null;
     final chatTitle = activeChat?.title;
+    final topPadding =
+        MediaQuery.of(context).padding.top + kToolbarHeight + 4;
 
     return Scaffold(
       key: _scaffoldKey,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         centerTitle: true,
         leading: IconButton(
@@ -243,6 +251,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           onPressed: () => _scaffoldKey.currentState?.openDrawer(),
         ),
         actions: const [SizedBox(width: 48)],
+        flexibleSpace: ClipRect(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+            child: Container(color: AppColors.glassLight),
+          ),
+        ),
         title: GestureDetector(
           onTap: effectiveChatId != null
               ? () => _showEditTitleDialog(chatTitle)
@@ -270,7 +284,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         children: [
           Expanded(
             child: _buildMessageArea(
-                effectiveChatId, messages, chatsAsync.isLoading),
+                effectiveChatId, messages, chatsAsync.isLoading, topPadding),
           ),
           _buildInputBar(),
         ],
@@ -278,19 +292,40 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     );
   }
 
-  Widget _buildMessageArea(
-      String? chatId, List<MessageModel> messages, bool isLoading) {
+  Widget _buildMessageArea(String? chatId, List<MessageModel> messages,
+      bool isLoading, double topPadding) {
     if (isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(
+          child: Padding(
+        padding: EdgeInsets.only(top: topPadding),
+        child: const CircularProgressIndicator(strokeWidth: 2),
+      ));
     }
 
     if (messages.isEmpty) {
-      return const Center(child: Text('Send a message to start'));
+      return Center(
+        child: Padding(
+          padding: EdgeInsets.only(top: topPadding),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.chat_bubble_outline,
+                  size: 48, color: AppColors.border),
+              const SizedBox(height: 12),
+              Text(
+                'Start a conversation',
+                style: TextStyle(
+                    color: AppColors.textSecondary, fontSize: 15),
+              ),
+            ],
+          ),
+        ),
+      );
     }
 
     return ListView.builder(
       controller: _scrollController,
-      padding: const EdgeInsets.all(12),
+      padding: EdgeInsets.fromLTRB(16, topPadding, 16, 8),
       itemCount: messages.length,
       itemBuilder: (context, index) {
         final msg = messages[index];
@@ -303,36 +338,61 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 
   Widget _buildInputBar() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: const BoxDecoration(
-        color: AppColors.surface,
-        border: Border(top: BorderSide(color: AppColors.border)),
-      ),
-      child: SafeArea(
-        top: false,
-        child: Row(
-          children: [
-            IconButton(
-              icon: const Icon(Icons.add, color: AppColors.textSecondary),
-              onPressed: _showAttachmentOptions,
-            ),
-            Expanded(
-              child: TextField(
-                controller: _controller,
-                decoration: const InputDecoration(
-                  hintText: 'Type a message...',
-                  border: InputBorder.none,
-                ),
-                textInputAction: TextInputAction.send,
-                onSubmitted: (_) => _send(),
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: AppColors.glassLight,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: AppColors.glassBorder),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x0A000000),
+                blurRadius: 12,
+                offset: Offset(0, -2),
               ),
-            ),
-            IconButton(
-              icon: const Icon(Icons.send, color: AppColors.primary),
-              onPressed: _send,
-            ),
-          ],
+            ],
+          ),
+          child: Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.add_circle_outline,
+                    color: AppColors.textSecondary),
+                onPressed: _showAttachmentOptions,
+              ),
+              Expanded(
+                child: TextField(
+                  controller: _controller,
+                  decoration: const InputDecoration(
+                    hintText: 'Message...',
+                    hintStyle: TextStyle(color: AppColors.textSecondary),
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    filled: false,
+                    contentPadding: EdgeInsets.symmetric(vertical: 10),
+                  ),
+                  textInputAction: TextInputAction.send,
+                  onSubmitted: (_) => _send(),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(right: 4),
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_upward),
+                  onPressed: _send,
+                  style: IconButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: AppColors.white,
+                    fixedSize: const Size(34, 34),
+                    padding: EdgeInsets.zero,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

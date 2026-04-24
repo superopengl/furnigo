@@ -35,8 +35,8 @@ class FurnigoApp extends ConsumerWidget {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                     child: Material(
-                      elevation: 4,
-                      borderRadius: BorderRadius.circular(8),
+                      elevation: 0,
+                      borderRadius: BorderRadius.circular(12),
                       color: const Color(0xFFFFF0EE),
                       child: Padding(
                         padding: const EdgeInsets.only(

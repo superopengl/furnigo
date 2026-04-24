@@ -12,14 +12,21 @@ class MessageBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     if (message.senderRole == 'system') {
       return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
+        padding: const EdgeInsets.symmetric(vertical: 8),
         child: Center(
-          child: Text(
-            message.textContent,
-            style: Theme.of(context)
-                .textTheme
-                .bodySmall
-                ?.copyWith(color: AppColors.textSecondary),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: AppColors.glassDark,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              message.textContent,
+              style: Theme.of(context)
+                  .textTheme
+                  .bodySmall
+                  ?.copyWith(color: AppColors.textSecondary),
+            ),
           ),
         ),
       );
@@ -28,17 +35,17 @@ class MessageBubble extends StatelessWidget {
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 4),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        margin: const EdgeInsets.symmetric(vertical: 3),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         constraints:
             BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
         decoration: BoxDecoration(
           color: isMe ? AppColors.primary : AppColors.surface,
           borderRadius: BorderRadius.only(
-            topLeft: const Radius.circular(16),
-            topRight: const Radius.circular(16),
-            bottomLeft: Radius.circular(isMe ? 16 : 4),
-            bottomRight: Radius.circular(isMe ? 4 : 16),
+            topLeft: const Radius.circular(18),
+            topRight: const Radius.circular(18),
+            bottomLeft: Radius.circular(isMe ? 18 : 4),
+            bottomRight: Radius.circular(isMe ? 4 : 18),
           ),
         ),
         child: _buildContent(context),
@@ -58,11 +65,11 @@ class MessageBubble extends StatelessWidget {
           children: [
             if (url != null)
               ClipRRect(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(12),
                 child: Image.network(url, fit: BoxFit.cover),
               ),
             if (caption != null) ...[
-              const SizedBox(height: 4),
+              const SizedBox(height: 6),
               Text(caption, style: TextStyle(color: textColor)),
             ],
           ],
@@ -70,7 +77,7 @@ class MessageBubble extends StatelessWidget {
       default:
         return Text(
           message.textContent,
-          style: TextStyle(color: textColor),
+          style: TextStyle(color: textColor, height: 1.35),
         );
     }
   }

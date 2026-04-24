@@ -108,104 +108,182 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'Furnigo',
-                style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Factory-direct furniture from Foshan',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-              ),
-              const SizedBox(height: 48),
-              TextField(
-                controller: _emailController,
-                decoration: const InputDecoration(
-                  labelText: 'Email',
-                  border: OutlineInputBorder(),
-                ),
-                keyboardType: TextInputType.emailAddress,
-                enabled: _otpId == null,
-              ),
-              if (_otpId != null) ...[
-                const SizedBox(height: 16),
-                if (_loading)
-                  const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                else
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: List.generate(6, (i) => SizedBox(
-                      width: 48,
-                      child: KeyboardListener(
-                        focusNode: FocusNode(),
-                        onKeyEvent: (event) => _onOtpKeyPress(i, event),
-                        child: TextField(
-                          controller: _otpControllers[i],
-                          focusNode: _otpFocusNodes[i],
-                          textAlign: TextAlign.center,
-                          keyboardType: TextInputType.number,
-                          inputFormatters: [
-                            LengthLimitingTextInputFormatter(1),
-                            FilteringTextInputFormatter.digitsOnly,
-                          ],
-                          decoration: const InputDecoration(
-                            border: OutlineInputBorder(),
-                            counterText: '',
-                          ),
-                          style: Theme.of(context).textTheme.headlineSmall,
-                          onChanged: (value) => _onOtpDigitChanged(i, value),
-                        ),
-                      ),
-                    )),
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(28),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Logo area
+                Container(
+                  width: 72,
+                  height: 72,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    borderRadius: BorderRadius.circular(20),
                   ),
-              ],
-              if (_error != null) ...[
-                const SizedBox(height: 8),
-                Text(_error!, style: TextStyle(color: AppColors.error)),
-              ],
-              if (_otpId == null) ...[
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton(
-                    onPressed: _loading ? null : _sendOtp,
-                    child: _loading
-                        ? const SizedBox(
+                  child: const Icon(Icons.weekend_outlined,
+                      color: AppColors.white, size: 36),
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  'Furnigo',
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Factory-direct furniture from Foshan',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                ),
+                const SizedBox(height: 40),
+
+                // Glass card
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: AppColors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: AppColors.glassBorder),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x08000000),
+                        blurRadius: 20,
+                        offset: Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextField(
+                        controller: _emailController,
+                        decoration: const InputDecoration(
+                          labelText: 'Email',
+                          prefixIcon: Icon(Icons.email_outlined, size: 20),
+                        ),
+                        keyboardType: TextInputType.emailAddress,
+                        enabled: _otpId == null,
+                      ),
+                      if (_otpId != null) ...[
+                        const SizedBox(height: 20),
+                        if (_loading)
+                          const SizedBox(
                             height: 20,
                             width: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
+                            child:
+                                CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Text('Send OTP'),
+                        else
+                          Row(
+                            mainAxisAlignment:
+                                MainAxisAlignment.spaceBetween,
+                            children: List.generate(
+                                6,
+                                (i) => SizedBox(
+                                      width: 44,
+                                      child: KeyboardListener(
+                                        focusNode: FocusNode(),
+                                        onKeyEvent: (event) =>
+                                            _onOtpKeyPress(i, event),
+                                        child: TextField(
+                                          controller: _otpControllers[i],
+                                          focusNode: _otpFocusNodes[i],
+                                          textAlign: TextAlign.center,
+                                          keyboardType:
+                                              TextInputType.number,
+                                          inputFormatters: [
+                                            LengthLimitingTextInputFormatter(
+                                                1),
+                                            FilteringTextInputFormatter
+                                                .digitsOnly,
+                                          ],
+                                          decoration: InputDecoration(
+                                            counterText: '',
+                                            contentPadding:
+                                                const EdgeInsets.symmetric(
+                                                    vertical: 12),
+                                            border: OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(
+                                                      10),
+                                            ),
+                                            enabledBorder:
+                                                OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(
+                                                      10),
+                                              borderSide: const BorderSide(
+                                                  color: AppColors.border),
+                                            ),
+                                            focusedBorder:
+                                                OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(
+                                                      10),
+                                              borderSide: const BorderSide(
+                                                  color:
+                                                      AppColors.secondary,
+                                                  width: 1.5),
+                                            ),
+                                            filled: true,
+                                            fillColor: AppColors.surface,
+                                          ),
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleLarge,
+                                          onChanged: (value) =>
+                                              _onOtpDigitChanged(i, value),
+                                        ),
+                                      ),
+                                    )),
+                          ),
+                      ],
+                      if (_error != null) ...[
+                        const SizedBox(height: 12),
+                        Text(_error!,
+                            style: const TextStyle(
+                                color: AppColors.error, fontSize: 13)),
+                      ],
+                      if (_otpId == null) ...[
+                        const SizedBox(height: 20),
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton(
+                            onPressed: _loading ? null : _sendOtp,
+                            child: _loading
+                                ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                : const Text('Continue'),
+                          ),
+                        ),
+                      ],
+                      if (_otpId != null) ...[
+                        const SizedBox(height: 12),
+                        TextButton(
+                          onPressed: () => setState(() {
+                            _otpId = null;
+                            _clearOtp();
+                            _error = null;
+                          }),
+                          child: const Text('Use a different email'),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
               ],
-              if (_otpId != null)
-                TextButton(
-                  onPressed: () => setState(() {
-                    _otpId = null;
-                    _clearOtp();
-                    _error = null;
-                  }),
-                  child: const Text('Use a different email'),
-                ),
-            ],
+            ),
           ),
         ),
       ),

@@ -32,9 +32,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text('Profile'),
+        centerTitle: true,
       ),
       body: profileAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () =>
+            const Center(child: CircularProgressIndicator(strokeWidth: 2)),
         error: (err, _) => Center(child: Text('Error: $err')),
         data: (user) {
           if (user == null) {
@@ -43,83 +45,122 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           return ListView(
             padding: const EdgeInsets.all(24),
             children: [
-              CircleAvatar(
-                radius: 40,
-                backgroundColor: AppColors.surface,
-                child: Text(
-                  (user.displayName ?? user.email)[0].toUpperCase(),
-                  style: const TextStyle(
-                      fontSize: 32, color: AppColors.primary),
-                ),
-              ),
-              const SizedBox(height: 24),
-              Text(
-                'Email',
-                style: Theme.of(context)
-                    .textTheme
-                    .bodySmall
-                    ?.copyWith(color: AppColors.textSecondary),
-              ),
-              const SizedBox(height: 4),
-              Text(user.email, style: Theme.of(context).textTheme.bodyLarge),
-              const SizedBox(height: 24),
-              Text(
-                'Display Name',
-                style: Theme.of(context)
-                    .textTheme
-                    .bodySmall
-                    ?.copyWith(color: AppColors.textSecondary),
-              ),
-              const SizedBox(height: 4),
-              if (_editing)
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _nameController,
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                        ),
-                        autofocus: true,
-                      ),
+              // Avatar
+              Center(
+                child: Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(color: AppColors.glassBorder),
+                  ),
+                  child: Center(
+                    child: Text(
+                      (user.displayName ?? user.email)[0].toUpperCase(),
+                      style: const TextStyle(
+                          fontSize: 32, color: AppColors.primary),
                     ),
-                    const SizedBox(width: 8),
-                    IconButton(
-                      icon: const Icon(Icons.check),
-                      onPressed: () async {
-                        await ref
-                            .read(profileProvider.notifier)
-                            .updateName(_nameController.text.trim());
-                        setState(() => _editing = false);
-                      },
-                    ),
-                  ],
-                )
-              else
-                GestureDetector(
-                  onTap: () {
-                    _nameController.text = user.displayName ?? '';
-                    setState(() => _editing = true);
-                  },
-                  child: Row(
-                    children: [
-                      Text(
-                        user.displayName ?? 'Tap to set name',
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                      const SizedBox(width: 8),
-                      const Icon(Icons.edit, size: 16, color: AppColors.textSecondary),
-                    ],
                   ),
                 ),
-              const SizedBox(height: 48),
-              OutlinedButton(
-                onPressed: () => ref.read(authProvider.notifier).logout(),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.error,
-                  side: const BorderSide(color: AppColors.error),
+              ),
+              const SizedBox(height: 28),
+
+              // Info card
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: AppColors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.glassBorder),
                 ),
-                child: const Text('Log out'),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Email',
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodySmall
+                          ?.copyWith(color: AppColors.textSecondary),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(user.email,
+                        style: Theme.of(context).textTheme.bodyLarge),
+                    const SizedBox(height: 20),
+                    Text(
+                      'Display Name',
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodySmall
+                          ?.copyWith(color: AppColors.textSecondary),
+                    ),
+                    const SizedBox(height: 4),
+                    if (_editing)
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: _nameController,
+                              autofocus: true,
+                              decoration: const InputDecoration(
+                                contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 10),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          IconButton(
+                            icon: const Icon(Icons.check,
+                                color: AppColors.secondary),
+                            onPressed: () async {
+                              await ref
+                                  .read(profileProvider.notifier)
+                                  .updateName(
+                                      _nameController.text.trim());
+                              setState(() => _editing = false);
+                            },
+                          ),
+                        ],
+                      )
+                    else
+                      GestureDetector(
+                        onTap: () {
+                          _nameController.text = user.displayName ?? '';
+                          setState(() => _editing = true);
+                        },
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                user.displayName ?? 'Tap to set name',
+                                style:
+                                    Theme.of(context).textTheme.bodyLarge,
+                              ),
+                            ),
+                            const Icon(Icons.edit_outlined,
+                                size: 16,
+                                color: AppColors.textSecondary),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 32),
+
+              // Logout
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: () =>
+                      ref.read(authProvider.notifier).logout(),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.error,
+                    side: const BorderSide(color: AppColors.error),
+                  ),
+                  child: const Text('Log out'),
+                ),
               ),
             ],
           );
