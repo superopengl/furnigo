@@ -342,57 +342,79 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       top: false,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: AppColors.glassLight,
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: AppColors.glassBorder),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x0A000000),
-                blurRadius: 12,
-                offset: Offset(0, -2),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.add_circle_outline,
-                    color: AppColors.textSecondary),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: IconButton(
+                icon: const Icon(Icons.add),
                 onPressed: _showAttachmentOptions,
-              ),
-              Expanded(
-                child: TextField(
-                  controller: _controller,
-                  decoration: const InputDecoration(
-                    hintText: 'Message...',
-                    hintStyle: TextStyle(color: AppColors.textSecondary),
-                    border: InputBorder.none,
-                    enabledBorder: InputBorder.none,
-                    focusedBorder: InputBorder.none,
-                    filled: false,
-                    contentPadding: EdgeInsets.symmetric(vertical: 10),
-                  ),
-                  textInputAction: TextInputAction.send,
-                  onSubmitted: (_) => _send(),
+                style: IconButton.styleFrom(
+                  backgroundColor: AppColors.surface,
+                  foregroundColor: AppColors.textSecondary,
+                  fixedSize: const Size(34, 34),
+                  padding: EdgeInsets.zero,
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.only(right: 4),
-                child: IconButton(
-                  icon: const Icon(Icons.arrow_upward),
-                  onPressed: _send,
-                  style: IconButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: AppColors.white,
-                    fixedSize: const Size(34, 34),
-                    padding: EdgeInsets.zero,
-                  ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: AppColors.glassLight,
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: AppColors.glassBorder),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x0A000000),
+                      blurRadius: 12,
+                      offset: Offset(0, -2),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: TextField(
+                        controller: _controller,
+                        minLines: 1,
+                        maxLines: 5,
+                        decoration: const InputDecoration(
+                          hintText: 'Message...',
+                          hintStyle:
+                              TextStyle(color: AppColors.textSecondary),
+                          border: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          filled: false,
+                          contentPadding:
+                              EdgeInsets.symmetric(vertical: 10),
+                        ),
+                        textInputAction: TextInputAction.newline,
+                      ),
+                    ),
+                    Padding(
+                      padding:
+                          const EdgeInsets.only(right: 4, bottom: 4),
+                      child: IconButton(
+                        icon: const Icon(Icons.arrow_upward),
+                        onPressed: _send,
+                        style: IconButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: AppColors.white,
+                          fixedSize: const Size(34, 34),
+                          padding: EdgeInsets.zero,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

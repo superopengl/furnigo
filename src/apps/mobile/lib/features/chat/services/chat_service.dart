@@ -24,12 +24,11 @@ class ChatService {
     return ChatModel.fromJson(res.data['data'] as Map<String, dynamic>);
   }
 
-  Future<ChatModel> updateChat(String chatId, {String? title}) async {
-    final res = await _dio.put('/chats/$chatId', data: {
+  Future<void> updateChat(String chatId, {String? title}) async {
+    await _dio.put('/chats/$chatId', data: {
       // ignore: use_null_aware_elements
       if (title != null) 'title': title,
     });
-    return ChatModel.fromJson(res.data['data'] as Map<String, dynamic>);
   }
 
   Future<List<MessageModel>> getMessages(String chatId, {String? cursor}) async {
