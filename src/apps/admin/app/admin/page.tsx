@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Typography, Input, Button, Tag, Table, Space, Avatar, Tooltip, ConfigProvider, theme as antTheme } from "antd";
+import { Typography, Input, Button, Tag, Table, Space, Tooltip, ConfigProvider, theme as antTheme } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import {
   SearchOutlined,
@@ -13,6 +13,7 @@ import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { AuthGuard } from "@/components/AuthGuard";
 import { ChatDrawer } from "@/components/ChatDrawer";
+import { UserAvatar } from "@/components/UserAvatar";
 import { colors } from "@/lib/theme";
 import type { Message } from "@furnigo/types";
 
@@ -42,15 +43,6 @@ interface ChatListItem {
   participants: Participant[];
   lastMessage: Message | null;
 }
-
-const getInitials = (displayName: string | null, email: string) => {
-  if (displayName) {
-    const parts = displayName.trim().split(/\s+/);
-    if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-    return parts[0][0].toUpperCase();
-  }
-  return email[0].toUpperCase();
-};
 
 const getRoleColor = (role: string) => {
   if (role === "client") return colors.secondary;
@@ -152,18 +144,10 @@ function ChatsContent() {
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
           {record.participants.map((p) => (
             <div key={p.userId} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <Avatar
+              <UserAvatar
+                user={{ id: p.userId, displayName: p.displayName, email: p.email, role: p.role as any, avatarUrl: null }}
                 size={24}
-                style={{
-                  backgroundColor: `${getRoleColor(p.role)}25`,
-                  color: getRoleColor(p.role),
-                  fontSize: 11,
-                  fontWeight: 600,
-                  flexShrink: 0,
-                }}
-              >
-                {getInitials(p.displayName, p.email)}
-              </Avatar>
+              />
               <div style={{ minWidth: 0 }}>
                 <Text style={{ fontSize: 13, color: dk.text, display: "block", lineHeight: 1.3 }} ellipsis>
                   {p.displayName || p.email.split("@")[0]}

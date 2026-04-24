@@ -47,7 +47,7 @@ export function UserAvatar({ user, size = 32 }: UserAvatarProps) {
   );
 
   return (
-    <Tooltip title={tooltipContent}>
+    <Tooltip title={tooltipContent} placement="bottom">
       {user.avatarUrl ? (
         <Avatar size={size} src={user.avatarUrl} />
       ) : (
