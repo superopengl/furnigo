@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../theme/colors.dart';
 import '../providers/auth_provider.dart';
@@ -12,10 +13,13 @@ class LoginScreen extends ConsumerStatefulWidget {
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailController = TextEditingController();
-  final _otpController = TextEditingController();
+  final _otpControllers = List.generate(6, (_) => TextEditingController());
+  final _otpFocusNodes = List.generate(6, (_) => FocusNode());
   bool _otpSent = false;
   bool _loading = false;
   String? _error;
+
+  String get _otpCode => _otpControllers.map((c) => c.text).join();
 
   Future<void> _sendOtp() async {
     final email = _emailController.text.trim();
@@ -32,6 +36,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         _otpSent = true;
         _loading = false;
       });
+      _otpFocusNodes[0].requestFocus();
     } catch (e) {
       setState(() {
         _error = 'Failed to send OTP. Please try again.';
@@ -42,7 +47,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   Future<void> _verifyOtp() async {
     final email = _emailController.text.trim();
-    final code = _otpController.text.trim();
+    final code = _otpCode;
     if (code.length != 6) return;
 
     setState(() {
@@ -54,17 +59,49 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     final authState = ref.read(authProvider);
     if (authState.status != AuthStatus.authenticated) {
+      _clearOtp();
       setState(() {
         _error = authState.error ?? 'Verification failed.';
         _loading = false;
       });
+      _otpFocusNodes[0].requestFocus();
+    }
+  }
+
+  void _onOtpDigitChanged(int index, String value) {
+    if (value.length == 1 && index < 5) {
+      _otpFocusNodes[index + 1].requestFocus();
+    }
+    if (_otpCode.length == 6) {
+      _verifyOtp();
+    }
+  }
+
+  void _onOtpKeyPress(int index, KeyEvent event) {
+    if (event is KeyDownEvent &&
+        event.logicalKey == LogicalKeyboardKey.backspace &&
+        _otpControllers[index].text.isEmpty &&
+        index > 0) {
+      _otpControllers[index - 1].clear();
+      _otpFocusNodes[index - 1].requestFocus();
+    }
+  }
+
+  void _clearOtp() {
+    for (final c in _otpControllers) {
+      c.clear();
     }
   }
 
   @override
   void dispose() {
     _emailController.dispose();
-    _otpController.dispose();
+    for (final c in _otpControllers) {
+      c.dispose();
+    }
+    for (final n in _otpFocusNodes) {
+      n.dispose();
+    }
     super.dispose();
   }
 
@@ -103,45 +140,68 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
               if (_otpSent) ...[
                 const SizedBox(height: 16),
-                TextField(
-                  controller: _otpController,
-                  decoration: const InputDecoration(
-                    labelText: 'Enter 6-digit code',
-                    border: OutlineInputBorder(),
+                if (_loading)
+                  const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                else
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: List.generate(6, (i) => SizedBox(
+                      width: 48,
+                      child: KeyboardListener(
+                        focusNode: FocusNode(),
+                        onKeyEvent: (event) => _onOtpKeyPress(i, event),
+                        child: TextField(
+                          controller: _otpControllers[i],
+                          focusNode: _otpFocusNodes[i],
+                          textAlign: TextAlign.center,
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [
+                            LengthLimitingTextInputFormatter(1),
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                            counterText: '',
+                          ),
+                          style: Theme.of(context).textTheme.headlineSmall,
+                          onChanged: (value) => _onOtpDigitChanged(i, value),
+                        ),
+                      ),
+                    )),
                   ),
-                  keyboardType: TextInputType.number,
-                  maxLength: 6,
-                  autofocus: true,
-                ),
               ],
               if (_error != null) ...[
                 const SizedBox(height: 8),
                 Text(_error!, style: TextStyle(color: AppColors.error)),
               ],
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton(
-                  onPressed: _loading
-                      ? null
-                      : (_otpSent ? _verifyOtp : _sendOtp),
-                  child: _loading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : Text(_otpSent ? 'Verify' : 'Send OTP'),
+              if (!_otpSent) ...[
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton(
+                    onPressed: _loading ? null : _sendOtp,
+                    child: _loading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Text('Send OTP'),
+                  ),
                 ),
-              ),
+              ],
               if (_otpSent)
                 TextButton(
                   onPressed: () => setState(() {
                     _otpSent = false;
-                    _otpController.clear();
+                    _clearOtp();
                     _error = null;
                   }),
                   child: const Text('Use a different email'),
