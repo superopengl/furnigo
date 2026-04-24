@@ -60,6 +60,7 @@ drizzle/meta/
 
 # Uploads (dev local storage)
 uploads/
+devUploadAttachments/
 
 # Secrets / certs
 *.pem

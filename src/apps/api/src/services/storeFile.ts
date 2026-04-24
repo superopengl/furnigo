@@ -1,9 +1,7 @@
 import { randomUUID } from "crypto";
 import { mkdir, writeFile } from "fs/promises";
 import { join } from "path";
-import { env } from "@furnigo/config";
-
-const DEV_UPLOAD_DIR = join(process.cwd(), "uploadAttachments");
+import { env, DEV_UPLOAD_DIR } from "@furnigo/config";
 
 export async function storeFile(data: Buffer, originalFilename: string): Promise<string> {
   const fileId = randomUUID();
@@ -13,7 +11,8 @@ export async function storeFile(data: Buffer, originalFilename: string): Promise
     throw new Error("Production file storage not implemented");
   }
 
-  await mkdir(DEV_UPLOAD_DIR, { recursive: true });
-  await writeFile(join(DEV_UPLOAD_DIR, fileId, originalFilename), data);
+  const dirPath = join(DEV_UPLOAD_DIR, fileId);
+  await mkdir(dirPath, { recursive: true });
+  await writeFile(join(dirPath, originalFilename), data);
   return fileId + '/' + originalFilename;
 }

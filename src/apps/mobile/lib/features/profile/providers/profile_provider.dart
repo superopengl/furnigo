@@ -22,4 +22,10 @@ class ProfileNotifier extends AsyncNotifier<UserModel?> {
     await dio.put('/users/me', data: {'displayName': displayName});
     ref.invalidateSelf();
   }
+
+  Future<void> updateAvatar(String avatarUrl) async {
+    final dio = ref.read(apiClientProvider);
+    await dio.put('/users/me', data: {'avatarUrl': avatarUrl});
+    ref.invalidateSelf();
+  }
 }

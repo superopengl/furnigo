@@ -1,5 +1,8 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
+import '../../../shared/services/api_client.dart';
 import '../../../theme/colors.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/profile_provider.dart';
@@ -14,6 +17,23 @@ class ProfileScreen extends ConsumerStatefulWidget {
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   final _nameController = TextEditingController();
   bool _editing = false;
+
+  Future<void> _pickAndUploadAvatar() async {
+    final image = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 512,
+      imageQuality: 80,
+    );
+    if (image == null) return;
+
+    final dio = ref.read(apiClientProvider);
+    final formData = FormData.fromMap({
+      'file': await MultipartFile.fromFile(image.path),
+    });
+    final res = await dio.post('/uploads', data: formData);
+    final url = res.data['data']['url'] as String;
+    await ref.read(profileProvider.notifier).updateAvatar(url);
+  }
 
   @override
   void dispose() {
@@ -31,7 +51,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           icon: const Icon(Icons.close),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('Profile'),
+        title: const Text('Settings'),
         centerTitle: true,
       ),
       body: profileAsync.when(
@@ -47,20 +67,47 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             children: [
               // Avatar
               Center(
-                child: Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    color: AppColors.surface,
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(color: AppColors.glassBorder),
-                  ),
-                  child: Center(
-                    child: Text(
-                      (user.displayName ?? user.email)[0].toUpperCase(),
-                      style: const TextStyle(
-                          fontSize: 32, color: AppColors.primary),
-                    ),
+                child: GestureDetector(
+                  onTap: () => _pickAndUploadAvatar(),
+                  child: Stack(
+                    children: [
+                      Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          color: AppColors.surface,
+                          borderRadius: BorderRadius.circular(24),
+                          border: Border.all(color: AppColors.glassBorder),
+                          image: user.avatarUrl != null
+                              ? DecorationImage(
+                                  image: NetworkImage(user.avatarUrl!),
+                                  fit: BoxFit.cover,
+                                )
+                              : null,
+                        ),
+                        child: user.avatarUrl == null
+                            ? Center(
+                                child: Text(
+                                  (user.displayName ?? user.email)[0].toUpperCase(),
+                                  style: const TextStyle(
+                                      fontSize: 32, color: AppColors.primary),
+                                ),
+                              )
+                            : null,
+                      ),
+                      Positioned(
+                        right: 0,
+                        bottom: 0,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(Icons.camera_alt, size: 14, color: AppColors.white),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),

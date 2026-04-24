@@ -33,3 +33,6 @@ const envSchema = z.object({
 export type Env = z.infer<typeof envSchema>;
 
 export const env = envSchema.parse(process.env);
+
+export const PROJECT_ROOT = root;
+export const DEV_UPLOAD_DIR = `${root}devUploadAttachments`;

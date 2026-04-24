@@ -489,7 +489,7 @@ GET    /dev/blob/:fileId       — Serve an uploaded file by fileId
 
 ### GET /dev/blob/:fileId
 
-Serves a locally stored file from the `uploadAttachments/` directory. In production, files are served directly from cloud storage (e.g. Cloudflare R2) via `FURNIGO_BLOB_BASE_URL`. No authentication required.
+Serves a locally stored file from the `devUploadAttachments/` directory at the project root. In production, files are served directly from cloud storage (e.g. Cloudflare R2) via `FURNIGO_BLOB_BASE_URL`. No authentication required.
 
 ```json
 // 200 — returns raw file with auto-detected Content-Type header
