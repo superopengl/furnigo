@@ -3,8 +3,8 @@
 ## Base URL
 
 ```
-Production:  https://api.furnigo.com.au/v1
-Development: http://localhost:9411/v1
+Production:  https://api.furnigo.com.au/api
+Development: http://localhost:9411/api
 ```
 
 ## Response Envelope
@@ -15,7 +15,7 @@ All responses follow this format:
 {
   "success": true,
   "data": { ... },
-  "meta": { "page": 1, "limit": 20, "total": 150 }
+  "meta": { "limit": 50, "cursor": "..." }
 }
 
 {
@@ -26,7 +26,7 @@ All responses follow this format:
 
 ## Authentication
 
-Stateless JWT auth for mobile and admin. Token contains user ID and role, signed with a server secret. Tokens expire after **12 hours**. No token storage on the backend — the server verifies the signature on each request. To block a user, set `is_active=false` on the users table.
+Stateless JWT auth for mobile and admin. Token contains user ID and role, signed with a server secret. Tokens expire after **12 hours**. No token storage on the backend — the server verifies the signature on each request. To block a user, set `isActive=false` on the user table.
 
 Unified auth flow: enter email → verify OTP → if new user, account is created automatically.
 
@@ -43,7 +43,7 @@ POST   /auth/token/refresh      — Refresh an expired token (within 7-day grace
 
 ### POST /auth/otp/send
 
-Send OTP to email. Works for both new and existing users.
+Send OTP to email. Works for both new and existing users. Creates the user record (inactive) if it doesn't exist.
 
 ```json
 // Request
@@ -55,9 +55,7 @@ Send OTP to email. Works for both new and existing users.
 {
   "success": true,
   "data": {
-    "otp_sent": true,
-    "email": "john@example.com",
-    "is_new_user": true,
+    "otp_id": "uuid",
     "expires_in": 300
   }
 }
@@ -65,12 +63,12 @@ Send OTP to email. Works for both new and existing users.
 
 ### POST /auth/otp/verify
 
-Verify OTP. If existing user, logs in. If new user, creates account. Returns short-lived token (12h).
+Verify OTP. If existing user, logs in. If new user, activates account. Returns short-lived token (12h).
 
 ```json
 // Request
 {
-  "email": "john@example.com",
+  "otp_id": "uuid",
   "code": "482916"
 }
 
@@ -81,13 +79,19 @@ Verify OTP. If existing user, logs in. If new user, creates account. Returns sho
     "user": {
       "id": "uuid",
       "email": "john@example.com",
-      "display_name": null,
+      "displayName": null,
       "role": "client"
     },
     "is_new_user": true,
     "token": "eyJhbGciOiJIUzI1NiIs...",
     "expires_at": "2027-04-22T00:00:00Z"
   }
+}
+
+// Invalid OTP — 400
+{
+  "success": false,
+  "error": { "code": "INVALID_OTP", "message": "Invalid or expired OTP" }
 }
 ```
 
@@ -158,6 +162,47 @@ GET    /users/me               — Get current user profile
 PUT    /users/me               — Update profile
 ```
 
+### GET /users/me
+
+Returns the current authenticated user's profile.
+
+```json
+// Response
+{
+  "success": true,
+  "data": {
+    "id": "uuid",
+    "email": "john@example.com",
+    "displayName": "John",
+    "avatarUrl": null,
+    "locale": "en",
+    "role": "client",
+    "isActive": true,
+    "createdAt": "2026-04-20T10:00:00Z",
+    "updatedAt": "2026-04-24T12:00:00Z"
+  }
+}
+```
+
+### PUT /users/me
+
+Update the current user's profile. All fields are optional.
+
+```json
+// Request
+{
+  "displayName": "John Doe",
+  "avatarUrl": "https://cdn.example.com/avatar.jpg",
+  "locale": "zh"
+}
+
+// Response
+{
+  "success": true,
+  "data": { /* updated user object */ }
+}
+```
+
 ---
 
 ## Chats
@@ -169,15 +214,35 @@ PUT    /chats/:id                — Update chat (e.g. title)
 GET    /chats/:id                — Get chat with recent messages
 GET    /chats/:id/messages       — Get messages (cursor-based, supports forward/backward)
 POST   /chats/:id/messages       — Send a message
-POST   /chats/:id/participants   — Add participant (agent joins)
+```
+
+### GET /chats
+
+List chats the current user participates in, sorted by most recently updated.
+
+```json
+// Response
+{
+  "success": true,
+  "data": [
+    {
+      "id": "uuid",
+      "title": "Living room furniture",
+      "createdAt": "2026-04-20T10:00:00Z",
+      "updatedAt": "2026-04-24T12:00:00Z",
+      "role": "client"
+    }
+  ]
+}
 ```
 
 ### POST /chats
 
+Create a new chat. The caller is automatically added as a "client" participant.
+
 ```json
 // Request
 {
-  "type": "inquiry",
   "title": "Looking for living room furniture"
 }
 
@@ -186,12 +251,12 @@ POST   /chats/:id/participants   — Add participant (agent joins)
   "success": true,
   "data": {
     "id": "uuid",
-    "type": "inquiry",
     "title": "Looking for living room furniture",
+    "createdAt": "2026-04-20T10:00:00Z",
+    "updatedAt": "2026-04-20T10:00:00Z",
     "participants": [
-      { "user_id": "uuid", "role": "client" }
-    ],
-    "ai_enabled": true
+      { "userId": "uuid", "role": "client" }
+    ]
   }
 }
 ```
@@ -203,16 +268,41 @@ Update a chat. Caller must be a participant.
 ```json
 // Request
 {
-  "title": "New chat 2"
+  "title": "New chat title"
 }
 
 // Response
 {
   "success": true,
   "data": {
-    "title": "New chat 2",
-    "updated_at": "2026-04-24T12:00:00Z"
+    "title": "New chat title",
+    "updatedAt": "2026-04-24T12:00:00Z"
   }
+}
+```
+
+### GET /chats/:id
+
+Get chat with participants and the most recent 50 messages. Caller must be a participant.
+
+```json
+// Response
+{
+  "success": true,
+  "data": {
+    "id": "uuid",
+    "title": "Living room furniture",
+    "participants": [
+      { "userId": "uuid", "role": "client" }
+    ],
+    "messages": [ /* up to 50 messages, chronological order */ ]
+  }
+}
+
+// Not a participant — 403
+{
+  "success": false,
+  "error": { "code": "FORBIDDEN", "message": "Not a participant of this chat" }
 }
 ```
 
@@ -228,9 +318,9 @@ Cursor-based pagination with two modes:
 
 `cursor` and `after` are mutually exclusive. If `after` is provided, it takes precedence.
 
-**Backward (default):** Messages ordered by `created_at DESC`, then reversed to chronological. `meta.cursor` points to the oldest returned message for fetching the next older batch.
+**Backward (default):** Messages ordered by `createdAt DESC`, then reversed to chronological. `meta.cursor` points to the oldest returned message for fetching the next older batch.
 
-**Forward (`after`):** Messages ordered by `created_at ASC`. `meta.cursor` points to the newest returned message for fetching the next newer batch.
+**Forward (`after`):** Messages ordered by `createdAt ASC`. `meta.cursor` points to the newest returned message for fetching the next newer batch.
 
 ```json
 // Response
@@ -245,41 +335,103 @@ The mobile client caches messages locally in SQLite. On chat open, it loads cach
 
 ### POST /chats/:id/messages
 
+Send a message. Caller must be a participant. Sender role is auto-detected from the participant record. The message is broadcast to the chat room via WebSocket `message:new` event.
+
 ```json
 // Request
 {
-  "content_type": "text",
+  "contentType": "text",
   "content": { "text": "I'm looking for a solid wood dining table" }
 }
 
 // Image message
 {
-  "content_type": "image",
-  "content": { "url": "s3://...", "caption": "Something like this style" }
+  "contentType": "image",
+  "content": { "url": "https://cdn.example.com/photo.jpg" }
 }
 
-// Response — the saved message
+// Attachment message
+{
+  "contentType": "attachment",
+  "content": { "url": "https://cdn.example.com/doc.pdf", "name": "invoice.pdf" }
+}
+```
+
+Supported `contentType` values: `text`, `image`, `attachment`, `video`, `tool`
+
+Optional `label` field for categorising messages:
+
+```json
+{
+  "contentType": "text",
+  "content": { "text": "Your payment has been received" },
+  "label": ["payment"]
+}
+```
+
+Supported labels: `order`, `action_required`, `payment`, `shipment`, `delivery`
+
+```json
+// Response
 {
   "success": true,
   "data": {
     "id": "uuid",
-    "sender_id": "uuid",
-    "sender_role": "client",
-    "content_type": "text",
+    "chatId": "uuid",
+    "senderId": "uuid",
+    "senderRole": "client",
+    "contentType": "text",
     "content": { "text": "I'm looking for a solid wood dining table" },
-    "created_at": "2026-04-20T10:30:00Z"
+    "label": null,
+    "createdAt": "2026-04-20T10:30:00Z",
+    "updatedAt": "2026-04-20T10:30:00Z"
   }
 }
 ```
 
-Note: The AI assistant response arrives via WebSocket, not in this HTTP response.
+---
+
+## Uploads
+
+```
+POST   /uploads                — Upload a file (image, video, or PDF)
+```
+
+### POST /uploads
+
+Upload a file attachment. Requires authentication. Accepts multipart form data with a single `file` field. Only images (`image/*`), videos (`video/*`), and PDFs (`application/pdf`) are allowed. Max file size: 10 MB.
+
+MIME type is auto-detected from the uploaded file. The returned `url` is a full blob URL constructed from `FURNIGO_BLOB_BASE_URL`.
+
+```
+Content-Type: multipart/form-data
+Authorization: Bearer <jwt>
+```
+
+```json
+// Response
+{
+  "success": true,
+  "data": {
+    "url": "http://localhost:9411/api/dev/blob/550e8400-e29b-41d4-a716-446655440000",
+    "name": "photo.jpg",
+    "size": 245760,
+    "contentType": "image/jpeg"
+  }
+}
+
+// Invalid file type — 400
+{
+  "success": false,
+  "error": { "code": "BAD_REQUEST", "message": "Only images, videos, and PDFs are allowed" }
+}
+```
 
 ---
 
 ## Admin API
 
 All admin endpoints require `Authorization: Bearer <jwt>` and an agent or admin role.
-Base prefix: `/admin`
 
 Auth uses the same OTP flow as the mobile app (`/auth/otp/send` + `/auth/otp/verify`). The admin portal rejects client-role users on the frontend after OTP verification.
 
@@ -305,7 +457,7 @@ Returns all chats with enriched participant info and last message preview.
       "createdAt": "2026-04-20T10:00:00Z",
       "updatedAt": "2026-04-24T12:00:00Z",
       "participants": [
-        { "userId": "uuid", "role": "client", "displayName": "John", "email": "john@example.com" }
+        { "userId": "uuid", "role": "client", "joinedAt": "2026-04-20T10:00:00Z", "displayName": "John", "email": "john@example.com" }
       ],
       "lastMessage": {
         "id": "uuid",
@@ -321,42 +473,85 @@ Returns all chats with enriched participant info and last message preview.
 
 #### GET /admin/chats/:id
 
-Returns chat with participants and recent 50 messages. If the requesting admin is not yet a participant, they are automatically added with role "agent".
+Returns chat with participants and recent 50 messages. If the requesting admin is not yet a participant, they are automatically added with role "agent" and a `participant:joined` WebSocket event is emitted.
 
 After joining, the admin can use existing chat endpoints to send messages (`POST /chats/:id/messages`) and load history (`GET /chats/:id/messages`).
 
+---
+
+## Dev-only APIs
+
+These endpoints are only available when `NODE_ENV=development`.
+
+```
+GET    /dev/blob/:fileId       — Serve an uploaded file by fileId
+```
+
+### GET /dev/blob/:fileId
+
+Serves a locally stored file from the `uploadAttachments/` directory. In production, files are served directly from cloud storage (e.g. Cloudflare R2) via `FURNIGO_BLOB_BASE_URL`. No authentication required.
+
+```json
+// 200 — returns raw file with auto-detected Content-Type header
+
+// Not found — 404
+{
+  "success": false,
+  "error": { "code": "NOT_FOUND", "message": "File not found" }
+}
+```
+
+---
+
+## Utility Endpoints
+
+```
+GET    /healthcheck            — Returns "OK"
+GET    /info                   — Returns registered routes and WebSocket info
+```
+
+### GET /info
+
+```json
+{
+  "success": true,
+  "data": {
+    "routes": [
+      { "method": "GET", "path": "/api/chats" },
+      { "method": "POST", "path": "/api/chats" }
+    ],
+    "websocket": { "path": "/ws", "protocol": "socket.io" }
+  }
+}
+```
 
 ---
 
 ## WebSocket Events
 
-Connection: `wss://api.furnigo.com.au/v1/ws?token=<jwt>`
+Protocol: Socket.IO at path `/ws`
 
-### Server → Client Events
+Authentication: JWT token passed in the handshake `auth` object:
 
-```json
-// New message in a chat
-{ "event": "message:new", "data": { "chat_id": "uuid", "message": { ... } } }
-
-// AI is typing indicator
-{ "event": "assistant:typing", "data": { "chat_id": "uuid" } }
-
-// Agent joined chat
-{ "event": "participant:joined", "data": { "chat_id": "uuid", "user": { ... } } }
-
-// Order status changed
-{ "event": "order:updated", "data": { "order_id": "uuid", "status": "shipped" } }
-
-// Shipment tracking update
-{ "event": "shipment:updated", "data": { "shipment_id": "uuid", "status": "customs_cleared" } }
+```js
+io("http://localhost:9411", {
+  path: "/ws",
+  auth: { token: "<jwt>" },
+});
 ```
 
 ### Client → Server Events
 
-```json
-// Send typing indicator
-{ "event": "typing", "data": { "chat_id": "uuid" } }
+| Event | Payload | Description |
+|-------|---------|-------------|
+| `join` | `chatId: string` | Join a chat room to receive real-time events |
+| `leave` | `chatId: string` | Leave a chat room |
+| `typing` | `{ chatId: string }` | Broadcast typing indicator to other users in the room |
 
-// Mark messages as read
-{ "event": "read", "data": { "chat_id": "uuid", "message_id": "uuid" } }
-```
+### Server → Client Events
+
+| Event | Payload | Trigger |
+|-------|---------|---------|
+| `message:new` | `{ chatId: string, message: Message }` | A new message is sent via `POST /chats/:id/messages` |
+| `typing` | `{ chatId: string, userId: string }` | Another user in the room is typing |
+| `participant:joined` | `{ chatId: string, user: { userId, role, displayName?, email? } }` | An admin/agent joins a chat via `GET /admin/chats/:id` |

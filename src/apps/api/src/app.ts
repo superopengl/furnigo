@@ -9,6 +9,7 @@ import { chatRoutes } from "./routes/chats";
 import { messageRoutes } from "./routes/messages";
 import { uploadRoutes } from "./routes/uploads";
 import { adminChatRoutes } from "./routes/admin/chats";
+import { devBlobRoutes } from "./routes/dev/blob";
 import { setupSocket } from "./ws/setupSocket";
 
 export async function buildApp() {
@@ -68,6 +69,9 @@ export async function buildApp() {
   await app.register(messageRoutes, { prefix: "/api/chats" });
   await app.register(uploadRoutes, { prefix: "/api/uploads" });
   await app.register(adminChatRoutes, { prefix: "/api/admin/chats" });
+  if (env.NODE_ENV === "development") {
+    await app.register(devBlobRoutes, { prefix: "/api/dev/blob" });
+  }
 
   app.get("/info", () => ({
     success: true,

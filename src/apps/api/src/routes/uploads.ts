@@ -1,17 +1,7 @@
 import type { FastifyInstance } from "fastify";
-import { readFile } from "fs/promises";
-import { join } from "path";
-import { storeFile, UPLOAD_DIR } from "../services/storeFile";
-
-const MIME_TYPES: Record<string, string> = {
-  jpg: "image/jpeg",
-  jpeg: "image/jpeg",
-  png: "image/png",
-  gif: "image/gif",
-  webp: "image/webp",
-  heic: "image/heic",
-  pdf: "application/pdf",
-};
+import mime from "mime";
+import { env } from "@furnigo/config";
+import { storeFile } from "../services/storeFile";
 
 export async function uploadRoutes(app: FastifyInstance) {
   app.post("/", { onRequest: [app.authenticate] }, async (request, reply) => {
@@ -23,25 +13,26 @@ export async function uploadRoutes(app: FastifyInstance) {
       });
     }
 
+    const detectedType = file.mimetype || mime.getType(file.filename) || "";
+    if (!detectedType.startsWith("image/") && !detectedType.startsWith("video/") && detectedType !== "application/pdf") {
+      return reply.code(400).send({
+        success: false,
+        error: { code: "BAD_REQUEST", message: "Only images, videos, and PDFs are allowed" },
+      });
+    }
+
     const buffer = await file.toBuffer();
-    const filename = await storeFile(buffer, file.filename);
+    const filePathName = await storeFile(buffer, file.filename);
 
-    return { success: true, data: { url: `/api/uploads/${filename}` } };
+    return {
+      success: true,
+      data: {
+        url: `${env.FURNIGO_BLOB_BASE_URL}/${filePathName}`,
+        name: file.filename,
+        size: buffer.length,
+        contentType: file.mimetype || mime.getType(file.filename) || "application/octet-stream",
+      },
+    };
   });
 
-  app.get("/:filename", async (request, reply) => {
-    const { filename } = request.params as { filename: string };
-
-    if (filename.includes("..") || filename.includes("/")) {
-      return reply.code(400).send({ success: false, error: { code: "BAD_REQUEST", message: "Invalid filename" } });
-    }
-
-    try {
-      const data = await readFile(join(UPLOAD_DIR, filename));
-      const ext = filename.split(".").pop()?.toLowerCase() ?? "";
-      return reply.type(MIME_TYPES[ext] ?? "application/octet-stream").send(data);
-    } catch {
-      return reply.code(404).send({ success: false, error: { code: "NOT_FOUND", message: "File not found" } });
-    }
-  });
 }
