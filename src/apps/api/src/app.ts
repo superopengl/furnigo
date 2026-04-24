@@ -8,6 +8,7 @@ import { userRoutes } from "./routes/users";
 import { chatRoutes } from "./routes/chats";
 import { messageRoutes } from "./routes/messages";
 import { uploadRoutes } from "./routes/uploads";
+import { adminChatRoutes } from "./routes/admin/chats";
 import { setupSocket } from "./ws/setupSocket";
 
 export async function buildApp() {
@@ -66,6 +67,7 @@ export async function buildApp() {
   await app.register(chatRoutes, { prefix: "/api/chats" });
   await app.register(messageRoutes, { prefix: "/api/chats" });
   await app.register(uploadRoutes, { prefix: "/api/uploads" });
+  await app.register(adminChatRoutes, { prefix: "/api/admin/chats" });
 
   app.get("/info", () => ({
     success: true,

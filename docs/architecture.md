@@ -40,15 +40,17 @@
 - **Purpose:** Internal web dashboard for Furnigo staff
 - **URL:** `https://admin.furnigo.com.au`
 - **Key features:**
-  - User management (clients + agents)
-  - Live chat monitoring and intervention
-- **Auth:** Email + password with session cookies (separate from client OTP flow)
+  - Chat list with participant details and last message preview
+  - Live chat messaging via right-side drawer (real-time via Socket.io)
+  - File/image/video upload in chat
+  - Mobile responsive layout
+- **Auth:** Same OTP flow as mobile app, restricted to agent/admin roles. JWT token stored in localStorage.
+- **Style:** ChatGPT-inspired floating glass design with Furnigo color palette
 
 ### 3. Fastify API Server
 - **Purpose:** Core backend handling all business logic
 - **Responsibilities:**
-  - Stateless JWT auth for mobile (OTP + JWT, no backend token storage)
-  - Session-based auth for admin portal
+  - Stateless JWT auth for mobile and admin (OTP + JWT, no backend token storage)
   - REST API for CRUD operations
   - Socket.io server for real-time chat
   - File upload handling (images, documents)

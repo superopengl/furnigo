@@ -216,28 +216,52 @@ Note: The AI assistant response arrives via WebSocket, not in this HTTP response
 
 ## Admin API
 
-All admin endpoints require `Authorization: Bearer <admin-session-token>` and an admin role.
+All admin endpoints require `Authorization: Bearer <jwt>` and an agent or admin role.
 Base prefix: `/admin`
 
-### Auth (Admin)
-```
-POST   /admin/auth/login           — Email + password login
-POST   /admin/auth/logout          — End session
-```
-
-### Users
-```
-GET    /admin/users                — List all users (filterable by role, status)
-GET    /admin/users/:id            — Get user detail + chat history
-PUT    /admin/users/:id            — Update user (role, status)
-```
+Auth uses the same OTP flow as the mobile app (`/auth/otp/send` + `/auth/otp/verify`). The admin portal rejects client-role users on the frontend after OTP verification.
 
 ### Chats
+
 ```
-GET    /admin/chats        — List all chats (filterable by status, date)
-GET    /admin/chats/:id    — View full chat chat
-POST   /admin/chats/:id/messages — Admin sends a message
+GET    /admin/chats        — List all chats with participants and last message
+GET    /admin/chats/:id    — Get chat detail (auto-joins admin as agent participant)
 ```
+
+#### GET /admin/chats
+
+Returns all chats with enriched participant info and last message preview.
+
+```json
+// Response
+{
+  "success": true,
+  "data": [
+    {
+      "id": "uuid",
+      "title": "Living room furniture",
+      "createdAt": "2026-04-20T10:00:00Z",
+      "updatedAt": "2026-04-24T12:00:00Z",
+      "participants": [
+        { "userId": "uuid", "role": "client", "displayName": "John", "email": "john@example.com" }
+      ],
+      "lastMessage": {
+        "id": "uuid",
+        "contentType": "text",
+        "content": { "text": "I'm looking for a dining table" },
+        "senderRole": "client",
+        "createdAt": "2026-04-24T12:00:00Z"
+      }
+    }
+  ]
+}
+```
+
+#### GET /admin/chats/:id
+
+Returns chat with participants and recent 50 messages. If the requesting admin is not yet a participant, they are automatically added with role "agent".
+
+After joining, the admin can use existing chat endpoints to send messages (`POST /chats/:id/messages`) and load history (`GET /chats/:id/messages`).
 
 
 ---

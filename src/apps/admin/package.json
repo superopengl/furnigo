@@ -3,27 +3,28 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+    "start:dev": "next dev -p 9412",
+    "prod:build": "next build",
+    "prod:start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
+    "@ant-design/icons": "^6.1.1",
+    "@ant-design/pro-layout": "^7.22.0",
     "@furnigo/config": "workspace:*",
     "@furnigo/db": "workspace:*",
     "@furnigo/types": "workspace:*",
+    "@tanstack/react-query": "^5.75.0",
+    "antd": "^5.24.0",
     "next": "^15.3.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "antd": "^5.24.0",
-    "@ant-design/pro-layout": "^7.22.0",
-    "@tanstack/react-query": "^5.75.0",
     "socket.io-client": "^4.8.0",
     "zod": "^3.24.0"
   },
   "devDependencies": {
-    "typescript": "^5.8.0",
     "@types/react": "^19.1.0",
-    "@types/react-dom": "^19.1.0"
+    "@types/react-dom": "^19.1.0",
+    "typescript": "^5.8.0"
   }
 }

@@ -61,12 +61,13 @@
 | Data tables | Ant Design Table (built-in) |
 | Forms | Ant Design Form + Zod |
 | State | TanStack Query (same as mobile) |
-| Auth | Session-based (email + password for admin staff, separate from client OTP flow) |
-| Real-time | Socket.io client (observe live chats) |
+| Icons | `@ant-design/icons` |
+| Auth | OTP (same flow as mobile, restricted to agent/admin roles). JWT in localStorage. |
+| Real-time | Socket.io client (live chat messaging) |
 
-Admin portal is web-only, desktop-first. Accessible at `https://admin.furnigo.com.au`.
+Admin portal is web-only, mobile responsive. Accessible at `https://admin.furnigo.com.au`.
 
-Single admin role for MVP (one-man operation).
+Single admin role for MVP (one-man operation). Admin auto-joins chats as "agent" participant when opening a chat.
 
 ## Project Structure
 
@@ -98,11 +99,10 @@ furnigo/
 │   │   │
 │   │   └── admin/                  — Next.js admin portal (TypeScript)
 │   │       ├── app/                — App Router pages
-│   │       │   ├── login/
-│   │       │   ├── users/
-│   │       │   └── chats/
-│   │       ├── components/
-│   │       └── lib/
+│   │       │   ├── login/          — OTP login page
+│   │       │   └── chats/          — Chat list + drawer page
+│   │       ├── components/         — AuthGuard, ChatDrawer, MessageBubble, MessageInput, Providers
+│   │       └── lib/                — api, auth, socket, theme
 │   │
 │   └── packages/                   — Shared JS/TS packages (pnpm workspaces)
 │       ├── db/                     — Drizzle schema + migrations

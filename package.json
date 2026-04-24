@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "start:api": "pnpm --filter @furnigo/api dev",
-    "start:admin": "pnpm --filter @furnigo/admin dev",
+    "start:admin": "pnpm --filter @furnigo/admin start:dev",
     "start:mobile": "bash scripts/run-mobile.sh",
     "build": "pnpm -r build",
     "lint": "pnpm -r lint",
