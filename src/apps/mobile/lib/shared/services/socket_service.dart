@@ -23,7 +23,7 @@ class SocketService {
       Env.wsUrl,
       io.OptionBuilder()
           .setTransports(['websocket'])
-          .setPath('/v1/ws')
+          .setPath('/ws')
           .setAuth({'token': token})
           .disableAutoConnect()
           .build(),

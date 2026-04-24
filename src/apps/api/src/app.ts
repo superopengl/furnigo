@@ -11,6 +11,15 @@ import { setupSocket } from "./ws/handlers";
 export async function buildApp() {
   const app = Fastify({ logger: true });
 
+  const routes: { method: string; path: string }[] = [];
+  app.addHook("onRoute", (routeOptions) => {
+    const methods = Array.isArray(routeOptions.method) ? routeOptions.method : [routeOptions.method];
+    for (const method of methods) {
+      if (method === "HEAD" || method === "OPTIONS") continue;
+      routes.push({ method, path: routeOptions.url });
+    }
+  });
+
   await app.register(cors, { origin: true });
   await app.register(jwt, { secret: env.FURNIGO_API_AUTH_JWT_SECRET });
 
@@ -26,10 +35,15 @@ export async function buildApp() {
   app.get("/healthcheck", () => "OK");
 
   // Routes
-  await app.register(authRoutes, { prefix: "/v1/auth" });
-  await app.register(userRoutes, { prefix: "/v1/users" });
-  await app.register(chatRoutes, { prefix: "/v1/chats" });
-  await app.register(messageRoutes, { prefix: "/v1/chats" });
+  await app.register(authRoutes, { prefix: "/auth" });
+  await app.register(userRoutes, { prefix: "/users" });
+  await app.register(chatRoutes, { prefix: "/chats" });
+  await app.register(messageRoutes, { prefix: "/chats" });
+
+  app.get("/info", () => ({
+    success: true,
+    data: { routes, websocket: { path: "/ws", protocol: "socket.io" } },
+  }));
 
   // WebSocket
   setupSocket(app);

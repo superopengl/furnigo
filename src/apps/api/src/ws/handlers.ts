@@ -10,7 +10,7 @@ export function getIO(): Server | null {
 export function setupSocket(app: FastifyInstance) {
   io = new Server(app.server, {
     cors: { origin: "*" },
-    path: "/v1/ws",
+    path: "/ws",
   });
 
   io.use((socket, next) => {
