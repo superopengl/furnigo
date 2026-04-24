@@ -2,10 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'features/auth/providers/auth_provider.dart';
 import 'features/auth/screens/login_screen.dart';
-import 'features/chat/screens/chat_list_screen.dart';
 import 'features/chat/screens/chat_screen.dart';
-import 'features/profile/screens/profile_screen.dart';
-import 'shared/widgets/shell_screen.dart';
 
 GoRouter createRouter(Ref ref) {
   return GoRouter(
@@ -27,18 +24,9 @@ GoRouter createRouter(Ref ref) {
         path: '/login',
         builder: (context, state) => const LoginScreen(),
       ),
-      ShellRoute(
-        builder: (context, state, child) => ShellScreen(child: child),
-        routes: [
-          GoRoute(
-            path: '/chats',
-            builder: (context, state) => const ChatListScreen(),
-          ),
-          GoRoute(
-            path: '/profile',
-            builder: (context, state) => const ProfileScreen(),
-          ),
-        ],
+      GoRoute(
+        path: '/chats',
+        builder: (context, state) => const ChatScreen(),
       ),
       GoRoute(
         path: '/chats/:id',

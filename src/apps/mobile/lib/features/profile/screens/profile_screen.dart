@@ -26,7 +26,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final profileAsync = ref.watch(profileProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Profile')),
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.close),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text('Profile'),
+      ),
       body: profileAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) => Center(child: Text('Error: $err')),
