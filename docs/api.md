@@ -26,15 +26,19 @@ All responses follow this format:
 
 ## Authentication
 
-Stateless JWT auth for mobile app. Token contains user ID and expiry (12 months), signed with a server secret. No token storage on the backend — the server verifies the signature on each request. To block a user, set `is_active=false` on the users table.
+Stateless JWT auth for mobile and admin. Token contains user ID and role, signed with a server secret. Tokens expire after **12 hours**. No token storage on the backend — the server verifies the signature on each request. To block a user, set `is_active=false` on the users table.
 
 Unified auth flow: enter email → verify OTP → if new user, account is created automatically.
 
 Token in `Authorization: Bearer <jwt>` header.
 
+**Token refresh:** Clients automatically call `POST /auth/token/refresh` when a 401 is received. The server accepts expired tokens within a **7-day grace window**, verifies the user is still active, and issues a fresh token. Tokens expired beyond 7 days require re-authentication via OTP.
+
 ```
 POST   /auth/otp/send           — Send OTP to email
 POST   /auth/otp/verify         — Verify OTP, login or create account, returns JWT
+GET    /auth/token/verify       — Check if current token is valid, returns user profile
+POST   /auth/token/refresh      — Refresh an expired token (within 7-day grace window)
 ```
 
 ### POST /auth/otp/send
@@ -61,7 +65,7 @@ Send OTP to email. Works for both new and existing users.
 
 ### POST /auth/otp/verify
 
-Verify OTP. If existing user, logs in. If new user, creates account. Returns long-lived token.
+Verify OTP. If existing user, logs in. If new user, creates account. Returns short-lived token (12h).
 
 ```json
 // Request
@@ -84,6 +88,64 @@ Verify OTP. If existing user, logs in. If new user, creates account. Returns lon
     "token": "eyJhbGciOiJIUzI1NiIs...",
     "expires_at": "2027-04-22T00:00:00Z"
   }
+}
+```
+
+### GET /auth/token/verify
+
+Check if the current JWT is valid and the user is active. Returns the user profile on success.
+
+```
+Authorization: Bearer <jwt>
+```
+
+```json
+// Success — 200
+{
+  "success": true,
+  "data": {
+    "id": "uuid",
+    "email": "john@example.com",
+    "displayName": "John",
+    "role": "client"
+  }
+}
+
+// Invalid/expired token — 401
+{
+  "success": false,
+  "error": { "code": "UNAUTHORIZED", "message": "Invalid or expired token" }
+}
+```
+
+### POST /auth/token/refresh
+
+Refresh an expired JWT. The expired token must still be within the 7-day grace window. The server verifies the user is still active before issuing a new token.
+
+```
+Authorization: Bearer <expired-jwt>
+```
+
+```json
+// Success — 200
+{
+  "success": true,
+  "data": {
+    "token": "eyJhbGciOiJIUzI1NiIs...",
+    "expires_at": "2026-04-25T12:00:00Z"
+  }
+}
+
+// Token expired beyond grace window — 401
+{
+  "success": false,
+  "error": { "code": "TOKEN_EXPIRED", "message": "Token expired beyond refresh window. Please log in again." }
+}
+
+// User deactivated — 403
+{
+  "success": false,
+  "error": { "code": "USER_DEACTIVATED", "message": "Your account has been deactivated" }
 }
 ```
 

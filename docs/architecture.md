@@ -50,7 +50,7 @@
 ### 3. Fastify API Server
 - **Purpose:** Core backend handling all business logic
 - **Responsibilities:**
-  - Stateless JWT auth for mobile and admin (OTP + JWT, no backend token storage)
+  - Stateless JWT auth for mobile and admin (OTP + JWT, 12h expiry, 7-day refresh grace window, no backend token storage)
   - REST API for CRUD operations
   - Socket.io server for real-time chat
   - File upload handling (images, documents)
