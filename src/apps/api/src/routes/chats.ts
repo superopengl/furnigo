@@ -85,7 +85,7 @@ export async function chatRoutes(app: FastifyInstance) {
       .update(chat)
       .set(body)
       .where(eq(chat.id, chatId))
-      .returning();
+      .returning({ title: chat.title, updatedAt: chat.updatedAt });
 
     return { success: true, data: updated };
   });

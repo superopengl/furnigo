@@ -43,43 +43,77 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     }
   }
 
-  void _showEditTitleDialog(String? currentTitle) {
+  void _showEditTitleDialog(String? currentTitle) async {
     final chatId = _activeChatId;
     if (chatId == null) return;
 
     final editController = TextEditingController(text: currentTitle ?? '');
-    showDialog(
+    final newTitle = await showGeneralDialog<String>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Edit chat title'),
-        content: TextField(
-          controller: editController,
-          autofocus: true,
-          decoration: const InputDecoration(
-            hintText: 'Enter chat title',
-            border: OutlineInputBorder(),
+      barrierDismissible: true,
+      barrierLabel: 'Edit title',
+      barrierColor: Colors.black54,
+      transitionDuration: const Duration(milliseconds: 250),
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(0, -1),
+            end: Offset.zero,
+          ).animate(CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOut,
+          )),
+          child: child,
+        );
+      },
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return Align(
+          alignment: Alignment.topCenter,
+          child: Material(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            borderRadius: const BorderRadius.vertical(
+                bottom: Radius.circular(16)),
+            child: SafeArea(
+              bottom: false,
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Edit chat title',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: editController,
+                      autofocus: true,
+                      decoration: const InputDecoration(
+                        hintText: 'Enter chat title',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton(
+                        onPressed: () => Navigator.pop(
+                            context, editController.text.trim()),
+                        child: const Text('Save'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              final newTitle = editController.text.trim();
-              Navigator.pop(context);
-              if (newTitle.isNotEmpty) {
-                ref
-                    .read(chatListProvider.notifier)
-                    .updateTitle(chatId, newTitle);
-              }
-            },
-            child: const Text('Save'),
-          ),
-        ],
-      ),
-    ).then((_) => editController.dispose());
+        );
+      },
+    );
+
+    if (newTitle != null && newTitle.isNotEmpty && mounted) {
+      ref.read(chatListProvider.notifier).updateTitle(chatId, newTitle);
+    }
   }
 
   void _scrollToBottom() {
@@ -215,7 +249,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               : null,
           child: Text(
             chatTitle ?? 'Untitled chat',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   color: AppColors.textSecondary,
                 ),
           ),
