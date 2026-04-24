@@ -26,15 +26,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   String? _currentUserId;
   String? _activeChatId;
-  int _charCount = 0;
 
   @override
   void initState() {
     super.initState();
     _activeChatId = widget.chatId;
     _controller.addListener(() {
-      final len = _controller.text.length;
-      if (len != _charCount) setState(() => _charCount = len);
       if (_activeChatId != null && _controller.text.isNotEmpty) {
         ref.read(chatMessagesProvider(_activeChatId!).notifier).sendTyping();
       }
@@ -421,52 +418,24 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   children: [
                     const SizedBox(width: 16),
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          TextField(
-                            controller: _controller,
-                            minLines: 1,
-                            maxLines: 5,
-                            maxLength: 1000,
-                            buildCounter: (context, {required currentLength, required isFocused, required maxLength}) => null,
-                            decoration: InputDecoration(
-                              hintText: 'Message...',
-                              hintStyle:
-                                  const TextStyle(color: AppColors.textSecondary),
-                              border: InputBorder.none,
-                              enabledBorder: InputBorder.none,
-                              focusedBorder: InputBorder.none,
-                              filled: false,
-                              contentPadding:
-                                  const EdgeInsets.symmetric(vertical: 10),
-                              suffixIcon: _charCount > 0
-                                  ? GestureDetector(
-                                      onTap: () => _controller.clear(),
-                                      child: const Padding(
-                                        padding: EdgeInsets.only(top: 10),
-                                        child: Icon(Icons.close, size: 18, color: AppColors.textSecondary),
-                                      ),
-                                    )
-                                  : null,
-                              suffixIconConstraints: const BoxConstraints(minWidth: 32, minHeight: 0),
-                            ),
-                            textInputAction: TextInputAction.newline,
-                          ),
-                          if (_charCount > 0)
-                            Padding(
-                              padding: const EdgeInsets.only(right: 4, bottom: 2),
-                              child: Text(
-                                '$_charCount/1000',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: _charCount >= 1000
-                                      ? AppColors.error
-                                      : AppColors.textSecondary,
-                                ),
-                              ),
-                            ),
-                        ],
+                      child: TextField(
+                        controller: _controller,
+                        minLines: 1,
+                        maxLines: 5,
+                        maxLength: 1000,
+                        buildCounter: (context, {required currentLength, required isFocused, required maxLength}) => null,
+                        decoration: const InputDecoration(
+                          hintText: 'Message...',
+                          hintStyle:
+                              TextStyle(color: AppColors.textSecondary),
+                          border: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          filled: false,
+                          contentPadding:
+                              EdgeInsets.symmetric(vertical: 10),
+                        ),
+                        textInputAction: TextInputAction.newline,
                       ),
                     ),
                     Padding(
@@ -476,8 +445,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                         icon: const Icon(Icons.arrow_upward),
                         onPressed: _send,
                         style: IconButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: AppColors.white,
+                          backgroundColor: AppColors.surface,
+                          foregroundColor: AppColors.textSecondary,
                           fixedSize: const Size(34, 34),
                           padding: EdgeInsets.zero,
                         ),
