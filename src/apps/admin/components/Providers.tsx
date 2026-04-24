@@ -4,9 +4,12 @@ import { useState, useEffect, useCallback, type ReactNode } from "react";
 import { ConfigProvider, App as AntApp } from "antd";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthContext, type AuthUser } from "@/lib/auth";
+import { ErrorContext, setGlobalShowError } from "@/lib/error";
 import { api, getToken, setToken, clearToken } from "@/lib/api";
 import { disconnectSocket } from "@/lib/socket";
 import { theme } from "@/lib/theme";
+import { ErrorBanner } from "./ErrorBanner";
+import { ErrorBoundary } from "./ErrorBoundary";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, refetchOnWindowFocus: false } },
@@ -15,6 +18,18 @@ const queryClient = new QueryClient({
 export function Providers({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const showError = useCallback((message: string) => {
+    setError(message);
+    setTimeout(() => setError(null), 8000);
+  }, []);
+
+  const clearError = useCallback(() => setError(null), []);
+
+  useEffect(() => {
+    setGlobalShowError(showError);
+  }, [showError]);
 
   useEffect(() => {
     const token = getToken();
@@ -57,9 +72,14 @@ export function Providers({ children }: { children: ReactNode }) {
     <QueryClientProvider client={queryClient}>
       <ConfigProvider theme={theme}>
         <AntApp>
-          <AuthContext.Provider value={{ user, login, logout, isLoading }}>
-            {children}
-          </AuthContext.Provider>
+          <ErrorContext.Provider value={{ error, showError, clearError }}>
+            <ErrorBanner />
+            <AuthContext.Provider value={{ user, login, logout, isLoading }}>
+              <ErrorBoundary>
+                {children}
+              </ErrorBoundary>
+            </AuthContext.Provider>
+          </ErrorContext.Provider>
         </AntApp>
       </ConfigProvider>
     </QueryClientProvider>

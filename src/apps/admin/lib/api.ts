@@ -1,3 +1,5 @@
+import { reportError } from "./error";
+
 const TOKEN_KEY = "furnigo_admin_token";
 
 export function getToken(): string | null {
@@ -31,6 +33,20 @@ export async function api<T = unknown>(
     headers["Content-Type"] = "application/json";
   }
 
-  const res = await fetch(`/api${path}`, { ...options, headers });
-  return res.json();
+  let res: Response;
+  try {
+    res = await fetch(`/api${path}`, { ...options, headers });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Network error";
+    reportError(message);
+    return { success: false as const, error: { code: "NETWORK_ERROR", message } };
+  }
+
+  const json = await res.json();
+
+  if (!json.success && json.error?.message) {
+    reportError(json.error.message);
+  }
+
+  return json;
 }

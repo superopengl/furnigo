@@ -37,7 +37,7 @@ function ChatsContent() {
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
 
-  const { data: chats, isLoading } = useQuery({
+  const { data: chats, isLoading, refetch } = useQuery({
     queryKey: ["admin-chats"],
     queryFn: async () => {
       const res = await api<ChatListItem[]>("/admin/chats");
@@ -154,9 +154,17 @@ function ChatsContent() {
           <Empty
             image={<MessageOutlined style={{ fontSize: 48, color: colors.border }} />}
             description={
-              <Text style={{ color: colors.textSecondary }}>
-                {search ? "No chats match your search" : "No chats yet"}
-              </Text>
+              search ? (
+                <Text style={{ color: colors.textSecondary }}>No chats match your search</Text>
+              ) : (
+                <Button
+                  type="link"
+                  onClick={() => refetch()}
+                  style={{ color: colors.secondary, padding: 0 }}
+                >
+                  Refresh
+                </Button>
+              )
             }
             style={{ padding: 60 }}
           />

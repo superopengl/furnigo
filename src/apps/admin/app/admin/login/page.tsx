@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Input, Typography, App, Space, Spin } from "antd";
-import { MailOutlined, LoadingOutlined } from "@ant-design/icons";
+import { MailOutlined, LoadingOutlined, ArrowLeftOutlined } from "@ant-design/icons";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { colors } from "@/lib/theme";
@@ -87,6 +87,7 @@ export default function LoginPage() {
       style={{
         minHeight: "100vh",
         display: "flex",
+        flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
         padding: 24,
@@ -434,6 +435,20 @@ export default function LoginPage() {
           </Space>
         )}
       </div>
+
+      <Button
+        type="link"
+        icon={<ArrowLeftOutlined />}
+        onClick={() => router.push("/")}
+        style={{
+          position: "relative",
+          marginTop: 20,
+          color: "rgba(255, 255, 255, 0.35)",
+          fontSize: 14,
+        }}
+      >
+        Back to Home
+      </Button>
 
       <style>{`
         @keyframes float1 {

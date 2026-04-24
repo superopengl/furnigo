@@ -151,7 +151,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       chatId = chat.id;
     }
     setState(() => _activeChatId = chatId);
-    return chatId;
+    return chatId!;
   }
 
   void _showAttachmentOptions() {
