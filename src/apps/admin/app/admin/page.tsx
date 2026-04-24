@@ -33,6 +33,7 @@ interface Participant {
   role: string;
   displayName: string | null;
   email: string;
+  avatarUrl: string | null;
 }
 
 interface ChatListItem {
@@ -145,7 +146,7 @@ function ChatsContent() {
           {record.participants.map((p) => (
             <div key={p.userId} style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <UserAvatar
-                user={{ id: p.userId, displayName: p.displayName, email: p.email, role: p.role as any, avatarUrl: null }}
+                user={{ id: p.userId, displayName: p.displayName, email: p.email, role: p.role as any, avatarUrl: p.avatarUrl }}
                 size={24}
               />
               <div style={{ minWidth: 0 }}>

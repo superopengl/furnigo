@@ -32,6 +32,7 @@ export async function adminChatRoutes(app: FastifyInstance) {
             joinedAt: chatParticipant.joinedAt,
             displayName: user.displayName,
             email: user.email,
+            avatarUrl: user.avatarUrl,
           })
           .from(chatParticipant)
           .innerJoin(user, eq(chatParticipant.userId, user.id))
@@ -103,6 +104,7 @@ export async function adminChatRoutes(app: FastifyInstance) {
         joinedAt: chatParticipant.joinedAt,
         displayName: user.displayName,
         email: user.email,
+        avatarUrl: user.avatarUrl,
       })
       .from(chatParticipant)
       .innerJoin(user, eq(chatParticipant.userId, user.id))
