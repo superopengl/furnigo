@@ -73,7 +73,7 @@ export default function LoginPage() {
         { id: u.id, email: u.email, displayName: u.display_name, role: u.role },
         token,
       );
-      router.replace("/chats");
+      router.replace("/admin/chats");
     } catch {
       message.error("Verification failed");
     } finally {
