@@ -105,7 +105,7 @@ GET    /chats                    — List user's chats
 POST   /chats                    — Create new chat
 PUT    /chats/:id                — Update chat (e.g. title)
 GET    /chats/:id                — Get chat with recent messages
-GET    /chats/:id/messages       — Get messages (paginated, cursor-based)
+GET    /chats/:id/messages       — Get messages (cursor-based, supports forward/backward)
 POST   /chats/:id/messages       — Send a message
 POST   /chats/:id/participants   — Add participant (agent joins)
 ```
@@ -153,6 +153,33 @@ Update a chat. Caller must be a participant.
   }
 }
 ```
+
+### GET /chats/:id/messages
+
+Cursor-based pagination with two modes:
+
+| Param | Type | Description |
+|-------|------|-------------|
+| `cursor` | ISO 8601 timestamp | Backward cursor — returns messages older than this timestamp (for loading history) |
+| `after` | ISO 8601 timestamp | Forward cursor — returns messages newer than this timestamp (for syncing new messages) |
+| `limit` | number | Max messages to return (default 50, max 100) |
+
+`cursor` and `after` are mutually exclusive. If `after` is provided, it takes precedence.
+
+**Backward (default):** Messages ordered by `created_at DESC`, then reversed to chronological. `meta.cursor` points to the oldest returned message for fetching the next older batch.
+
+**Forward (`after`):** Messages ordered by `created_at ASC`. `meta.cursor` points to the newest returned message for fetching the next newer batch.
+
+```json
+// Response
+{
+  "success": true,
+  "data": [ /* messages in chronological order */ ],
+  "meta": { "limit": 50, "cursor": "2026-04-20T10:30:00.000Z" }
+}
+```
+
+The mobile client caches messages locally in SQLite. On chat open, it loads cached messages instantly, then calls `GET /chats/:id/messages?after=<lastCachedTimestamp>` to fetch only new messages since the last sync.
 
 ### POST /chats/:id/messages
 

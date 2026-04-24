@@ -11,6 +11,7 @@
 | UI | Material 3 + custom widgets |
 | Chat UI | Custom (ListView-based) — WeChat-style 2-role group chat |
 | Token storage | flutter_secure_storage |
+| Local message cache | sqflite (SQLite) |
 | Push notifications | firebase_messaging (FCM + APNs) |
 | Images | cached_network_image |
 | WebSocket | Socket.io client (socket_io_client) |

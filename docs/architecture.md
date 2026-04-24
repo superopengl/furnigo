@@ -34,6 +34,7 @@
   - Image/voice message support
 - **State management:** Riverpod
 - **Navigation:** go_router
+- **Local caching:** Chat messages are cached in SQLite (sqflite). Messages are immutable — on chat open, cached messages load instantly from disk, then only new messages are fetched from the API using a forward cursor (`after` param). WebSocket messages are also persisted to the cache. Cache is cleared on logout.
 
 ### 2. Next.js Admin Portal
 - **Purpose:** Internal web dashboard for Furnigo staff
