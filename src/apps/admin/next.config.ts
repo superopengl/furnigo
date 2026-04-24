@@ -1,3 +1,4 @@
+import "@furnigo/config"; // side-effect: loads root .env files
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
