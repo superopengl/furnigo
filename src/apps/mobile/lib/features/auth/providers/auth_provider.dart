@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../shared/models/user_model.dart';
 import '../../../shared/providers/auth_store.dart';
+import '../../../shared/services/message_cache.dart';
 import '../../../shared/services/socket_service.dart';
 import '../services/auth_service.dart';
 
@@ -29,8 +30,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
   final AuthService _authService;
   final AuthStore _authStore;
   final SocketService _socketService;
+  final MessageCache _messageCache;
 
-  AuthNotifier(this._authService, this._authStore, this._socketService)
+  AuthNotifier(this._authService, this._authStore, this._socketService, this._messageCache)
       : super(const AuthState()) {
     _init();
   }
@@ -68,6 +70,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<void> logout() async {
     _socketService.disconnect();
     await _authStore.clear();
+    await _messageCache.clearAll();
     state = const AuthState(status: AuthStatus.unauthenticated);
   }
 }
@@ -77,5 +80,6 @@ final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
     ref.read(authServiceProvider),
     ref.read(authStoreProvider),
     ref.read(socketServiceProvider),
+    ref.read(messageCacheProvider),
   );
 });

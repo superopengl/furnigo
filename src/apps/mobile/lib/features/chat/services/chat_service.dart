@@ -31,8 +31,9 @@ class ChatService {
     });
   }
 
-  Future<List<MessageModel>> getMessages(String chatId, {String? cursor}) async {
+  Future<List<MessageModel>> getMessages(String chatId, {String? cursor, String? after}) async {
     final params = <String, dynamic>{'limit': '50'};
+    if (after != null) params['after'] = after;
     if (cursor != null) params['cursor'] = cursor;
 
     final res = await _dio.get('/chats/$chatId/messages', queryParameters: params);

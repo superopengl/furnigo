@@ -27,5 +27,15 @@ class MessageModel {
         createdAt: json['createdAt'] as String,
       );
 
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'chatId': chatId,
+        'senderId': senderId,
+        'senderRole': senderRole,
+        'contentType': contentType,
+        'content': content,
+        'createdAt': createdAt,
+      };
+
   String get textContent => content['text'] as String? ?? '';
 }

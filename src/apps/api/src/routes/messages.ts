@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { db, message, chatParticipant } from "@furnigo/db";
-import { eq, and, lt, desc } from "drizzle-orm";
+import { eq, and, lt, gt, desc, asc } from "drizzle-orm";
 import { getIO } from "../ws/getIO";
 
 const sendSchema = z.object({
@@ -15,7 +15,7 @@ export async function messageRoutes(app: FastifyInstance) {
   app.get("/:id/messages", { onRequest: [app.authenticate] }, async (request, reply) => {
     const { id: userId } = request.user as { id: string };
     const { id: chatId } = request.params as { id: string };
-    const { cursor, limit: rawLimit } = request.query as { cursor?: string; limit?: string };
+    const { cursor, after, limit: rawLimit } = request.query as { cursor?: string; after?: string; limit?: string };
     const limit = Math.min(parseInt(rawLimit || "50", 10), 100);
 
     // Verify participant
@@ -32,6 +32,26 @@ export async function messageRoutes(app: FastifyInstance) {
       });
     }
 
+    if (after) {
+      // Forward cursor: get messages newer than `after`
+      const messages = await db
+        .select()
+        .from(message)
+        .where(and(eq(message.chatId, chatId), gt(message.createdAt, new Date(after))))
+        .orderBy(asc(message.createdAt))
+        .limit(limit);
+
+      return {
+        success: true,
+        data: messages,
+        meta: {
+          limit,
+          cursor: messages.length > 0 ? messages[messages.length - 1].createdAt.toISOString() : null,
+        },
+      };
+    }
+
+    // Backward cursor: get older messages (existing behavior)
     const conditions = [
       eq(message.chatId, chatId),
       ...(cursor ? [lt(message.createdAt, new Date(cursor))] : []),
