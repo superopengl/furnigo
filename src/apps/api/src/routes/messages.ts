@@ -32,10 +32,10 @@ export async function messageRoutes(app: FastifyInstance) {
       });
     }
 
-    const conditions = [eq(message.chatId, chatId)];
-    if (cursor) {
-      conditions.push(lt(message.createdAt, new Date(cursor)));
-    }
+    const conditions = [
+      eq(message.chatId, chatId),
+      ...(cursor ? [lt(message.createdAt, new Date(cursor))] : []),
+    ];
 
     const messages = await db
       .select()

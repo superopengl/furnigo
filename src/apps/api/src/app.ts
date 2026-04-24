@@ -11,13 +11,15 @@ import { setupSocket } from "./ws/handlers";
 export async function buildApp() {
   const app = Fastify({ logger: true });
 
-  const routes: { method: string; path: string }[] = [];
+  let routes: { method: string; path: string }[] = [];
   app.addHook("onRoute", (routeOptions) => {
     const methods = Array.isArray(routeOptions.method) ? routeOptions.method : [routeOptions.method];
-    for (const method of methods) {
-      if (method === "HEAD" || method === "OPTIONS") continue;
-      routes.push({ method, path: routeOptions.url });
-    }
+    routes = [
+      ...routes,
+      ...methods
+        .filter((m) => m !== "HEAD" && m !== "OPTIONS")
+        .map((method) => ({ method, path: routeOptions.url })),
+    ];
   });
 
   await app.register(cors, { origin: true });

@@ -2,8 +2,14 @@ import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { db, user } from "@furnigo/db";
 import { eq } from "drizzle-orm";
+import { env } from "@furnigo/config";
 import { createOtp, verifyOtp } from "../services/otp";
 import { signToken } from "../services/jwt";
+
+function isOtpBypassed(email: string): boolean {
+  const domain = env.FURNIGO_OTP_BYPASS_DOMAIN;
+  return !!domain && email.endsWith(`@${domain}`);
+}
 
 const sendSchema = z.object({ email: z.string().email() });
 const verifySchema = z.object({ email: z.string().email(), code: z.string().length(6) });
@@ -18,10 +24,12 @@ export async function authRoutes(app: FastifyInstance) {
       .where(eq(user.email, body.email))
       .limit(1);
 
-    const { code } = await createOtp(body.email);
+    if (!isOtpBypassed(body.email)) {
+      const { code } = await createOtp(body.email);
 
-    // TODO: send email via SES/Resend. For dev, log it.
-    app.log.info({ email: body.email, otp: code }, "OTP generated");
+      // TODO: send email via SES/Resend. For dev, log it.
+      app.log.info({ email: body.email, otp: code }, "OTP generated");
+    }
 
     return {
       success: true,
@@ -37,12 +45,14 @@ export async function authRoutes(app: FastifyInstance) {
   app.post("/otp/verify", async (request, reply) => {
     const body = verifySchema.parse(request.body);
 
-    const otp = await verifyOtp(body.email, body.code);
-    if (!otp) {
-      return reply.code(400).send({
-        success: false,
-        error: { code: "INVALID_OTP", message: "Invalid or expired OTP" },
-      });
+    if (!isOtpBypassed(body.email)) {
+      const otp = await verifyOtp(body.email, body.code);
+      if (!otp) {
+        return reply.code(400).send({
+          success: false,
+          error: { code: "INVALID_OTP", message: "Invalid or expired OTP" },
+        });
+      }
     }
 
     // Find or create user
