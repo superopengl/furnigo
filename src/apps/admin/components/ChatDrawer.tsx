@@ -70,6 +70,7 @@ export function ChatDrawer({ chatId, onClose }: ChatDrawerProps) {
         if (old.messages.some((m) => m.id === data.message.id)) return old;
         return { ...old, messages: [...old.messages, data.message] };
       });
+      scrollToBottom();
     };
 
     socket.on("message:new", handleNewMessage);

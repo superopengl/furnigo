@@ -242,6 +242,19 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         ? ref.watch(chatMessagesProvider(effectiveChatId))
         : <MessageModel>[];
 
+    // Auto-scroll when a new message is appended (not when older messages load)
+    if (effectiveChatId != null) {
+      ref.listen<List<MessageModel>>(
+        chatMessagesProvider(effectiveChatId),
+        (prev, next) {
+          if (next.isNotEmpty &&
+              (prev == null || prev.isEmpty || next.last.id != prev.last.id)) {
+            _scrollToBottom();
+          }
+        },
+      );
+    }
+
     final activeChat = effectiveChatId != null && chats != null
         ? chats.where((c) => c.id == effectiveChatId).firstOrNull
         : null;
