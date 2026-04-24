@@ -2,9 +2,9 @@
   "name": "furnigo",
   "private": true,
   "scripts": {
-    "api": "pnpm --filter @furnigo/api dev",
-    "admin": "pnpm --filter @furnigo/admin dev",
-    "mobile": "bash scripts/run-mobile.sh",
+    "start:api": "pnpm --filter @furnigo/api dev",
+    "start:admin": "pnpm --filter @furnigo/admin dev",
+    "start:mobile": "bash scripts/run-mobile.sh",
     "build": "pnpm -r build",
     "lint": "pnpm -r lint",
     "db:generate": "pnpm --filter @furnigo/db generate",
