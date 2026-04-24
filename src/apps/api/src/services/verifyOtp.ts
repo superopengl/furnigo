@@ -1,27 +1,19 @@
 import { db, otpCode } from "@furnigo/db";
-import { eq, and, isNull, gt, desc } from "drizzle-orm";
+import { eq, and, isNull, gt } from "drizzle-orm";
 
-export async function verifyOtp(email: string, code: string) {
-  const [otp] = await db
-    .select()
-    .from(otpCode)
+export async function verifyOtp(otpId: string, code: string) {
+  const result = await db
+    .update(otpCode)
+    .set({ verifiedAt: new Date() })
     .where(
       and(
-        eq(otpCode.email, email),
+        eq(otpCode.id, otpId),
         eq(otpCode.code, code),
         isNull(otpCode.verifiedAt),
         gt(otpCode.expiresAt, new Date()),
       ),
     )
-    .orderBy(desc(otpCode.createdAt))
-    .limit(1);
+    .returning();
 
-  if (!otp) return null;
-
-  await db
-    .update(otpCode)
-    .set({ verifiedAt: new Date() })
-    .where(eq(otpCode.id, otp.id));
-
-  return otp;
+  return result.length > 0 ? result[0] : null;
 }

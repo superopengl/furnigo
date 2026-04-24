@@ -8,13 +8,8 @@ import { verifyOtp } from "../services/verifyOtp";
 import { sendOtpEmail } from "../services/sendOtpEmail";
 import { createAuthToken } from "../services/createAuthToken";
 
-function isOtpBypassed(email: string): boolean {
-  const domain = env.FURNIGO_OTP_BYPASS_DOMAIN;
-  return !!domain && email.endsWith(`@${domain}`);
-}
-
 const sendSchema = z.object({ email: z.string().email() });
-const verifySchema = z.object({ email: z.string().email(), code: z.string().length(6) });
+const verifySchema = z.object({ otp_id: z.string().uuid(), code: z.string().length(6) });
 
 export async function authRoutes(app: FastifyInstance) {
   app.post("/otp/send", async (request, reply) => {
@@ -33,16 +28,14 @@ export async function authRoutes(app: FastifyInstance) {
         .returning({ id: user.id });
     }
 
-    const { code } = await createOtp(body.email);
+    const { id: otpId, code } = await createOtp(body.email);
 
     await sendOtpEmail(body.email, code);
 
     return {
       success: true,
       data: {
-        otp_sent: true,
-        email: body.email,
-        is_new_user: !existing,
+        otp_id: otpId,
         expires_in: 300,
       },
     };
@@ -51,7 +44,7 @@ export async function authRoutes(app: FastifyInstance) {
   app.post("/otp/verify", async (request, reply) => {
     const body = verifySchema.parse(request.body);
 
-    const otp = await verifyOtp(body.email, body.code);
+    const otp = await verifyOtp(body.otp_id, body.code);
     if (!otp) {
       return reply.code(400).send({
         success: false,
@@ -63,7 +56,7 @@ export async function authRoutes(app: FastifyInstance) {
     let [existing] = await db
       .select()
       .from(user)
-      .where(eq(user.email, body.email))
+      .where(eq(user.email, otp.email))
       .limit(1);
 
     if (!existing) {

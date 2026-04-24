@@ -16,9 +16,9 @@ class AuthService {
     return res.data['data'] as Map<String, dynamic>;
   }
 
-  Future<Map<String, dynamic>> verifyOtp(String email, String code) async {
+  Future<Map<String, dynamic>> verifyOtp(String otpId, String code) async {
     final res = await _dio.post('/auth/otp/verify', data: {
-      'email': email,
+      'otp_id': otpId,
       'code': code,
     });
     return res.data['data'] as Map<String, dynamic>;

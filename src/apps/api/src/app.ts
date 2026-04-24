@@ -10,7 +10,17 @@ import { setupSocket } from "./ws/setupSocket";
 
 export async function buildApp() {
   const app = Fastify({
-    logger: { level: env.NODE_ENV === "development" ? "debug" : "info" },
+    logger: {
+      level: env.NODE_ENV === "development" ? "debug" : "info",
+      base: undefined,
+      formatters: {
+        level: (label) => ({ level: label }),
+      },
+      timestamp: () => {
+        const now = new Date();
+        return `,"utc":"${now.toISOString()}","local":"${now.toLocaleString(undefined, { timeZoneName: "short" })}"`;
+      },
+    },
   });
 
   let routes: { method: string; path: string }[] = [];

@@ -1,3 +1,4 @@
+import 'dart:developer' as developer;
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/auth_store.dart';
@@ -17,7 +18,16 @@ final apiClientProvider = Provider<Dio>((ref) {
       if (token != null) {
         options.headers['Authorization'] = 'Bearer $token';
       }
+      developer.log('→ ${options.method} ${options.path}', name: 'API');
       handler.next(options);
+    },
+    onResponse: (response, handler) {
+      developer.log('← ${response.statusCode} ${response.requestOptions.method} ${response.requestOptions.path}', name: 'API');
+      handler.next(response);
+    },
+    onError: (error, handler) {
+      developer.log('← ${error.response?.statusCode ?? 'ERR'} ${error.requestOptions.method} ${error.requestOptions.path}', name: 'API');
+      handler.next(error);
     },
   ));
 

@@ -15,7 +15,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailController = TextEditingController();
   final _otpControllers = List.generate(6, (_) => TextEditingController());
   final _otpFocusNodes = List.generate(6, (_) => FocusNode());
-  bool _otpSent = false;
+  String? _otpId;
   bool _loading = false;
   String? _error;
 
@@ -31,9 +31,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
 
     try {
-      await ref.read(authProvider.notifier).sendOtp(email);
+      final otpId = await ref.read(authProvider.notifier).sendOtp(email);
       setState(() {
-        _otpSent = true;
+        _otpId = otpId;
         _loading = false;
       });
       _otpFocusNodes[0].requestFocus();
@@ -46,16 +46,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _verifyOtp() async {
-    final email = _emailController.text.trim();
     final code = _otpCode;
-    if (code.length != 6) return;
+    if (code.length != 6 || _otpId == null) return;
 
     setState(() {
       _loading = true;
       _error = null;
     });
 
-    await ref.read(authProvider.notifier).verifyOtp(email, code);
+    await ref.read(authProvider.notifier).verifyOtp(_otpId!, code);
 
     final authState = ref.read(authProvider);
     if (authState.status != AuthStatus.authenticated) {
@@ -136,9 +135,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   border: OutlineInputBorder(),
                 ),
                 keyboardType: TextInputType.emailAddress,
-                enabled: !_otpSent,
+                enabled: !_otpId != null,
               ),
-              if (_otpSent) ...[
+              if (_otpId != null) ...[
                 const SizedBox(height: 16),
                 if (_loading)
                   const SizedBox(
@@ -178,7 +177,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 const SizedBox(height: 8),
                 Text(_error!, style: TextStyle(color: AppColors.error)),
               ],
-              if (!_otpSent) ...[
+              if (!_otpId != null) ...[
                 const SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,
@@ -197,10 +196,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                 ),
               ],
-              if (_otpSent)
+              if (_otpId != null)
                 TextButton(
                   onPressed: () => setState(() {
-                    _otpSent = false;
+                    _otpId = null;
                     _clearOtp();
                     _error = null;
                   }),

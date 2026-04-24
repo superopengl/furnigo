@@ -45,13 +45,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
-  Future<Map<String, dynamic>> sendOtp(String email) async {
-    return _authService.sendOtp(email);
+  Future<String> sendOtp(String email) async {
+    final data = await _authService.sendOtp(email);
+    return data['otp_id'] as String;
   }
 
-  Future<void> verifyOtp(String email, String code) async {
+  Future<void> verifyOtp(String otpId, String code) async {
     try {
-      final data = await _authService.verifyOtp(email, code);
+      final data = await _authService.verifyOtp(otpId, code);
       final user = UserModel.fromJson(data['user'] as Map<String, dynamic>);
       final token = data['token'] as String;
 

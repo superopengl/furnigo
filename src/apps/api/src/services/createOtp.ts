@@ -11,14 +11,15 @@ export async function createOtp(email: string) {
   const code = generateCode();
   const expiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
 
-  await db
+  const [result] = await db
     .insert(otpCode)
     .values({ email, code, expiresAt })
     .onConflictDoUpdate({
       target: otpCode.email,
       targetWhere: sql`verified_at IS NULL`,
       set: { code, expiresAt, updatedAt: new Date() },
-    });
+    })
+    .returning({ id: otpCode.id });
 
-  return { code, expiresAt };
+  return { id: result.id, code, expiresAt };
 }
