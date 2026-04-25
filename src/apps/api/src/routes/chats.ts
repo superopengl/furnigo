@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
-import { db, chat, chatParticipant, message } from "@furnigo/db";
+import { db, chat, chatParticipant, message, user } from "@furnigo/db";
 import { eq, desc, and } from "drizzle-orm";
 
 const createSchema = z.object({
@@ -123,8 +123,16 @@ export async function chatRoutes(app: FastifyInstance) {
     }
 
     const participants = await db
-      .select()
+      .select({
+        userId: chatParticipant.userId,
+        role: chatParticipant.role,
+        joinedAt: chatParticipant.joinedAt,
+        displayName: user.displayName,
+        email: user.email,
+        avatarUrl: user.avatarUrl,
+      })
       .from(chatParticipant)
+      .innerJoin(user, eq(chatParticipant.userId, user.id))
       .where(eq(chatParticipant.chatId, chatId));
 
     const recentMessages = await db

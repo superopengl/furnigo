@@ -1,12 +1,20 @@
 import 'package:flutter/material.dart';
 import '../../../theme/colors.dart';
 import '../../../shared/models/message_model.dart';
+import '../../../shared/models/user_model.dart';
+import '../../../shared/widgets/user_avatar.dart';
 
 class MessageBubble extends StatelessWidget {
   final MessageModel message;
   final bool isMe;
+  final UserModel? sender;
 
-  const MessageBubble({super.key, required this.message, required this.isMe});
+  const MessageBubble({
+    super.key,
+    required this.message,
+    required this.isMe,
+    this.sender,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -32,23 +40,49 @@ class MessageBubble extends StatelessWidget {
       );
     }
 
-    return Align(
-      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 3),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        constraints:
-            BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
-        decoration: BoxDecoration(
-          color: isMe ? AppColors.primary : AppColors.surface,
-          borderRadius: BorderRadius.only(
-            topLeft: const Radius.circular(18),
-            topRight: const Radius.circular(18),
-            bottomLeft: Radius.circular(isMe ? 18 : 4),
-            bottomRight: Radius.circular(isMe ? 4 : 18),
-          ),
+    final bubble = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      constraints:
+          BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.7),
+      decoration: BoxDecoration(
+        color: isMe ? AppColors.primary : AppColors.surface,
+        borderRadius: BorderRadius.only(
+          topLeft: const Radius.circular(18),
+          topRight: const Radius.circular(18),
+          bottomLeft: Radius.circular(isMe ? 18 : 4),
+          bottomRight: Radius.circular(isMe ? 4 : 18),
         ),
-        child: _buildContent(context),
+      ),
+      child: _buildContent(context),
+    );
+
+    final s = sender;
+    if (isMe || s == null) {
+      return Align(
+        alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 3),
+          child: bubble,
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          UserAvatar(
+            id: s.id,
+            displayName: s.displayName,
+            email: s.email,
+            role: s.role,
+            avatarUrl: s.avatarUrl,
+            size: 28,
+          ),
+          const SizedBox(width: 8),
+          Flexible(child: bubble),
+        ],
       ),
     );
   }

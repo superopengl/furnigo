@@ -111,7 +111,14 @@ export async function adminChatRoutes(app: FastifyInstance) {
       .where(eq(chatParticipant.chatId, chatId));
 
     const recentMessages = await db
-      .select()
+      .select({
+        senderId: message.senderId,
+        senderRole: message.senderRole,
+        contentType: message.contentType,
+        content: message.content,
+        label: message.label,
+        createdAt: message.createdAt,
+      })
       .from(message)
       .where(eq(message.chatId, chatId))
       .orderBy(desc(message.createdAt))

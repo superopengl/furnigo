@@ -17,7 +17,7 @@ const { Text } = Typography;
 interface ChatDetail {
   id: string;
   title: string | null;
-  participants: { userId: string; role: string; displayName: string | null; email: string }[];
+  participants: { userId: string; role: string; displayName: string | null; email: string; avatarUrl: string | null }[];
   messages: Message[];
 }
 
@@ -131,6 +131,12 @@ export function ChatDrawer({ chatId, onClose }: ChatDrawerProps) {
     }
   };
 
+  const senderMap = useMemo(() => {
+    const map = new Map<string, ChatDetail["participants"][number]>();
+    chat?.participants.forEach((p) => map.set(p.userId, p));
+    return map;
+  }, [chat?.participants]);
+
   const participantLabel = chat?.participants
     .map((p) => p.displayName || p.email.split("@")[0])
     .join(", ");
@@ -203,9 +209,17 @@ export function ChatDrawer({ chatId, onClose }: ChatDrawerProps) {
                 <Spin size="small" />
               </div>
             )}
-            {chat?.messages.map((msg) => (
-              <MessageBubble key={msg.id} message={msg} isOwn={msg.senderId === user?.id} />
-            ))}
+            {chat?.messages.map((msg) => {
+              const sender = msg.senderId ? senderMap.get(msg.senderId) : undefined;
+              return (
+                <MessageBubble
+                  key={msg.id}
+                  message={msg}
+                  isOwn={msg.senderId === user?.id}
+                  sender={sender ? { id: sender.userId, displayName: sender.displayName, email: sender.email, role: sender.role as any, avatarUrl: sender.avatarUrl } : undefined}
+                />
+              );
+            })}
             <div ref={messagesEndRef} />
           </>
         )}

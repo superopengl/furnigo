@@ -3,16 +3,18 @@
 import { Image, Typography } from "antd";
 import { FileOutlined, PlayCircleOutlined } from "@ant-design/icons";
 import { colors } from "@/lib/theme";
-import type { Message } from "@furnigo/types";
+import { UserAvatar } from "./UserAvatar";
+import type { Message, UserRole } from "@furnigo/types";
 
 const { Text } = Typography;
 
 interface MessageBubbleProps {
   message: Message;
   isOwn: boolean;
+  sender?: { id: string; displayName: string | null; email: string; role: UserRole; avatarUrl: string | null };
 }
 
-export function MessageBubble({ message: msg, isOwn }: MessageBubbleProps) {
+export function MessageBubble({ message: msg, isOwn, sender }: MessageBubbleProps) {
   const isSystem = msg.senderRole === "system";
 
   if (isSystem) {
@@ -79,13 +81,16 @@ export function MessageBubble({ message: msg, isOwn }: MessageBubbleProps) {
       style={{
         display: "flex",
         justifyContent: isOwn ? "flex-end" : "flex-start",
+        alignItems: "flex-end",
+        gap: 8,
         margin: "4px 0",
         padding: "0 16px",
       }}
     >
+      {!isOwn && sender && <UserAvatar user={sender} size={28} />}
       <div
         style={{
-          maxWidth: "75%",
+          maxWidth: "70%",
           padding: msg.contentType === "image" ? 4 : "10px 14px",
           borderRadius: 16,
           borderBottomRightRadius: isOwn ? 4 : 16,

@@ -6,8 +6,10 @@ import '../../../theme/colors.dart';
 import '../../../shared/models/message_model.dart';
 import '../../../shared/providers/auth_store.dart';
 import '../../profile/screens/profile_screen.dart';
+import '../../../shared/models/user_model.dart';
 import '../providers/chat_list_provider.dart';
 import '../providers/chat_messages_provider.dart';
+import '../providers/chat_participants_provider.dart';
 import '../widgets/chat_drawer.dart';
 import '../widgets/message_bubble.dart';
 
@@ -239,6 +241,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         ? ref.watch(chatMessagesProvider(effectiveChatId))
         : <MessageModel>[];
 
+    final participantsAsync = effectiveChatId != null
+        ? ref.watch(chatParticipantsProvider(effectiveChatId))
+        : null;
+    final participants = participantsAsync?.valueOrNull ?? <String, UserModel>{};
+
     // Auto-scroll on initial load and when a new message is appended
     if (effectiveChatId != null) {
       ref.listen<List<MessageModel>>(
@@ -306,7 +313,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         children: [
           Expanded(
             child: _buildMessageArea(
-                effectiveChatId, messages, chatsAsync.isLoading, topPadding),
+                effectiveChatId, messages, chatsAsync.isLoading, topPadding, participants),
           ),
           if (effectiveChatId != null) _buildTypingIndicator(effectiveChatId),
           _buildInputBar(),
@@ -316,7 +323,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 
   Widget _buildMessageArea(String? chatId, List<MessageModel> messages,
-      bool isLoading, double topPadding) {
+      bool isLoading, double topPadding, Map<String, UserModel> participants) {
     if (isLoading) {
       return Center(
           child: Padding(
@@ -352,9 +359,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       itemCount: messages.length,
       itemBuilder: (context, index) {
         final msg = messages[index];
+        final sender = msg.senderId != null ? participants[msg.senderId] : null;
         return MessageBubble(
           message: msg,
           isMe: msg.senderId == _currentUserId,
+          sender: sender,
         );
       },
     );
