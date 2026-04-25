@@ -36,31 +36,33 @@ export function MessageBubble({ message: msg, isOwn, sender }: MessageBubbleProp
     switch (msg.contentType) {
       case "image":
         return (
-          <Image
-            src={msg.content.url as string}
-            alt="image"
-            style={{ maxWidth: 240, borderRadius: 8 }}
-            preview={{ mask: null }}
-            fallback={() => (
-              <div 
-                style={{
-                  width: 240,
-                  height: 180,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  backgroundColor: "#f5f5f5",
-                  borderRadius: 8,
-                  border: "1px dashed #ccc"
-                }}
-              >
-                <div style={{ textAlign: "center", color: "#666" }}>
-                  <FileOutlined style={{ fontSize: 32, marginBottom: 8 }} />
-                  <div>Image cannot be shown</div>
+          <div style={{ display: 'inline-block' }}>
+            <Image
+              src={msg.content.url as string}
+              alt="image"
+              style={{ maxWidth: 240, borderRadius: 8 }}
+              preview={{ mask: null }}
+              fallback={
+                <div 
+                  style={{
+                    width: 240,
+                    height: 180,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    backgroundColor: "#f5f5f5",
+                    borderRadius: 8,
+                    border: "1px dashed #ccc"
+                  }}
+                >
+                  <div style={{ textAlign: "center", color: "#666" }}>
+                    <FileOutlined style={{ fontSize: 32, marginBottom: 8 }} />
+                    <div>Image cannot be shown</div>
+                  </div>
                 </div>
-              </div>
-            )}
-          />
+              }
+            />
+          </div>
         );
       case "video":
         return (
