@@ -106,7 +106,35 @@ class MessageBubble extends StatelessWidget {
             if (url != null)
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: Image.network(url, fit: BoxFit.cover),
+                child: Image.network(
+                  url, 
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      width: 240,
+                      height: 180,
+                      decoration: BoxDecoration(
+                        color: AppColors.surface,
+                        border: Border.all(color: AppColors.border),
+                        borderRadius: BorderRadius.circular(12)
+                      ),
+                      child: const Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.broken_image, size: 32, color: AppColors.textSecondary),
+                            SizedBox(height: 8),
+                            Text(
+                              'Image cannot be shown',
+                              style: TextStyle(color: AppColors.textSecondary),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
               ),
             if (caption != null) ...[
               const SizedBox(height: 6),
