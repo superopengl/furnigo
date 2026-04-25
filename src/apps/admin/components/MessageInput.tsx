@@ -24,6 +24,7 @@ export function MessageInput({ chatId, onSent }: MessageInputProps) {
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const [pastedImages, setPastedImages] = useState<File[]>([]);
+  const [dragging, setDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const uploadTypeRef = useRef<"image" | "attachment" | "video">("image");
   const lastTypingSent = useRef(0);
@@ -129,6 +130,19 @@ export function MessageInput({ chatId, onSent }: MessageInputProps) {
     setPastedImages((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const isAcceptedType = (file: File) =>
+    file.type.startsWith("image/") || file.type.startsWith("video/") || file.type === "application/pdf";
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragging(false);
+    const files = Array.from(e.dataTransfer.files).filter(isAcceptedType);
+    const images = files.filter((f) => f.type.startsWith("image/"));
+    const others = files.filter((f) => !f.type.startsWith("image/"));
+    if (images.length > 0) setPastedImages((prev) => [...prev, ...images]);
+    for (const file of others) handleFileUpload(file);
+  };
+
   const menuItems: MenuProps["items"] = [
     {
       key: "image",
@@ -162,8 +176,12 @@ export function MessageInput({ chatId, onSent }: MessageInputProps) {
   return (
     <div
       className="glass-strong"
+      onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+      onDragLeave={() => setDragging(false)}
+      onDrop={handleDrop}
       style={{
-        borderTop: `1px solid ${colors.border}`,
+        borderTop: `1px solid ${dragging ? colors.primary : colors.border}`,
+        transition: "border-color 0.2s",
       }}
     >
       {/* Pasted image previews */}
