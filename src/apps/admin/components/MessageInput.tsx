@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
-import { Button, Input, Upload, Dropdown } from "antd";
+import { Button, Input, Dropdown, Image } from "antd";
 import {
   SendOutlined,
   PlusOutlined,
   PictureOutlined,
   FileOutlined,
   VideoCameraOutlined,
+  CloseOutlined,
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 import { api } from "@/lib/api";
@@ -22,6 +23,7 @@ interface MessageInputProps {
 export function MessageInput({ chatId, onSent }: MessageInputProps) {
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
+  const [pastedImages, setPastedImages] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const uploadTypeRef = useRef<"image" | "attachment" | "video">("image");
   const lastTypingSent = useRef(0);
@@ -33,19 +35,45 @@ export function MessageInput({ chatId, onSent }: MessageInputProps) {
     try { getSocket().emit("typing", { chatId }); } catch {}
   }, [chatId]);
 
-  const sendTextMessage = async () => {
+  const uploadAndSendImage = async (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const uploadRes = await api<{ url: string }>("/uploads", {
+      method: "POST",
+      body: formData,
+    });
+    if (!uploadRes.success) return;
+    await api(`/chats/${chatId}/messages`, {
+      method: "POST",
+      body: JSON.stringify({
+        contentType: "image",
+        content: { url: uploadRes.data.url, name: file.name },
+      }),
+    });
+  };
+
+  const handleSend = async () => {
     const trimmed = text.trim();
-    if (!trimmed) return;
+    if (!trimmed && pastedImages.length === 0) return;
     setSending(true);
     setText("");
+    const imagesToSend = [...pastedImages];
+    setPastedImages([]);
     try {
-      await api(`/chats/${chatId}/messages`, {
-        method: "POST",
-        body: JSON.stringify({ contentType: "text", content: { text: trimmed } }),
-      });
+      // Send pasted images first
+      for (const img of imagesToSend) {
+        await uploadAndSendImage(img);
+      }
+      // Then send text if any
+      if (trimmed) {
+        await api(`/chats/${chatId}/messages`, {
+          method: "POST",
+          body: JSON.stringify({ contentType: "text", content: { text: trimmed } }),
+        });
+      }
       onSent();
     } catch {
-      setText(trimmed);
+      if (trimmed) setText(trimmed);
     } finally {
       setSending(false);
     }
@@ -79,6 +107,26 @@ export function MessageInput({ chatId, onSent }: MessageInputProps) {
     const file = e.target.files?.[0];
     if (file) handleFileUpload(file);
     e.target.value = "";
+  };
+
+  const handlePaste = (e: React.ClipboardEvent) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    const images: File[] = [];
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.startsWith("image/")) {
+        const file = items[i].getAsFile();
+        if (file) images.push(file);
+      }
+    }
+    if (images.length > 0) {
+      e.preventDefault();
+      setPastedImages((prev) => [...prev, ...images]);
+    }
+  };
+
+  const removePastedImage = (index: number) => {
+    setPastedImages((prev) => prev.filter((_, i) => i !== index));
   };
 
   const menuItems: MenuProps["items"] = [
@@ -115,64 +163,106 @@ export function MessageInput({ chatId, onSent }: MessageInputProps) {
     <div
       className="glass-strong"
       style={{
-        display: "flex",
-        alignItems: "flex-end",
-        gap: 8,
-        padding: "12px 16px",
         borderTop: `1px solid ${colors.border}`,
       }}
     >
-      <input
-        ref={fileInputRef}
-        type="file"
-        hidden
-        onChange={onFileChange}
-        accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx"
-      />
+      {/* Pasted image previews */}
+      {pastedImages.length > 0 && (
+        <div style={{ display: "flex", gap: 8, padding: "8px 16px 0", flexWrap: "wrap" }}>
+          {pastedImages.map((img, i) => (
+            <div key={i} style={{ position: "relative" }}>
+              <Image
+                src={URL.createObjectURL(img)}
+                alt="pasted"
+                width={64}
+                height={64}
+                style={{ borderRadius: 8, objectFit: "cover" }}
+                preview={false}
+              />
+              <div
+                onClick={() => removePastedImage(i)}
+                style={{
+                  position: "absolute",
+                  top: -6,
+                  right: -6,
+                  width: 18,
+                  height: 18,
+                  borderRadius: "50%",
+                  background: colors.error,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                }}
+              >
+                <CloseOutlined style={{ fontSize: 10, color: "#fff" }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
-      <Dropdown menu={{ items: menuItems }} trigger={["click"]} placement="topLeft">
-        <Button
-          shape="circle"
-          icon={<PlusOutlined />}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "flex-end",
+          gap: 8,
+          padding: "12px 16px",
+        }}
+      >
+        <input
+          ref={fileInputRef}
+          type="file"
+          hidden
+          onChange={onFileChange}
+          accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx"
+        />
+
+        <Dropdown menu={{ items: menuItems }} trigger={["click"]} placement="topLeft">
+          <Button
+            shape="circle"
+            icon={<PlusOutlined />}
+            style={{
+              flexShrink: 0,
+              border: `1px solid ${colors.border}`,
+              color: colors.textSecondary,
+            }}
+          />
+        </Dropdown>
+
+        <Input.TextArea
+          value={text}
+          onChange={(e) => { setText(e.target.value); if (e.target.value) emitTyping(); }}
+          onPressEnter={(e) => {
+            if (!e.shiftKey) {
+              e.preventDefault();
+              handleSend();
+            }
+          }}
+          onPaste={handlePaste}
+          placeholder="Type a message..."
+          maxLength={2000}
+          showCount={{ formatter: ({ count, maxLength }) => <span style={{ fontSize: 11, color: colors.textSecondary }}>{count}/{maxLength}</span> }}
+          autoSize={{ minRows: 1 }}
           style={{
-            flexShrink: 0,
+            borderRadius: 20,
+            resize: "none",
             border: `1px solid ${colors.border}`,
-            color: colors.textSecondary,
+            padding: "8px 16px",
+            color: colors.text,
           }}
         />
-      </Dropdown>
 
-      <Input.TextArea
-        value={text}
-        onChange={(e) => { setText(e.target.value); if (e.target.value) emitTyping(); }}
-        onPressEnter={(e) => {
-          if (!e.shiftKey) {
-            e.preventDefault();
-            sendTextMessage();
-          }
-        }}
-        placeholder="Type a message..."
-        maxLength={2000}
-        showCount={{ formatter: ({ count, maxLength }) => <span style={{ fontSize: 11, color: colors.textSecondary }}>{count}/{maxLength}</span> }}
-        autoSize={{ minRows: 1 }}
-        style={{
-          borderRadius: 20,
-          resize: "none",
-          border: `1px solid ${colors.border}`,
-          padding: "8px 16px",
-          color: colors.text,
-        }}
-      />
-
-      <Button
-        type="primary"
-        shape="circle"
-        icon={<SendOutlined />}
-        loading={sending}
-        onClick={sendTextMessage}
-        disabled={!text.trim() && !sending}
-        style={{ flexShrink: 0 }}
-      />
+        <Button
+          type="primary"
+          shape="circle"
+          icon={<SendOutlined />}
+          loading={sending}
+          onClick={handleSend}
+          disabled={!text.trim() && pastedImages.length === 0 && !sending}
+          style={{ flexShrink: 0 }}
+        />
+      </div>
     </div>
   );
 }
