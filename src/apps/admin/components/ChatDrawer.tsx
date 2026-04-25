@@ -11,8 +11,31 @@ import { colors } from "@/lib/theme";
 import { MessageBubble } from "./MessageBubble";
 import { MessageInput } from "./MessageInput";
 import type { Message } from "@furnigo/types";
+import { format as timeago } from "timeago.js";
 
 const { Text } = Typography;
+
+function getDividerLabel(current: string, previous: string | null): string | null {
+  const curr = new Date(current);
+  const prev = previous ? new Date(previous) : null;
+  const isNewDay = !prev || curr.toDateString() !== prev.toDateString();
+  if (isNewDay) {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const yesterday = new Date(today.getTime() - 86400000);
+    const target = new Date(curr.getFullYear(), curr.getMonth(), curr.getDate());
+    if (target.getTime() === today.getTime()) return "Today";
+    if (target.getTime() === yesterday.getTime()) return "Yesterday";
+    const date = curr.toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" });
+    return `${date} (${timeago(curr)})`;
+  }
+
+  if (prev && curr.getTime() - prev.getTime() >= 60 * 60 * 1000) {
+    return curr.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false });
+  }
+
+  return null;
+}
 
 interface ChatDetail {
   id: string;
@@ -209,15 +232,27 @@ export function ChatDrawer({ chatId, onClose }: ChatDrawerProps) {
                 <Spin size="small" />
               </div>
             )}
-            {chat?.messages.map((msg) => {
+            {chat?.messages.map((msg, i) => {
               const sender = msg.senderId ? senderMap.get(msg.senderId) : undefined;
+              const prevTime = i > 0 ? chat.messages[i - 1].createdAt : null;
+              const dividerLabel = getDividerLabel(msg.createdAt, prevTime);
               return (
-                <MessageBubble
-                  key={msg.id}
-                  message={msg}
-                  isOwn={msg.senderId === user?.id}
-                  sender={sender ? { id: sender.userId, displayName: sender.displayName, email: sender.email, role: sender.role as any, avatarUrl: sender.avatarUrl } : undefined}
-                />
+                <div key={msg.id}>
+                  {dividerLabel && (
+                    <div style={{ display: "flex", alignItems: "center", margin: "16px 0 8px", gap: 12, padding: "0 16px" }}>
+                      <div style={{ flex: 1, height: 1, background: colors.border }} />
+                      <Text style={{ fontSize: 11, color: colors.textSecondary, flexShrink: 0 }}>
+                        {dividerLabel}
+                      </Text>
+                      <div style={{ flex: 1, height: 1, background: colors.border }} />
+                    </div>
+                  )}
+                  <MessageBubble
+                    message={msg}
+                    isOwn={msg.senderId === user?.id}
+                    sender={sender ? { id: sender.userId, displayName: sender.displayName, email: sender.email, role: sender.role as any, avatarUrl: sender.avatarUrl } : undefined}
+                  />
+                </div>
               );
             })}
             <div ref={messagesEndRef} />

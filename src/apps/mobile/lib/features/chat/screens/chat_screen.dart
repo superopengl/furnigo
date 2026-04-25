@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:timeago/timeago.dart' as timeago;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../theme/colors.dart';
@@ -360,12 +361,67 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       itemBuilder: (context, index) {
         final msg = messages[index];
         final sender = msg.senderId != null ? participants[msg.senderId] : null;
-        return MessageBubble(
+        final prevTime = index > 0 ? messages[index - 1].createdAt : null;
+        final dividerLabel = _getDividerLabel(msg.createdAt, prevTime);
+
+        final bubble = MessageBubble(
           message: msg,
           isMe: msg.senderId == _currentUserId,
           sender: sender,
         );
+
+        if (dividerLabel == null) return bubble;
+
+        return Column(
+          children: [
+            _buildTimeDivider(dividerLabel),
+            bubble,
+          ],
+        );
       },
+    );
+  }
+
+  static const _months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  String _monthName(int month) => _months[month - 1];
+
+  String _formatHHmm(DateTime dt) =>
+      '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+
+  String? _getDividerLabel(String current, String? previous) {
+    final curr = DateTime.parse(current).toLocal();
+    final prev = previous != null ? DateTime.parse(previous).toLocal() : null;
+
+    final isNewDay = prev == null ||
+        curr.year != prev.year || curr.month != prev.month || curr.day != prev.day;
+
+    if (isNewDay) {
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      final yesterday = today.subtract(const Duration(days: 1));
+      final target = DateTime(curr.year, curr.month, curr.day);
+      if (target == today) return 'Today';
+      if (target == yesterday) return 'Yesterday';
+      final date = '${curr.day} ${_monthName(curr.month)} ${curr.year}';
+      return '$date (${timeago.format(curr)})';
+    }
+
+    if (prev != null && curr.difference(prev).inMinutes >= 60) {
+      return _formatHHmm(curr);
+    }
+
+    return null;
+  }
+
+  Widget _buildTimeDivider(String label) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Center(
+        child: Text(
+          label,
+          style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+        ),
+      ),
     );
   }
 
