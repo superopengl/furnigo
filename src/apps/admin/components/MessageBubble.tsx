@@ -76,6 +76,8 @@ export function MessageBubble({ message: msg, isOwn, sender }: MessageBubbleProp
     }
   };
 
+  const isText = msg.contentType === "text" || !msg.contentType;
+
   return (
     <div
       style={{
@@ -91,13 +93,17 @@ export function MessageBubble({ message: msg, isOwn, sender }: MessageBubbleProp
       <div
         style={{
           maxWidth: "70%",
-          padding: msg.contentType === "image" ? 4 : "10px 14px",
-          borderRadius: 16,
-          borderBottomRightRadius: isOwn ? 4 : 16,
-          borderBottomLeftRadius: isOwn ? 16 : 4,
-          background: isOwn ? colors.primary : "rgba(255,255,255,0.8)",
-          color: isOwn ? colors.white : colors.text,
-          boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+          ...(isText
+            ? {
+                padding: "10px 14px",
+                borderRadius: 16,
+                borderBottomRightRadius: isOwn ? 4 : 16,
+                borderBottomLeftRadius: isOwn ? 16 : 4,
+                background: isOwn ? colors.primary : "rgba(255,255,255,0.8)",
+                color: isOwn ? colors.white : colors.text,
+                boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+              }
+            : {}),
           fontSize: 14,
           lineHeight: 1.5,
         }}

@@ -187,17 +187,7 @@ export function ChatDrawer({ chatId, onClose }: ChatDrawerProps) {
           flexShrink: 0,
         }}
       >
-        <div style={{ minWidth: 0, display: "flex", alignItems: "center", gap: 12 }}>
-          <div style={{ display: "flex", flexShrink: 0 }}>
-            {chat?.participants.map((p) => (
-              <div key={p.userId} style={{ marginLeft: chat.participants.indexOf(p) > 0 ? -8 : 0 }}>
-                <UserAvatar
-                  user={{ id: p.userId, displayName: p.displayName, email: p.email, role: p.role as any, avatarUrl: p.avatarUrl }}
-                  size={28}
-                />
-              </div>
-            ))}
-          </div>
+        <div style={{ minWidth: 0 }}>
           {editingTitle ? (
             <Input
               size="small"
@@ -214,18 +204,28 @@ export function ChatDrawer({ chatId, onClose }: ChatDrawerProps) {
                 setEditingTitle(false);
               }}
               onBlur={() => setEditingTitle(false)}
-              style={{ fontSize: 14, maxWidth: 200 }}
+              style={{ fontSize: 14, color: colors.primary }}
             />
           ) : (
             <Text
               strong
-              style={{ fontSize: 16, color: colors.text, cursor: "pointer" }}
+              style={{ fontSize: 16, color: colors.text, cursor: "pointer", display: "block" }}
               ellipsis
               onClick={() => { setTitleDraft(chat?.title || ""); setEditingTitle(true); }}
             >
               {chat?.title || "Untitled Chat"}
             </Text>
           )}
+          <div style={{ display: "flex", marginTop: 4 }}>
+            {chat?.participants.map((p, i) => (
+              <div key={p.userId} style={{ marginLeft: i > 0 ? -6 : 0 }}>
+                <UserAvatar
+                  user={{ id: p.userId, displayName: p.displayName, email: p.email, role: p.role as any, avatarUrl: p.avatarUrl }}
+                  size={22}
+                />
+              </div>
+            ))}
+          </div>
         </div>
         <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
           <Button

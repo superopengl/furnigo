@@ -40,19 +40,25 @@ class MessageBubble extends StatelessWidget {
       );
     }
 
+    final isText = message.contentType == 'text' || message.contentType == null;
+
     final bubble = Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      padding: isText
+          ? const EdgeInsets.symmetric(horizontal: 16, vertical: 10)
+          : EdgeInsets.zero,
       constraints:
           BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.7),
-      decoration: BoxDecoration(
-        color: isMe ? AppColors.primary : AppColors.surface,
-        borderRadius: BorderRadius.only(
-          topLeft: const Radius.circular(18),
-          topRight: const Radius.circular(18),
-          bottomLeft: Radius.circular(isMe ? 18 : 4),
-          bottomRight: Radius.circular(isMe ? 4 : 18),
-        ),
-      ),
+      decoration: isText
+          ? BoxDecoration(
+              color: isMe ? AppColors.primary : AppColors.surface,
+              borderRadius: BorderRadius.only(
+                topLeft: const Radius.circular(18),
+                topRight: const Radius.circular(18),
+                bottomLeft: Radius.circular(isMe ? 18 : 4),
+                bottomRight: Radius.circular(isMe ? 4 : 18),
+              ),
+            )
+          : null,
       child: _buildContent(context),
     );
 
