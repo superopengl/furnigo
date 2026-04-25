@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useCallback, useState, useMemo } from "react";
-import { Drawer, Spin, Typography, Button, Tag } from "antd";
+import { Drawer, Spin, Typography, Button, Tag, Input } from "antd";
 import { CloseOutlined, ReloadOutlined } from "@ant-design/icons";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
@@ -10,6 +10,7 @@ import { useAuth } from "@/lib/auth";
 import { colors } from "@/lib/theme";
 import { MessageBubble } from "./MessageBubble";
 import { MessageInput } from "./MessageInput";
+import { UserAvatar } from "./UserAvatar";
 import type { Message } from "@furnigo/types";
 import { format as timeago } from "timeago.js";
 
@@ -56,6 +57,8 @@ export function ChatDrawer({ chatId, onClose }: ChatDrawerProps) {
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const [loadingOlder, setLoadingOlder] = useState(false);
   const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set());
+  const [editingTitle, setEditingTitle] = useState(false);
+  const [titleDraft, setTitleDraft] = useState("");
 
   const { data: chat, isLoading } = useQuery({
     queryKey: ["admin-chat", chatId],
@@ -160,10 +163,6 @@ export function ChatDrawer({ chatId, onClose }: ChatDrawerProps) {
     return map;
   }, [chat?.participants]);
 
-  const participantLabel = chat?.participants
-    .map((p) => p.displayName || p.email.split("@")[0])
-    .join(", ");
-
   return (
     <Drawer
       open={!!chatId}
@@ -188,16 +187,45 @@ export function ChatDrawer({ chatId, onClose }: ChatDrawerProps) {
           flexShrink: 0,
         }}
       >
-        <div style={{ minWidth: 0 }}>
-          <Text strong style={{ fontSize: 16, display: "block", color: colors.text }}>
-            {chat?.title || "Untitled Chat"}
-          </Text>
-          <Text
-            style={{ fontSize: 12, color: colors.textSecondary }}
-            ellipsis
-          >
-            {participantLabel}
-          </Text>
+        <div style={{ minWidth: 0, display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{ display: "flex", flexShrink: 0 }}>
+            {chat?.participants.map((p) => (
+              <div key={p.userId} style={{ marginLeft: chat.participants.indexOf(p) > 0 ? -8 : 0 }}>
+                <UserAvatar
+                  user={{ id: p.userId, displayName: p.displayName, email: p.email, role: p.role as any, avatarUrl: p.avatarUrl }}
+                  size={28}
+                />
+              </div>
+            ))}
+          </div>
+          {editingTitle ? (
+            <Input
+              size="small"
+              autoFocus
+              value={titleDraft}
+              onChange={(e) => setTitleDraft(e.target.value)}
+              onPressEnter={async () => {
+                const trimmed = titleDraft.trim();
+                if (trimmed && chatId) {
+                  await api(`/chats/${chatId}`, { method: "PUT", body: JSON.stringify({ title: trimmed }) });
+                  queryClient.invalidateQueries({ queryKey: ["admin-chat", chatId] });
+                  queryClient.invalidateQueries({ queryKey: ["admin-chats"] });
+                }
+                setEditingTitle(false);
+              }}
+              onBlur={() => setEditingTitle(false)}
+              style={{ fontSize: 14, maxWidth: 200 }}
+            />
+          ) : (
+            <Text
+              strong
+              style={{ fontSize: 16, color: colors.text, cursor: "pointer" }}
+              ellipsis
+              onClick={() => { setTitleDraft(chat?.title || ""); setEditingTitle(true); }}
+            >
+              {chat?.title || "Untitled Chat"}
+            </Text>
+          )}
         </div>
         <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
           <Button
@@ -206,7 +234,7 @@ export function ChatDrawer({ chatId, onClose }: ChatDrawerProps) {
             icon={<ReloadOutlined />}
             onClick={() => queryClient.invalidateQueries({ queryKey: ["admin-chat", chatId] })}
           />
-          <Button type="text" size="small" icon={<CloseOutlined />} onClick={onClose} />
+          <Button type="text" size="small" icon={<CloseOutlined style={{ color: colors.primary }} />} onClick={onClose} />
         </div>
       </div>
 

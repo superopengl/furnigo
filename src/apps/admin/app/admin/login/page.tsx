@@ -76,7 +76,7 @@ export default function LoginPage() {
       }
 
       login(
-        { id: u.id, email: u.email, displayName: u.display_name, role: u.role },
+        { id: u.id, email: u.email, displayName: u.display_name, avatarUrl: u.avatar_url ?? null, role: u.role },
         token,
       );
       router.replace("/admin");

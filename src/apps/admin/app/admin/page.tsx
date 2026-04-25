@@ -1,12 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { Typography, Input, Button, Tag, Table, Space, Tooltip, ConfigProvider, theme as antTheme } from "antd";
+import { Typography, Input, Button, Tag, Table, ConfigProvider, Dropdown, Modal, Upload, theme as antTheme } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import {
   SearchOutlined,
   LogoutOutlined,
   ReloadOutlined,
+  SettingOutlined,
+  CameraOutlined,
+  LoadingOutlined,
 } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
@@ -99,9 +102,15 @@ const darkTheme = {
 };
 
 function ChatsContent() {
+  const [modal, contextHolder] = Modal.useModal();
   const { user, logout } = useAuth();
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [savingName, setSavingName] = useState(false);
+  const [editAvatarUrl, setEditAvatarUrl] = useState<string | null>(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   const { data: chats, isLoading, refetch } = useQuery({
     queryKey: ["admin-chats"],
@@ -220,6 +229,7 @@ function ChatsContent() {
 
   return (
     <ConfigProvider theme={darkTheme}>
+      {contextHolder}
       <div className="admin-dark" style={{ minHeight: "100vh", background: dk.bg, position: "relative", overflow: "hidden" }}>
         {/* Background orbs */}
         <div
@@ -297,23 +307,57 @@ function ChatsContent() {
             />
           </div>
 
-          <Space>
-            <Text style={{ color: dk.textSecondary, fontSize: 13 }}>
-              {user?.displayName || user?.email}
-            </Text>
-            <Button
-              type="text"
-              icon={<ReloadOutlined />}
-              onClick={() => refetch()}
-              style={{ color: dk.textSecondary }}
-            />
-            <Button
-              type="text"
-              icon={<LogoutOutlined />}
-              onClick={logout}
-              style={{ color: dk.textSecondary }}
-            />
-          </Space>
+          {user && (
+            <Dropdown
+              trigger={["click"]}
+              placement="bottomRight"
+              popupRender={() => (
+                <div style={{ background: dk.surface, border: `1px solid ${dk.border}`, borderRadius: 12, padding: "12px 0", minWidth: 220 }}>
+                  <div style={{ padding: "8px 16px 12px", borderBottom: `1px solid ${dk.border}` }}>
+                    <Text strong style={{ color: dk.text, display: "block" }}>{user.displayName || user.email.split("@")[0]}</Text>
+                    <Text style={{ color: dk.textSecondary, fontSize: 12, display: "block" }}>{user.email}</Text>
+                    <Text style={{ color: dk.textSecondary, fontSize: 11, display: "block", marginTop: 2 }}>{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</Text>
+                  </div>
+                  <div style={{ padding: "4px 8px" }}>
+                    <Button
+                      type="text"
+                      icon={<SettingOutlined />}
+                      block
+                      style={{ color: dk.text, textAlign: "left", justifyContent: "flex-start" }}
+                      onClick={() => { setEditName(user.displayName || ""); setEditAvatarUrl(null); setSettingsOpen(true); }}
+                    >
+                      Settings
+                    </Button>
+                    <div style={{ borderTop: `1px solid ${dk.border}`, margin: "4px 0" }} />
+                    <Button
+                      type="text"
+                      icon={<LogoutOutlined />}
+                      block
+                      danger
+                      style={{ textAlign: "left", justifyContent: "flex-start" }}
+                      onClick={() => modal.confirm({
+                        title: "Log out",
+                        content: "Are you sure you want to log out?",
+                        okText: "Log out",
+                        okButtonProps: { danger: true },
+                        onOk: logout,
+                      })}
+                    >
+                      Log out
+                    </Button>
+                  </div>
+                </div>
+              )}
+            >
+              <div style={{ cursor: "pointer" }}>
+                <UserAvatar
+                  user={{ id: user.id, displayName: user.displayName ?? null, email: user.email, role: user.role as any, avatarUrl: user.avatarUrl }}
+                  size={32}
+                  tooltip={false}
+                />
+              </div>
+            </Dropdown>
+          )}
         </div>
 
         {/* Chat Table */}
@@ -341,9 +385,87 @@ function ChatsContent() {
             }}
             style={{ borderRadius: 12, overflow: "hidden" }}
           />
+          <Button
+            type="text"
+            icon={<ReloadOutlined />}
+            onClick={() => refetch()}
+            style={{ color: dk.textSecondary, marginTop: 8 }}
+          >
+            Refresh
+          </Button>
         </div>
 
         <ChatDrawer chatId={activeChatId} onClose={() => setActiveChatId(null)} />
+
+        <Modal
+          title="Settings"
+          open={settingsOpen}
+          onCancel={() => setSettingsOpen(false)}
+          confirmLoading={savingName}
+          onOk={async () => {
+            const trimmed = editName.trim();
+            if (!trimmed) return;
+            setSavingName(true);
+            try {
+              await api("/users/me", {
+                method: "PUT",
+                body: JSON.stringify({ displayName: trimmed }),
+              });
+              window.location.reload();
+            } finally {
+              setSavingName(false);
+            }
+          }}
+          okText="Save"
+        >
+          {/* Avatar upload */}
+          <div style={{ textAlign: "center", marginBottom: 24 }}>
+            <Upload
+              showUploadList={false}
+              accept="image/*"
+              beforeUpload={async (file) => {
+                setUploadingAvatar(true);
+                try {
+                  const formData = new FormData();
+                  formData.append("file", file);
+                  const uploadRes = await api<{ url: string }>("/uploads", { method: "POST", body: formData });
+                  if (uploadRes.success) {
+                    const avatarUrl = uploadRes.data.url;
+                    await api("/users/me", { method: "PUT", body: JSON.stringify({ avatarUrl }) });
+                    setEditAvatarUrl(avatarUrl);
+                  }
+                } finally {
+                  setUploadingAvatar(false);
+                }
+                return false;
+              }}
+            >
+              <div style={{ cursor: "pointer", position: "relative", display: "inline-block" }}>
+                <UserAvatar
+                  user={{ id: user!.id, displayName: user!.displayName ?? null, email: user!.email, role: user!.role as any, avatarUrl: editAvatarUrl }}
+                  size={80}
+                  tooltip={false}
+                />
+                <div style={{
+                  position: "absolute", right: 0, bottom: 0,
+                  width: 24, height: 24, borderRadius: 8,
+                  background: colors.secondary, display: "flex", alignItems: "center", justifyContent: "center",
+                }}>
+                  {uploadingAvatar ? <LoadingOutlined style={{ color: "#fff", fontSize: 12 }} /> : <CameraOutlined style={{ color: "#fff", fontSize: 12 }} />}
+                </div>
+              </div>
+            </Upload>
+          </div>
+
+          <div style={{ marginBottom: 8 }}>
+            <Text style={{ fontSize: 13, color: dk.textSecondary }}>Display Name</Text>
+          </div>
+          <Input
+            value={editName}
+            onChange={(e) => setEditName(e.target.value)}
+            placeholder="Enter display name"
+          />
+        </Modal>
 
         <style>{`
           .admin-dark .ant-table-wrapper .ant-table {

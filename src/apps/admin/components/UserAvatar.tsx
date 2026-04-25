@@ -6,6 +6,7 @@ import type { User } from "@furnigo/types";
 interface UserAvatarProps {
   user: Pick<User, "id" | "displayName" | "email" | "role" | "avatarUrl">;
   size?: number;
+  tooltip?: boolean;
 }
 
 const PALETTE = [
@@ -34,7 +35,7 @@ function formatRole(role: string): string {
   return role.charAt(0).toUpperCase() + role.slice(1);
 }
 
-export function UserAvatar({ user, size = 32 }: UserAvatarProps) {
+export function UserAvatar({ user, size = 32, tooltip = true }: UserAvatarProps) {
   const color = hashColor(user.id);
   const fontSize = Math.max(11, Math.round(size * 0.38));
 
@@ -46,24 +47,28 @@ export function UserAvatar({ user, size = 32 }: UserAvatarProps) {
     </div>
   );
 
+  const avatar = user.avatarUrl ? (
+    <Avatar size={size} src={user.avatarUrl} />
+  ) : (
+    <Avatar
+      size={size}
+      style={{
+        backgroundColor: `${color}25`,
+        color,
+        fontSize,
+        fontWeight: 600,
+        cursor: "default",
+      }}
+    >
+      {getInitials(user.displayName, user.email)}
+    </Avatar>
+  );
+
+  if (!tooltip) return avatar;
+
   return (
     <Tooltip title={tooltipContent} placement="bottom">
-      {user.avatarUrl ? (
-        <Avatar size={size} src={user.avatarUrl} />
-      ) : (
-        <Avatar
-          size={size}
-          style={{
-            backgroundColor: `${color}25`,
-            color,
-            fontSize,
-            fontWeight: 600,
-            cursor: "default",
-          }}
-        >
-          {getInitials(user.displayName, user.email)}
-        </Avatar>
-      )}
+      {avatar}
     </Tooltip>
   );
 }

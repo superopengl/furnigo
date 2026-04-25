@@ -44,6 +44,7 @@ export function Providers({ children }: { children: ReactNode }) {
           id: res.data.id,
           email: res.data.email,
           displayName: res.data.displayName,
+          avatarUrl: res.data.avatarUrl,
           role: res.data.role,
         });
         connectSocket();

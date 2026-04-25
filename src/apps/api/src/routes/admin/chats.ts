@@ -112,6 +112,8 @@ export async function adminChatRoutes(app: FastifyInstance) {
 
     const recentMessages = await db
       .select({
+        id: message.id,
+        chatId: message.chatId,
         senderId: message.senderId,
         senderRole: message.senderRole,
         contentType: message.contentType,
