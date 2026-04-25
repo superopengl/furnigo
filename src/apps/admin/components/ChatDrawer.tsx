@@ -118,9 +118,20 @@ export function ChatDrawer({ chatId, onClose }: ChatDrawerProps) {
     };
     socket.on("typing", handleTyping);
 
+    // Handle chat title updates
+    const handleTitleUpdate = (data: { chatId: string; title: string }) => {
+      if (data.chatId !== chatId) return;
+      queryClient.setQueryData(["admin-chat", chatId], (old: ChatDetail | undefined) => {
+        if (!old) return old;
+        return { ...old, title: data.title };
+      });
+    };
+    socket.on("chat:titleUpdated", handleTitleUpdate);
+
     return () => {
       socket.off("message:new", handleNewMessage);
       socket.off("typing", handleTyping);
+      socket.off("chat:titleUpdated", handleTitleUpdate);
       typingTimers.forEach(clearTimeout);
       setTypingUsers(new Set());
       socket.emit("leave", chatId);

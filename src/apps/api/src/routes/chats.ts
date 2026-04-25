@@ -2,6 +2,7 @@ import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { db, chat, chatParticipant, message, user } from "@furnigo/db";
 import { eq, desc, and } from "drizzle-orm";
+import { getIO } from "../ws/getIO";
 
 const createSchema = z.object({
   title: z.string().optional(),
@@ -86,6 +87,16 @@ export async function chatRoutes(app: FastifyInstance) {
       .set(body)
       .where(eq(chat.id, chatId))
       .returning({ title: chat.title, updatedAt: chat.updatedAt });
+
+    // Emit WebSocket event for updated chat
+    const io = getIO();
+    if (io) {
+      // Broadcast to all participants in this chat
+      io.to(chatId).emit("chat:titleUpdated", {
+        chatId,
+        title: updated.title,
+      });
+    }
 
     return { success: true, data: updated };
   });
