@@ -15,6 +15,15 @@ export function clearToken() {
   localStorage.removeItem(TOKEN_KEY);
 }
 
+// Callbacks for auth lifecycle events (set by Providers)
+let onTokenRefreshed: (() => void) | null = null;
+let onAuthLost: (() => void) | null = null;
+
+export function setAuthCallbacks(callbacks: { onTokenRefreshed?: () => void; onAuthLost?: () => void }) {
+  onTokenRefreshed = callbacks.onTokenRefreshed ?? null;
+  onAuthLost = callbacks.onAuthLost ?? null;
+}
+
 let refreshPromise: Promise<string | null> | null = null;
 
 async function refreshToken(): Promise<string | null> {
@@ -34,12 +43,13 @@ async function refreshToken(): Promise<string | null> {
 
     if (json.success) {
       setToken(json.data.token);
+      onTokenRefreshed?.();
       return json.data.token;
     }
 
     // Deactivated or expired beyond grace window — force logout
     clearToken();
-    window.location.href = "/admin/login";
+    onAuthLost?.();
     return null;
   } catch {
     return null;

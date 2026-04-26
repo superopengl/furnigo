@@ -37,3 +37,8 @@ export function disconnectSocket() {
     socket = null;
   }
 }
+
+export function reconnectSocket() {
+  disconnectSocket();
+  connectSocket();
+}

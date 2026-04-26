@@ -19,6 +19,7 @@ class SocketService {
     final token = await _authStore.getToken();
     if (token == null) return;
 
+    _socket?.disconnect();
     _socket = io.io(
       Env.wsUrl,
       io.OptionBuilder()
@@ -26,10 +27,17 @@ class SocketService {
           .setPath('/ws')
           .setAuth({'token': token})
           .disableAutoConnect()
+          .enableForceNew()
           .build(),
     );
 
     _socket!.connect();
+  }
+
+  /// Reconnect with a fresh token (e.g. after token refresh).
+  Future<void> reconnect() async {
+    disconnect();
+    await connect();
   }
 
   void joinChat(String chatId) {

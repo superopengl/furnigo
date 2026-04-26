@@ -5,8 +5,8 @@ import { ConfigProvider, App as AntApp } from "antd";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthContext, type AuthUser } from "@/lib/auth";
 import { ErrorContext, setGlobalShowError } from "@/lib/error";
-import { api, getToken, setToken, clearToken } from "@/lib/api";
-import { connectSocket, disconnectSocket } from "@/lib/socket";
+import { api, getToken, setToken, clearToken, setAuthCallbacks } from "@/lib/api";
+import { connectSocket, disconnectSocket, reconnectSocket } from "@/lib/socket";
 import { theme } from "@/lib/theme";
 import { ErrorBanner } from "./ErrorBanner";
 import { ErrorBoundary } from "./ErrorBoundary";
@@ -70,6 +70,16 @@ export function Providers({ children }: { children: ReactNode }) {
     setUser(null);
     queryClient.clear();
   }, []);
+
+  // Wire auth lifecycle callbacks so the api layer can trigger
+  // socket reconnect after token refresh and clean logout on auth loss.
+  useEffect(() => {
+    setAuthCallbacks({
+      onTokenRefreshed: reconnectSocket,
+      onAuthLost: logout,
+    });
+    return () => setAuthCallbacks({});
+  }, [logout]);
 
   return (
     <QueryClientProvider client={queryClient}>

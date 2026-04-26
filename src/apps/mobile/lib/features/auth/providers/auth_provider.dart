@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../shared/models/user_model.dart';
 import '../../../shared/providers/auth_store.dart';
+import '../../../shared/services/auth_event_bus.dart';
 import '../../../shared/services/message_cache.dart';
 import '../../../shared/services/socket_service.dart';
 import '../services/auth_service.dart';
@@ -31,18 +33,53 @@ class AuthNotifier extends StateNotifier<AuthState> {
   final AuthStore _authStore;
   final SocketService _socketService;
   final MessageCache _messageCache;
+  StreamSubscription<AuthEvent>? _authEventSub;
 
-  AuthNotifier(this._authService, this._authStore, this._socketService, this._messageCache)
-      : super(const AuthState()) {
+  AuthNotifier(
+    this._authService,
+    this._authStore,
+    this._socketService,
+    this._messageCache,
+    AuthEventBus authEventBus,
+  ) : super(const AuthState()) {
+    _authEventSub = authEventBus.stream.listen(_onAuthEvent);
     _init();
+  }
+
+  void _onAuthEvent(AuthEvent event) {
+    switch (event) {
+      case AuthEvent.authLost:
+        _handleAuthLost();
+      case AuthEvent.tokenRefreshed:
+        _socketService.reconnect();
+    }
+  }
+
+  void _handleAuthLost() {
+    if (state.status == AuthStatus.unauthenticated) return;
+    _socketService.disconnect();
+    _messageCache.clearAll();
+    state = const AuthState(status: AuthStatus.unauthenticated);
   }
 
   Future<void> _init() async {
     final token = await _authStore.getToken();
-    if (token != null) {
-      state = state.copyWith(status: AuthStatus.authenticated);
+    if (token == null) {
+      state = state.copyWith(status: AuthStatus.unauthenticated);
+      return;
+    }
+
+    // Verify session by calling /users/me.
+    // If the token is expired, the Dio interceptor will transparently
+    // refresh it before this call returns.
+    try {
+      final data = await _authService.getMe();
+      final user = UserModel.fromJson(data);
+      state = state.copyWith(status: AuthStatus.authenticated, user: user);
       await _socketService.connect();
-    } else {
+    } catch (_) {
+      // Token invalid and refresh also failed — force re-login.
+      await _authStore.clear();
       state = state.copyWith(status: AuthStatus.unauthenticated);
     }
   }
@@ -73,6 +110,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
     await _messageCache.clearAll();
     state = const AuthState(status: AuthStatus.unauthenticated);
   }
+
+  @override
+  void dispose() {
+    _authEventSub?.cancel();
+    super.dispose();
+  }
 }
 
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
@@ -81,5 +124,6 @@ final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
     ref.read(authStoreProvider),
     ref.read(socketServiceProvider),
     ref.read(messageCacheProvider),
+    ref.read(authEventBusProvider),
   );
 });

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/auth_store.dart';
+import 'auth_event_bus.dart';
 import '../../config/env.dart';
 
 final apiClientProvider = Provider<Dio>((ref) {
@@ -13,6 +14,7 @@ final apiClientProvider = Provider<Dio>((ref) {
   ));
 
   final authStore = ref.read(authStoreProvider);
+  final authEventBus = ref.read(authEventBusProvider);
 
   // Separate Dio instance for refresh calls to avoid interceptor recursion
   final refreshDio = Dio(BaseOptions(
@@ -22,7 +24,7 @@ final apiClientProvider = Provider<Dio>((ref) {
     headers: {'Content-Type': 'application/json'},
   ));
 
-  Completer<String?>? _refreshCompleter;
+  Completer<String?>? refreshCompleter;
 
   dio.interceptors.add(InterceptorsWrapper(
     onRequest: (options, handler) async {
@@ -37,10 +39,11 @@ final apiClientProvider = Provider<Dio>((ref) {
         return handler.next(error);
       }
 
-      // If deactivated (403), don't attempt refresh
+      // If deactivated, don't attempt refresh
       final errorCode = error.response?.data?['error']?['code'];
       if (errorCode == 'USER_DEACTIVATED') {
         await authStore.clear();
+        authEventBus.emit(AuthEvent.authLost);
         return handler.next(error);
       }
 
@@ -50,17 +53,17 @@ final apiClientProvider = Provider<Dio>((ref) {
       }
 
       // Serialize concurrent refresh attempts
-      if (_refreshCompleter != null) {
-        final newToken = await _refreshCompleter!.future;
+      if (refreshCompleter != null) {
+        final newToken = await refreshCompleter!.future;
         if (newToken != null) {
           error.requestOptions.headers['Authorization'] = 'Bearer $newToken';
-          final res = await dio.fetch(error.requestOptions);
+          final res = await refreshDio.fetch(error.requestOptions);
           return handler.resolve(res);
         }
         return handler.next(error);
       }
 
-      _refreshCompleter = Completer<String?>();
+      refreshCompleter = Completer<String?>();
 
       try {
         final res = await refreshDio.post(
@@ -70,22 +73,24 @@ final apiClientProvider = Provider<Dio>((ref) {
 
         final newToken = res.data['data']['token'] as String;
         await authStore.save(token: newToken, userId: (await authStore.getUserId())!);
-        _refreshCompleter!.complete(newToken);
+        refreshCompleter!.complete(newToken);
+        authEventBus.emit(AuthEvent.tokenRefreshed);
 
-        // Retry the original request
+        // Retry the original request with the refresh Dio to avoid re-entering interceptors
         error.requestOptions.headers['Authorization'] = 'Bearer $newToken';
-        final retryRes = await dio.fetch(error.requestOptions);
+        final retryRes = await refreshDio.fetch(error.requestOptions);
         return handler.resolve(retryRes);
       } on DioException catch (e) {
-        _refreshCompleter!.complete(null);
-        // Refresh failed — clear auth state
+        refreshCompleter!.complete(null);
+        // Refresh failed — clear auth state and notify
         final code = e.response?.data?['error']?['code'];
         if (code == 'TOKEN_EXPIRED' || code == 'USER_DEACTIVATED') {
           await authStore.clear();
+          authEventBus.emit(AuthEvent.authLost);
         }
         return handler.next(error);
       } finally {
-        _refreshCompleter = null;
+        refreshCompleter = null;
       }
     },
   ));

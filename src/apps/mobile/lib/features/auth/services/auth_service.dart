@@ -23,4 +23,9 @@ class AuthService {
     });
     return res.data['data'] as Map<String, dynamic>;
   }
+
+  Future<Map<String, dynamic>> getMe() async {
+    final res = await _dio.get('/users/me');
+    return res.data['data'] as Map<String, dynamic>;
+  }
 }

@@ -396,7 +396,7 @@ export default function LoginPage() {
         </Title>
 
         {step === "email" ? (
-          <Space direction="vertical" size="middle" style={{ width: "100%" }}>
+          <Space orientation="vertical" size="middle" style={{ width: "100%" }}>
             <Input
               size="large"
               prefix={<MailOutlined style={{ color: "rgba(255,255,255,0.35)" }} />}
@@ -433,7 +433,7 @@ export default function LoginPage() {
             </Button>
           </Space>
         ) : (
-          <Space direction="vertical" size="middle" style={{ width: "100%" }}>
+          <Space orientation="vertical" size="middle" style={{ width: "100%" }}>
             <Text style={{ color: "rgba(255, 255, 255, 0.4)", display: "block", marginBottom: 4 }}>
               Enter the 6-digit code sent to{" "}
               <strong style={{ color: "rgba(255, 255, 255, 0.75)" }}>{email}</strong>
