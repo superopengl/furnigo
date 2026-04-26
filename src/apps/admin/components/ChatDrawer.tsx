@@ -232,7 +232,7 @@ export function ChatDrawer({ chatId, onClose }: ChatDrawerProps) {
               <div key={p.userId} style={{ marginLeft: i > 0 ? -6 : 0 }}>
                 <UserAvatar
                   user={{ id: p.userId, displayName: p.displayName, email: p.email, role: p.role as any, avatarUrl: p.avatarUrl }}
-                  size={22}
+                  size={36}
                 />
               </div>
             ))}
