@@ -62,6 +62,3 @@ final routerProvider = Provider<GoRouter>((ref) {
 
   return router;
 });
-
-  return router;
-});
