@@ -3,13 +3,20 @@
   "private": true,
   "scripts": {
     "start:api": "pnpm --filter @furnigo/api dev",
-    "start:admin": "pnpm --filter @furnigo/admin start:dev",
+    "start:portal": "pnpm --filter @furnigo/admin start:dev",
     "start:mobile": "bash scripts/run-mobile.sh",
     "build": "pnpm -r build",
     "lint": "pnpm -r lint",
     "db:generate": "pnpm --filter @furnigo/db generate",
     "db:migrate": "pnpm --filter @furnigo/db migrate",
     "scan": "osv-scanner scan source -r ."
+  },
+  "pnpm": {
+    "overrides": {
+      "esbuild@<0.25.0": ">=0.25.0",
+      "path-to-regexp@<8.4.0": ">=8.4.0",
+      "postcss@<8.5.10": ">=8.5.10"
+    }
   },
   "devDependencies": {
     "@types/node": "^25.6.0"
