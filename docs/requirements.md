@@ -86,7 +86,7 @@ Furnigo collects and processes personal information for providing services, incl
 
 We implement appropriate security measures to protect your personal information and comply with Australian privacy laws.
 
-### Terms of Usage
+### Terms of Use
 These terms govern the use of Furnigo's website, mobile application and services. They cover:
 - Acceptable use of our Services
 - Furniture ordering processes and transactions with Foshan manufacturers  

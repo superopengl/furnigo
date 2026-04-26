@@ -35,7 +35,17 @@ export async function chatRoutes(app: FastifyInstance) {
       .where(eq(chatParticipant.userId, id))
       .orderBy(desc(chat.updatedAt));
 
-    return { success: true, data: rows };
+    // Ensure all fields are properly typed for the response
+    return { 
+      success: true, 
+      data: rows.map(row => ({
+        id: row.id,
+        title: row.title,
+        createdAt: row.createdAt,
+        updatedAt: row.updatedAt,
+        role: row.role
+      })) 
+    };
   });
 
   // Create new chat

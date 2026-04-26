@@ -6,7 +6,7 @@ import '../../config/env.dart';
 
 final apiClientProvider = Provider<Dio>((ref) {
   final dio = Dio(BaseOptions(
-    baseUrl: Env.apiBaseUrl,
+    baseUrl: '${Env.baseUrl}${Env.apiPath}',
     connectTimeout: const Duration(seconds: 10),
     receiveTimeout: const Duration(seconds: 10),
     headers: {'Content-Type': 'application/json'},
@@ -16,7 +16,7 @@ final apiClientProvider = Provider<Dio>((ref) {
 
   // Separate Dio instance for refresh calls to avoid interceptor recursion
   final refreshDio = Dio(BaseOptions(
-    baseUrl: Env.apiBaseUrl,
+    baseUrl: '${Env.baseUrl}${Env.apiPath}',
     connectTimeout: const Duration(seconds: 10),
     receiveTimeout: const Duration(seconds: 10),
     headers: {'Content-Type': 'application/json'},

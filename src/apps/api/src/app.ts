@@ -10,6 +10,7 @@ import { messageRoutes } from "./routes/messages";
 import { uploadRoutes } from "./routes/uploads";
 import { adminChatRoutes } from "./routes/admin/chats";
 import { devBlobRoutes } from "./routes/dev/blob";
+import { legalRoutes } from "./routes/legal";
 import { setupSocket } from "./ws/setupSocket";
 
 export async function buildApp() {
@@ -61,6 +62,9 @@ export async function buildApp() {
   });
 
   app.get("/healthcheck", () => "OK");
+
+  // Public pages (no auth)
+  await app.register(legalRoutes);
 
   // Routes
   await app.register(authRoutes, { prefix: "/api/auth" });

@@ -354,8 +354,8 @@ export default function HomePage() {
             <a href="/privacy_policy" style={{ color: colors.textSecondary, fontSize: 12, textDecoration: "none" }}>
               Privacy Policy
             </a>
-            <a href="/terms_of_usage" style={{ color: colors.textSecondary, fontSize: 12, textDecoration: "none" }}>
-              Terms of Usage
+            <a href="/terms_of_use" style={{ color: colors.textSecondary, fontSize: 12, textDecoration: "none" }}>
+              Terms of Use
             </a>
           </div>
         </div>
