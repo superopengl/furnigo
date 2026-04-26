@@ -8,7 +8,8 @@
     "build": "pnpm -r build",
     "lint": "pnpm -r lint",
     "db:generate": "pnpm --filter @furnigo/db generate",
-    "db:migrate": "pnpm --filter @furnigo/db migrate"
+    "db:migrate": "pnpm --filter @furnigo/db migrate",
+    "scan": "osv-scanner scan source -r ."
   },
   "devDependencies": {
     "@types/node": "^25.6.0"
