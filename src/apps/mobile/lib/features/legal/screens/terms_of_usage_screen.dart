@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:furnigo/config/env.dart';
 
 class TermsOfUsageScreen extends StatelessWidget {
   const TermsOfUsageScreen({super.key});
@@ -16,7 +17,7 @@ class TermsOfUsageScreen extends StatelessWidget {
       ),
       body: InAppWebView(
         initialUrlRequest: URLRequest(
-          url: WebUri('https://admin.furnigo.com.au/terms_of_usage'),
+          url: WebUri('${Env.baseUrl}/terms_of_usage'),
         ),
       ),
     );

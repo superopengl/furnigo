@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:furnigo/config/env.dart';
 
 class PrivacyPolicyScreen extends StatelessWidget {
   const PrivacyPolicyScreen({super.key});
@@ -16,7 +17,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
       ),
       body: InAppWebView(
         initialUrlRequest: URLRequest(
-          url: WebUri('https://admin.furnigo.com.au/privacy_policy'),
+          url: WebUri('${Env.baseUrl}/privacy_policy'),
         ),
       ),
     );
