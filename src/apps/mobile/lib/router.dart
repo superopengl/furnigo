@@ -3,6 +3,9 @@ import 'package:go_router/go_router.dart';
 import 'features/auth/providers/auth_provider.dart';
 import 'features/auth/screens/login_screen.dart';
 import 'features/chat/screens/chat_screen.dart';
+import 'features/profile/screens/profile_screen.dart';
+import 'features/legal/screens/privacy_policy_screen.dart';
+import 'features/legal/screens/terms_of_usage_screen.dart';
 
 GoRouter createRouter(Ref ref) {
   return GoRouter(
@@ -34,6 +37,18 @@ GoRouter createRouter(Ref ref) {
           chatId: state.pathParameters['id']!,
         ),
       ),
+      GoRoute(
+        path: '/profile',
+        builder: (context, state) => const ProfileScreen(),
+      ),
+      GoRoute(
+        path: '/privacy_policy',
+        builder: (context, state) => const PrivacyPolicyScreen(),
+      ),
+      GoRoute(
+        path: '/terms_of_usage',
+        builder: (context, state) => const TermsOfUsageScreen(),
+      ),
     ],
   );
 }
@@ -44,6 +59,9 @@ final routerProvider = Provider<GoRouter>((ref) {
   ref.listen(authProvider, (prev, next) {
     router.refresh();
   });
+
+  return router;
+});
 
   return router;
 });

@@ -118,6 +118,37 @@ class ChatDrawer extends ConsumerWidget {
                             ),
                     ),
                   ),
+                  // Footer with legal links
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.glassDark,
+                      borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TextButton.icon(
+                          label: const Text('Privacy Policy'),
+                          icon: const Icon(Icons.privacy_tip, size: 16),
+                          onPressed: () {
+                            Navigator.pop(context);
+                            // Navigate to privacy policy page
+                            Navigator.pushNamed(context, '/privacy_policy');
+                          },
+                        ),
+                        TextButton.icon(
+                          label: const Text('Terms of Usage'),
+                          icon: const Icon(Icons.description, size: 16),
+                          onPressed: () {
+                            Navigator.pop(context);
+                            // Navigate to terms of usage page
+                            Navigator.pushNamed(context, '/terms_of_usage');
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
