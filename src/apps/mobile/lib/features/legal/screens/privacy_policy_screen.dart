@@ -14,7 +14,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: const InAppWebView(
+      body: InAppWebView(
         initialUrlRequest: URLRequest(
           url: Uri.parse('https://admin.furnigo.com.au/privacy_policy'),
         ),
