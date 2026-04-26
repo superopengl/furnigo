@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../shared/services/api_client.dart';
@@ -207,20 +208,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Legal', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 8),
                     ListTile(
                       title: const Text('Privacy Policy'),
                       trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                       onTap: () {
-                        Navigator.pushNamed(context, '/privacy_policy');
+                        context.push('/privacy_policy');
                       },
                     ),
                     ListTile(
-                      title: const Text('Terms of Usage'),
+                      title: const Text('Terms of Use'),
                       trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                       onTap: () {
-                        Navigator.pushNamed(context, '/terms_of_usage');
+                        context.push('/terms_of_use');
                       },
                     ),
                   ],

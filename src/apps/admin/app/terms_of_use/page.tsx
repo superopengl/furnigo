@@ -60,7 +60,7 @@ export default function TermsOfUsagePage() {
         </Button>
 
         <Title level={1} style={{ color: "#3d3a35", marginBottom: 24 }}>
-          Terms of Usage
+          Terms of Use
         </Title>
 
         <Text style={{ color: "#3d3a35", fontSize: 16, display: "block", marginBottom: 24 }}>
@@ -69,7 +69,7 @@ export default function TermsOfUsagePage() {
 
         <div style={{ marginBottom: 32 }}>
           <Paragraph style={{ color: "#3d3a35", fontSize: 16, lineHeight: 1.7 }}>
-            These Terms of Usage ("Terms") govern your access to and use of the Furnigo website, mobile application, and related services ("Services"). By accessing or using our Services, you agree to be bound by these Terms.
+            These Terms of Use ("Terms") govern your access to and use of the Furnigo website, mobile application, and related services ("Services"). By accessing or using our Services, you agree to be bound by these Terms.
           </Paragraph>
           
           <Title level={2} style={{ color: "#3d3a35", marginTop: 32, marginBottom: 16 }}>
@@ -145,7 +145,7 @@ export default function TermsOfUsagePage() {
           </Title>
           
           <Paragraph style={{ color: "#3d3a35", fontSize: 16, lineHeight: 1.7 }}>
-            If you have any questions about these Terms of Usage, please contact us at:
+            If you have any questions about these Terms of Use, please contact us at:
           </Paragraph>
           
           <Paragraph style={{ color: "#3d3a35", fontSize: 16, lineHeight: 1.7 }}>

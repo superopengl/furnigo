@@ -15,7 +15,23 @@ class ChatListScreen extends ConsumerWidget {
       appBar: AppBar(title: const Text('Chats')),
       body: chatsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, _) => Center(child: Text('Error: $err')),
+        error: (err, _) => Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.cloud_off, size: 48, color: AppColors.textSecondary),
+                  const SizedBox(height: 12),
+                  Text('Unable to load chats',
+                      style: TextStyle(fontSize: 16, color: AppColors.textSecondary)),
+                  const SizedBox(height: 16),
+                  OutlinedButton.icon(
+                    onPressed: () => ref.invalidate(chatListProvider),
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Retry'),
+                  ),
+                ],
+              ),
+            ),
         data: (chats) => chats.isEmpty
             ? const Center(child: Text('No chats yet. Start a new one!'))
             : RefreshIndicator(

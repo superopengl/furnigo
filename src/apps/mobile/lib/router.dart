@@ -5,7 +5,7 @@ import 'features/auth/screens/login_screen.dart';
 import 'features/chat/screens/chat_screen.dart';
 import 'features/profile/screens/profile_screen.dart';
 import 'features/legal/screens/privacy_policy_screen.dart';
-import 'features/legal/screens/terms_of_usage_screen.dart';
+import 'features/legal/screens/terms_of_use_screen.dart';
 
 GoRouter createRouter(Ref ref) {
   return GoRouter(
@@ -46,8 +46,8 @@ GoRouter createRouter(Ref ref) {
         builder: (context, state) => const PrivacyPolicyScreen(),
       ),
       GoRoute(
-        path: '/terms_of_usage',
-        builder: (context, state) => const TermsOfUsageScreen(),
+        path: '/terms_of_use',
+        builder: (context, state) => const TermsOfUseScreen(),
       ),
     ],
   );
