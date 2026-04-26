@@ -44,6 +44,7 @@
   - Live chat messaging via right-side drawer (real-time via Socket.io)
   - File/image/video upload in chat
   - Mobile responsive layout
+  - Privacy policy and terms of usage pages for legal compliance
 - **Auth:** Same OTP flow as mobile app, restricted to agent/admin roles. JWT token stored in localStorage.
 - **Style:** ChatGPT-inspired floating glass design with Furnigo color palette
 

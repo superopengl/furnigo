@@ -64,6 +64,7 @@
 | Icons | `@ant-design/icons` |
 | Auth | OTP (same flow as mobile, restricted to agent/admin roles). JWT in localStorage. |
 | Real-time | Socket.io client (live chat messaging) |
+| Legal Pages | Privacy Policy and Terms of Usage pages for legal compliance |
 
 Admin portal is web-only, mobile responsive. Accessible at `https://admin.furnigo.com.au`.
 

@@ -346,9 +346,19 @@ export default function HomePage() {
           borderTop: `1px solid ${colors.border}`,
         }}
       >
-        <Text style={{ color: colors.textSecondary, fontSize: 13 }}>
-          Furnigo Pty Ltd
-        </Text>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <Text style={{ color: colors.textSecondary, fontSize: 13 }}>
+            Furnigo Pty Ltd
+          </Text>
+          <div style={{ display: "flex", gap: 20, marginTop: 8 }}>
+            <a href="/privacy_policy" style={{ color: colors.textSecondary, fontSize: 12, textDecoration: "none" }}>
+              Privacy Policy
+            </a>
+            <a href="/terms_of_usage" style={{ color: colors.textSecondary, fontSize: 12, textDecoration: "none" }}>
+              Terms of Usage
+            </a>
+          </div>
+        </div>
       </footer>
     </div>
   );

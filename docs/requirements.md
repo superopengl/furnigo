@@ -74,3 +74,22 @@ The core UX is a WeChat-style group chat chat per order/inquiry:
 - As an admin, I want to view and search all chats across all clients
 - As an admin, I want to intervene in a chat by sending a message directly
 - As an admin, I want to deactivate or force-logout any user
+
+## Legal Requirements
+
+### Privacy Policy
+Furnigo collects and processes personal information for providing services, including but not limited to:
+- Client contact details (name, email)
+- Communication records from our chat support system  
+- Furniture order information and preferences
+- Payment information for transactions with manufacturers in China
+
+We implement appropriate security measures to protect your personal information and comply with Australian privacy laws.
+
+### Terms of Usage
+These terms govern the use of Furnigo's website, mobile application and services. They cover:
+- Acceptable use of our Services
+- Furniture ordering processes and transactions with Foshan manufacturers  
+- Intellectual property rights
+- User account responsibilities
+- Limitation of liability
