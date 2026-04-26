@@ -156,7 +156,7 @@ function ChatsContent() {
             <div key={p.userId} style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <UserAvatar
                 user={{ id: p.userId, displayName: p.displayName, email: p.email, role: p.role as any, avatarUrl: p.avatarUrl }}
-                size={24}
+                size={36}
               />
               <div style={{ minWidth: 0 }}>
                 <Text style={{ fontSize: 13, color: dk.text, display: "block", lineHeight: 1.3 }} ellipsis>
