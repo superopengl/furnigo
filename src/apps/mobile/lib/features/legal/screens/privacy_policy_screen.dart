@@ -16,7 +16,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
       ),
       body: InAppWebView(
         initialUrlRequest: URLRequest(
-          url: Uri.parse('https://admin.furnigo.com.au/privacy_policy'),
+          url: WebUri('https://admin.furnigo.com.au/privacy_policy'),
         ),
       ),
     );

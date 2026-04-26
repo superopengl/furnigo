@@ -16,7 +16,7 @@ class TermsOfUsageScreen extends StatelessWidget {
       ),
       body: InAppWebView(
         initialUrlRequest: URLRequest(
-          url: Uri.parse('https://admin.furnigo.com.au/terms_of_usage'),
+          url: WebUri('https://admin.furnigo.com.au/terms_of_usage'),
         ),
       ),
     );
