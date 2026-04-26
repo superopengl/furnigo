@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Button, Typography } from "antd";
 import { ArrowRightOutlined, CustomerServiceOutlined, ShopOutlined, GlobalOutlined, AppleOutlined, AndroidOutlined } from "@ant-design/icons";
 import { colors } from "@/lib/theme";
@@ -351,12 +352,12 @@ export default function HomePage() {
             Furnigo Pty Ltd
           </Text>
           <div style={{ display: "flex", gap: 20, marginTop: 8 }}>
-            <a href="/privacy_policy" style={{ color: colors.textSecondary, fontSize: 12, textDecoration: "none" }}>
+            <Link href="/privacy_policy" style={{ color: colors.textSecondary, fontSize: 12, textDecoration: "none" }}>
               Privacy Policy
-            </a>
-            <a href="/terms_of_use" style={{ color: colors.textSecondary, fontSize: 12, textDecoration: "none" }}>
+            </Link>
+            <Link href="/terms_of_use" style={{ color: colors.textSecondary, fontSize: 12, textDecoration: "none" }}>
               Terms of Use
-            </a>
+            </Link>
           </div>
         </div>
       </footer>

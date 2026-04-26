@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Typography, Button } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
