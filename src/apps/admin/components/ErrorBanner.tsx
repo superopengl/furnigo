@@ -12,7 +12,7 @@ export function ErrorBanner() {
     <div style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 9999, padding: "8px 16px" }}>
       <Alert
         type="error"
-        message={error}
+        title={error}
         closable
         onClose={clearError}
         banner

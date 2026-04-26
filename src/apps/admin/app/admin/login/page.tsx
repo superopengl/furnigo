@@ -17,6 +17,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [otpId, setOtpId] = useState("");
   const [code, setCode] = useState("");
+  const [otpError, setOtpError] = useState("");
   const [loading, setLoading] = useState(false);
   const { user, isLoading, login } = useAuth();
   const { message } = App.useApp();
@@ -64,14 +65,16 @@ export default function LoginPage() {
       });
 
       if (!res.success) {
-        message.error(res.error.message);
+        setOtpError(res.error.message);
+        setCode("");
         return;
       }
 
       const { user: u, token } = res.data;
 
       if (u.role === "client") {
-        message.error("Access restricted to admin and agent users");
+        setOtpError("Access restricted to admin and agent users");
+        setCode("");
         return;
       }
 
@@ -81,7 +84,8 @@ export default function LoginPage() {
       );
       router.replace("/admin");
     } catch {
-      message.error("Verification failed");
+      setOtpError("Verification failed");
+      setCode("");
     } finally {
       setLoading(false);
     }
@@ -442,10 +446,14 @@ export default function LoginPage() {
               <Input.OTP
                 length={6}
                 value={code}
-                onChange={(val) => { setCode(val); if (val.length === 6) handleVerifyOtp(val); }}
+                onChange={(val) => { setOtpError(""); setCode(val); if (val.length === 6) handleVerifyOtp(val); }}
                 size="large"
+                status={otpError ? "error" : undefined}
               />
             </div>
+            {otpError && (
+              <Text style={{ color: "#ff4d4f", fontSize: 13 }}>{otpError}</Text>
+            )}
             <Button
               type="link"
               size="small"
