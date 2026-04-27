@@ -56,6 +56,55 @@ export async function adminChatRoutes(app: FastifyInstance) {
     return { success: true, data: enriched };
   });
 
+  // Join chat as agent if not already a participant
+  app.get("/:id/join", async (request, reply) => {
+    const { id: userId } = request.user as { id: string };
+    const { id: chatId } = request.params as { id: string };
+
+    const [found] = await db
+      .select()
+      .from(chat)
+      .where(eq(chat.id, chatId))
+      .limit(1);
+
+    if (!found) {
+      return reply.code(404).send({
+        success: false,
+        error: { code: "NOT_FOUND", message: "Chat not found" },
+      });
+    }
+
+    const [existing] = await db
+      .select()
+      .from(chatParticipant)
+      .where(and(eq(chatParticipant.chatId, chatId), eq(chatParticipant.userId, userId)))
+      .limit(1);
+
+    if (!existing) {
+      await db.insert(chatParticipant).values({
+        chatId,
+        userId,
+        role: "agent",
+      });
+
+      const io = getIO();
+      if (io) {
+        const [joined] = await db
+          .select({ displayName: user.displayName, email: user.email })
+          .from(user)
+          .where(eq(user.id, userId))
+          .limit(1);
+
+        io.to(chatId).emit("participant:joined", {
+          chatId,
+          user: { userId, role: "agent", displayName: joined?.displayName, email: joined?.email },
+        });
+      }
+    }
+
+    return { success: true, data: { chatId, alreadyJoined: !!existing } };
+  });
+
   // Get chat detail — auto-join admin as agent if not a participant
   app.get("/:id", async (request) => {
     const { id: userId } = request.user as { id: string };
