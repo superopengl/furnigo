@@ -4,6 +4,8 @@ import 'package:timeago/timeago.dart' as timeago;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:qr_flutter/qr_flutter.dart';
+import '../../../config/env.dart';
 import '../../../theme/colors.dart';
 import '../../../shared/models/message_model.dart';
 import '../../../shared/providers/auth_store.dart';
@@ -225,6 +227,60 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     );
   }
 
+  void _showShareQrCode(String chatId) {
+    final joinUrl = '${Env.apiBaseUrl}/chats/$chatId/join';
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: AppColors.background,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Scan to join chat',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 20),
+              QrImageView(
+                data: joinUrl,
+                version: QrVersions.auto,
+                size: 220,
+                eyeStyle: const QrEyeStyle(
+                  eyeShape: QrEyeShape.square,
+                  color: AppColors.primary,
+                ),
+                dataModuleStyle: const QrDataModuleStyle(
+                  dataModuleShape: QrDataModuleShape.circle,
+                  color: AppColors.primary,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                joinUrl,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 11,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Close'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   void dispose() {
     _controller.dispose();
@@ -291,7 +347,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           icon: const Icon(Icons.format_list_bulleted),
           onPressed: () => _scaffoldKey.currentState?.openDrawer(),
         ),
-        actions: const [SizedBox(width: 48)],
+        actions: [
+          if (effectiveChatId != null)
+            IconButton(
+              icon: const Icon(Icons.qr_code),
+              onPressed: () => _showShareQrCode(effectiveChatId),
+            )
+          else
+            const SizedBox(width: 48),
+        ],
         flexibleSpace: ClipRect(
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
