@@ -247,18 +247,51 @@ function ChatsContent() {
     {
       title: "Last Message",
       key: "lastMessage",
-      ellipsis: true,
       sorter: (a, b) => {
         const aTime = a.lastMessage?.createdAt || a.createdAt;
         const bTime = b.lastMessage?.createdAt || b.createdAt;
         return new Date(aTime).getTime() - new Date(bTime).getTime();
       },
       defaultSortOrder: "descend",
-      render: (_, record) => (
-        <Text style={{ color: dk.textSecondary, fontSize: 13 }}>
-          {getPreview(record.lastMessage)}
-        </Text>
-      ),
+      render: (_, record) => {
+        const msg = record.lastMessage;
+        if (!msg) return <Text style={{ color: dk.textSecondary, fontSize: 13, fontWeight: 400 }}>—</Text>;
+        const sender = record.participants.find((p) => p.userId === msg.senderId);
+        const isOwn = msg.senderId === user?.id;
+        const bubbleBg = isOwn ? colors.primary : "rgba(255,255,255,0.8)";
+        const bubbleColor = isOwn ? "#fff" : colors.text;
+        const avatar = sender && (
+          <UserAvatar
+            user={{ id: sender.userId, displayName: sender.displayName, email: sender.email, role: sender.role as any, avatarUrl: sender.avatarUrl }}
+            size={28}
+          />
+        );
+        return (
+          <div style={{ display: "flex", alignItems: "flex-end", gap: 8, justifyContent: isOwn ? "flex-end" : "flex-start", fontWeight: 400 }}>
+            {!isOwn && avatar}
+            <div
+              style={{
+                padding: "6px 10px",
+                borderRadius: 16,
+                ...(isOwn ? { borderBottomRightRadius: 4 } : { borderBottomLeftRadius: 4 }),
+                background: bubbleBg,
+                color: bubbleColor,
+                fontSize: 13,
+                lineHeight: 1.4,
+                maxWidth: 260,
+              }}
+            >
+              <div style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {getPreview(msg)}
+              </div>
+              <div style={{ fontSize: 11, color: isOwn ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.35)", textAlign: "right", marginTop: 2 }}>
+                {formatDateTime(msg.createdAt)}
+              </div>
+            </div>
+            {isOwn && avatar}
+          </div>
+        );
+      },
     },
   ];
 
