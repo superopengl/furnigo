@@ -149,42 +149,59 @@ function ChatsContent() {
       ),
     },
     {
-      title: "Participants",
-      key: "participants",
-      render: (_, record) => (
-        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-          {record.participants.map((p) => (
-            <div key={p.userId} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <UserAvatar
-                user={{ id: p.userId, displayName: p.displayName, email: p.email, role: p.role as any, avatarUrl: p.avatarUrl }}
-                size={36}
-              />
-              <div style={{ minWidth: 0 }}>
-                <Text style={{ fontSize: 13, color: dk.text, display: "block", lineHeight: 1.3 }} ellipsis>
-                  {p.displayName || p.email.split("@")[0]}
-                </Text>
-                <Text style={{ fontSize: 11, color: dk.textSecondary, display: "block", lineHeight: 1.3 }} ellipsis>
-                  {p.email}
-                </Text>
+      title: "Clients",
+      key: "clients",
+      render: (_, record) => {
+        const clients = record.participants.filter((p) => p.role === "client");
+        return (
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            {clients.map((p) => (
+              <div key={p.userId} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <UserAvatar
+                  user={{ id: p.userId, displayName: p.displayName, email: p.email, role: p.role as any, avatarUrl: p.avatarUrl }}
+                  size={36}
+                />
+                <div style={{ minWidth: 0 }}>
+                  <Text style={{ fontSize: 13, color: dk.text, display: "block", lineHeight: 1.3 }} ellipsis>
+                    {p.displayName || p.email.split("@")[0]}
+                  </Text>
+                  <Text style={{ fontSize: 11, color: dk.textSecondary, display: "block", lineHeight: 1.3 }} ellipsis>
+                    {p.email}
+                  </Text>
+                </div>
               </div>
-              <Tag
-                style={{
-                  margin: 0,
-                  borderRadius: 6,
-                  fontSize: 10,
-                  lineHeight: "16px",
-                  border: "none",
-                  background: `${getRoleColor(p.role)}18`,
-                  color: getRoleColor(p.role),
-                  flexShrink: 0,
-                }}
-              >
-                {p.role}
-              </Tag>
-            </div>
-          ))}
-        </div>
-      ),
+            ))}
+          </div>
+        );
+      },
+      responsive: ["md"],
+    },
+    {
+      title: "Agents",
+      key: "agents",
+      render: (_, record) => {
+        const agents = record.participants.filter((p) => p.role !== "client");
+        return (
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            {agents.map((p) => (
+              <div key={p.userId} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <UserAvatar
+                  user={{ id: p.userId, displayName: p.displayName, email: p.email, role: p.role as any, avatarUrl: p.avatarUrl }}
+                  size={36}
+                />
+                <div style={{ minWidth: 0 }}>
+                  <Text style={{ fontSize: 13, color: dk.text, display: "block", lineHeight: 1.3 }} ellipsis>
+                    {p.displayName || p.email.split("@")[0]}
+                  </Text>
+                  <Text style={{ fontSize: 11, color: dk.textSecondary, display: "block", lineHeight: 1.3 }} ellipsis>
+                    {p.email}
+                  </Text>
+                </div>
+              </div>
+            ))}
+          </div>
+        );
+      },
       responsive: ["md"],
     },
     {
