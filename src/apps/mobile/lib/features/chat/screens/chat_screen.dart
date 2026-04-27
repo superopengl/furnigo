@@ -29,6 +29,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   String? _currentUserId;
   String? _activeChatId;
+  bool _autoCreating = false;
 
   @override
   void initState() {
@@ -237,6 +238,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final firstChatId =
         (chats != null && chats.isNotEmpty) ? chats.first.id : null;
     final effectiveChatId = _activeChatId ?? firstChatId;
+
+    // Auto-create a chat when the list loads empty and no chat is active
+    if (chats != null && chats.isEmpty && _activeChatId == null && !_autoCreating) {
+      _autoCreating = true;
+      Future.microtask(() async {
+        final chat = await ref.read(chatListProvider.notifier).createChat(title: 'New chat');
+        if (mounted) setState(() => _activeChatId = chat.id);
+      });
+    }
 
     final messages = effectiveChatId != null
         ? ref.watch(chatMessagesProvider(effectiveChatId))
