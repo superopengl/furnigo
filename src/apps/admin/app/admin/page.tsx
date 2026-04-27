@@ -400,7 +400,10 @@ function ChatsContent() {
                   return next;
                 });
               },
-              style: { cursor: "pointer" },
+              style: {
+                cursor: "pointer",
+                fontWeight: newMessageChatIds.has(record.id) ? 700 : undefined,
+              },
             })}
             locale={{
               emptyText: (
