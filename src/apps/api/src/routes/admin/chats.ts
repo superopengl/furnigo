@@ -19,7 +19,11 @@ export async function adminChatRoutes(app: FastifyInstance) {
   // List all chats with participants and last message
   app.get("/", async () => {
     const chats = await db
-      .select()
+      .select({
+        id: chat.id,
+        title: chat.title,
+        createdAt: chat.createdAt,
+      })
       .from(chat)
       .orderBy(desc(chat.updatedAt));
 

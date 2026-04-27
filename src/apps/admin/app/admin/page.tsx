@@ -20,6 +20,7 @@ import { ChatDrawer } from "@/components/ChatDrawer";
 import { UserAvatar } from "@/components/UserAvatar";
 import { colors } from "@/lib/theme";
 import { Logo } from "@/components/Logo";
+import { format as timeago } from "timeago.js";
 import type { Message } from "@furnigo/types";
 
 const { Title, Text } = Typography;
@@ -45,7 +46,6 @@ interface ChatListItem {
   id: string;
   title: string | null;
   createdAt: string;
-  updatedAt: string;
   participants: Participant[];
   lastMessage: Message | null;
 }
@@ -66,9 +66,20 @@ const getPreview = (msg: Message | null) => {
 
 const formatDateTime = (iso: string) => {
   const d = new Date(iso);
-  return d.toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" }) +
-    " " +
-    d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const yesterday = new Date(today.getTime() - 86400000);
+  const dateDay = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const time = d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  if (dateDay.getTime() === today.getTime()) return `Today ${time}`;
+  if (dateDay.getTime() === yesterday.getTime()) return `Yesterday ${time}`;
+  return d.toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" }) + " " + time;
+};
+
+const getAgeColor = (iso: string) => {
+  const days = (Date.now() - new Date(iso).getTime()) / 86400000;
+  const hue = Math.max(0, 120 - (days / 30) * 120);
+  return `hsl(${hue}, 50%, 30%)`;
 };
 
 const darkTheme = {
@@ -151,10 +162,20 @@ function ChatsContent() {
       dataIndex: "title",
       key: "title",
       sorter: (a, b) => (a.title || "").localeCompare(b.title || ""),
-      render: (title: string | null) => (
-        <Text strong style={{ color: dk.text }}>
-          {title || "Untitled Chat"}
-        </Text>
+      render: (title: string | null, record) => (
+        <div>
+          <Text strong style={{ color: dk.text, display: "block", lineHeight: 1.3 }}>
+            {title || "Untitled Chat"}
+          </Text>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 2 }}>
+            <Text style={{ fontSize: 11, color: dk.textSecondary, lineHeight: 1.3 }}>
+              {formatDateTime(record.createdAt)}
+            </Text>
+            <Tag style={{ fontSize: 11, lineHeight: "18px", margin: 0, border: "none", color: "#fff", background: getAgeColor(record.createdAt) }}>
+              {timeago(record.createdAt)}
+            </Tag>
+          </div>
+        </div>
       ),
     },
     {
@@ -218,8 +239,8 @@ function ChatsContent() {
       key: "lastMessage",
       ellipsis: true,
       sorter: (a, b) => {
-        const aTime = a.lastMessage?.createdAt || a.updatedAt;
-        const bTime = b.lastMessage?.createdAt || b.updatedAt;
+        const aTime = a.lastMessage?.createdAt || a.createdAt;
+        const bTime = b.lastMessage?.createdAt || b.createdAt;
         return new Date(aTime).getTime() - new Date(bTime).getTime();
       },
       defaultSortOrder: "descend",
@@ -228,29 +249,6 @@ function ChatsContent() {
           {getPreview(record.lastMessage)}
         </Text>
       ),
-    },
-    {
-      title: "Created",
-      dataIndex: "createdAt",
-      key: "createdAt",
-      width: 170,
-      sorter: (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
-      render: (val: string) => (
-        <Text style={{ color: dk.textSecondary, fontSize: 13 }}>{formatDateTime(val)}</Text>
-      ),
-      responsive: ["lg"],
-    },
-    {
-      title: "Updated",
-      dataIndex: "updatedAt",
-      key: "updatedAt",
-      width: 170,
-      sorter: (a, b) => new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime(),
-      defaultSortOrder: "descend",
-      render: (val: string) => (
-        <Text style={{ color: dk.textSecondary, fontSize: 13 }}>{formatDateTime(val)}</Text>
-      ),
-      responsive: ["lg"],
     },
   ];
 
