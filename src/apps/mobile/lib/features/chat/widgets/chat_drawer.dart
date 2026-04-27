@@ -18,6 +18,25 @@ class ChatDrawer extends ConsumerWidget {
     required this.onSettings,
   });
 
+  Widget _buildEmptyState(BuildContext context) {
+    return Center(
+      child: GestureDetector(
+        onTap: () {
+          Navigator.pop(context);
+          onNewChat();
+        },
+        child: Text(
+          '+ Start a new chat',
+          style: TextStyle(
+            color: AppColors.primary,
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final chatsAsync = ref.watch(chatListProvider);
@@ -64,17 +83,9 @@ class ChatDrawer extends ConsumerWidget {
                       loading: () => const Center(
                           child:
                               CircularProgressIndicator(strokeWidth: 2)),
-                      error: (err, _) =>
-                          Center(child: Text('Error: $err')),
+                      error: (err, _) => _buildEmptyState(context),
                       data: (chats) => chats.isEmpty
-                          ? Center(
-                              child: Text(
-                                'No chats yet',
-                                style: TextStyle(
-                                    color: AppColors.textSecondary,
-                                    fontSize: 14),
-                              ),
-                            )
+                          ? _buildEmptyState(context)
                           : ListView.builder(
                               padding:
                                   const EdgeInsets.symmetric(horizontal: 8),
