@@ -118,6 +118,7 @@ function ChatsContent() {
   const [modal, contextHolder] = Modal.useModal();
   const { user, logout } = useAuth();
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
+  const [newMessageChatIds, setNewMessageChatIds] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState("");
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [editName, setEditName] = useState("");
@@ -138,10 +139,16 @@ function ChatsContent() {
   // Real-time: refetch chat list when any chat gets a new message
   useEffect(() => {
     const socket = getSocket();
-    const handler = () => { refetch(); };
+    const handler = (data: { chatId: string }) => {
+      refetch();
+      // Mark chat as having new messages (unless it's currently open)
+      if (data.chatId !== activeChatId) {
+        setNewMessageChatIds((prev) => new Set([...prev, data.chatId]));
+      }
+    };
     socket.on("chat:updated", handler);
     return () => { socket.off("chat:updated", handler); };
-  }, [refetch]);
+  }, [refetch, activeChatId]);
 
   const filtered = chats?.filter((c) => {
     if (!search.trim()) return true;
@@ -162,9 +169,11 @@ function ChatsContent() {
       dataIndex: "title",
       key: "title",
       sorter: (a, b) => (a.title || "").localeCompare(b.title || ""),
-      render: (title: string | null, record) => (
+      render: (title: string | null, record) => {
+        const hasNew = newMessageChatIds.has(record.id);
+        return (
         <div>
-          <Text strong style={{ color: dk.text, display: "block", lineHeight: 1.3 }}>
+          <Text strong={hasNew} style={{ color: hasNew ? "#fff" : dk.textSecondary, display: "block", lineHeight: 1.3 }}>
             {title || "Untitled Chat"}
           </Text>
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 2 }}>
@@ -176,7 +185,8 @@ function ChatsContent() {
             </Tag>
           </div>
         </div>
-      ),
+        );
+      },
     },
     {
       title: "Clients",
@@ -381,7 +391,15 @@ function ChatsContent() {
             loading={isLoading}
             pagination={{ pageSize: 20, showSizeChanger: true, showTotal: (total) => `${total} chats` }}
             onRow={(record) => ({
-              onClick: () => setActiveChatId(record.id),
+              onClick: () => {
+                setActiveChatId(record.id);
+                setNewMessageChatIds((prev) => {
+                  if (!prev.has(record.id)) return prev;
+                  const next = new Set(prev);
+                  next.delete(record.id);
+                  return next;
+                });
+              },
               style: { cursor: "pointer" },
             })}
             locale={{
