@@ -178,10 +178,10 @@ export function ChatDrawer({ chatId, onClose }: ChatDrawerProps) {
     <Drawer
       open={!!chatId}
       onClose={onClose}
-      width={480}
       rootClassName="chat-drawer"
       closable={false}
       styles={{
+        wrapper: { width: 480 },
         body: { padding: 0, display: "flex", flexDirection: "column", height: "100%" },
         header: { display: "none" },
       }}

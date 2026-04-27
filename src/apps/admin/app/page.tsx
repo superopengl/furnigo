@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Button, Typography } from "antd";
 import { ArrowRightOutlined, CustomerServiceOutlined, ShopOutlined, GlobalOutlined, AppleOutlined, AndroidOutlined } from "@ant-design/icons";
 import { colors } from "@/lib/theme";
+import { Logo } from "@/components/Logo";
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -147,25 +148,7 @@ export default function HomePage() {
           margin: "0 auto",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <div
-            style={{
-              width: 40,
-              height: 40,
-              borderRadius: 12,
-              background: `linear-gradient(135deg, ${colors.secondary}, ${colors.accent})`,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              boxShadow: `0 4px 16px ${colors.secondary}25`,
-            }}
-          >
-            <span style={{ color: "#fff", fontSize: 18, fontWeight: 700 }}>F</span>
-          </div>
-          <Text strong style={{ color: colors.text, fontSize: 18 }}>
-            Furnigo
-          </Text>
-        </div>
+        <Logo size={40} showText textColor={colors.text} />
 
         <Button
           type="text"

@@ -18,6 +18,7 @@ import { AuthGuard } from "@/components/AuthGuard";
 import { ChatDrawer } from "@/components/ChatDrawer";
 import { UserAvatar } from "@/components/UserAvatar";
 import { colors } from "@/lib/theme";
+import { Logo } from "@/components/Logo";
 import type { Message } from "@furnigo/types";
 
 const { Title, Text } = Typography;
@@ -277,20 +278,7 @@ function ChatsContent() {
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: 10,
-                background: `linear-gradient(135deg, ${colors.secondary}, ${colors.accent})`,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                boxShadow: `0 4px 12px ${colors.secondary}30`,
-              }}
-            >
-              <span style={{ color: "#fff", fontSize: 16, fontWeight: 700 }}>F</span>
-            </div>
+            <Logo size={36} />
             <Title level={4} style={{ margin: 0, color: dk.text }}>
               Chats
             </Title>

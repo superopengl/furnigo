@@ -7,6 +7,7 @@ import { MailOutlined, LoadingOutlined, ArrowLeftOutlined } from "@ant-design/ic
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { colors } from "@/lib/theme";
+import { Logo } from "@/components/Logo";
 
 const { Title, Text } = Typography;
 
@@ -377,22 +378,8 @@ export default function LoginPage() {
         )}
 
         {/* Logo */}
-        <div style={{ marginBottom: 8 }}>
-          <div
-            style={{
-              width: 56,
-              height: 56,
-              borderRadius: 16,
-              background: `linear-gradient(135deg, ${colors.secondary}, ${colors.accent})`,
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              marginBottom: 16,
-              boxShadow: `0 8px 24px ${colors.secondary}40`,
-            }}
-          >
-            <span style={{ color: "#fff", fontSize: 24, fontWeight: 700 }}>F</span>
-          </div>
+        <div style={{ marginBottom: 8, display: "flex", justifyContent: "center" }}>
+          <Logo size={56} />
         </div>
 
         <Title level={2} style={{ margin: 0, color: "rgba(255, 255, 255, 0.92)", marginBlockEnd: "2rem" }}>
