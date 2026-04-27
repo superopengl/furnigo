@@ -29,6 +29,11 @@ export function setupSocket(app: FastifyInstance) {
   io.on("connection", (socket) => {
     app.log.info({ userId: socket.data.userId }, "WebSocket connected");
 
+    // Auto-join admin/agent users to the "admin" room for broadcast notifications
+    if (socket.data.role === "admin" || socket.data.role === "agent") {
+      socket.join("admin");
+    }
+
     socket.on("join", (chatId: string) => {
       socket.join(chatId);
     });

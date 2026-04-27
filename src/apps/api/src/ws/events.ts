@@ -5,6 +5,7 @@ export const WS_EVENTS = {
   MESSAGE_NEW: "message:new",
   PARTICIPANT_JOINED: "participant:joined",
   TYPING: "typing",
+  CHAT_UPDATED: "chat:updated",
 
   // Client → Server
   JOIN: "join",

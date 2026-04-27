@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Typography, Input, Button, Tag, Table, ConfigProvider, Dropdown, Modal, Upload, theme as antTheme } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import {
@@ -14,6 +14,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
+import { getSocket } from "@/lib/socket";
 import { AuthGuard } from "@/components/AuthGuard";
 import { ChatDrawer } from "@/components/ChatDrawer";
 import { UserAvatar } from "@/components/UserAvatar";
@@ -122,6 +123,14 @@ function ChatsContent() {
     },
     refetchInterval: 30_000,
   });
+
+  // Real-time: refetch chat list when any chat gets a new message
+  useEffect(() => {
+    const socket = getSocket();
+    const handler = () => { refetch(); };
+    socket.on("chat:updated", handler);
+    return () => { socket.off("chat:updated", handler); };
+  }, [refetch]);
 
   const filtered = chats?.filter((c) => {
     if (!search.trim()) return true;

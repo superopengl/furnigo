@@ -109,6 +109,8 @@ export async function messageRoutes(app: FastifyInstance) {
     const io = getIO();
     if (io) {
       io.to(chatId).emit("message:new", { chatId, message: newMessage });
+      // Notify admin room so the chat list refreshes
+      io.to("admin").emit("chat:updated", { chatId });
     }
 
     return { success: true, data: newMessage };
