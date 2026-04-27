@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../theme/colors.dart';
 import '../../../shared/models/message_model.dart';
@@ -319,6 +320,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           setState(() => _activeChatId = chat.id);
         },
         onSettings: _showProfile,
+        onScanToJoin: () => context.push('/scan'),
       ),
       body: Column(
         children: [

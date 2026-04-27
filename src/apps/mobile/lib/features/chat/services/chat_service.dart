@@ -57,6 +57,11 @@ class ChatService {
     return res.data['data']['url'] as String;
   }
 
+  Future<Map<String, dynamic>> joinChat(String chatId) async {
+    final res = await _dio.post('/chats/$chatId/join');
+    return res.data['data'] as Map<String, dynamic>;
+  }
+
   Future<MessageModel> sendImage(String chatId, {required String url}) async {
     final res = await _dio.post('/chats/$chatId/messages', data: {
       'contentType': 'image',

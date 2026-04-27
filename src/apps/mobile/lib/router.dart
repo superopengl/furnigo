@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'features/auth/providers/auth_provider.dart';
 import 'features/auth/screens/login_screen.dart';
 import 'features/chat/screens/chat_screen.dart';
+import 'features/chat/screens/scan_to_join_screen.dart';
 import 'features/profile/screens/profile_screen.dart';
 import 'features/legal/screens/privacy_policy_screen.dart';
 import 'features/legal/screens/terms_of_use_screen.dart';
@@ -36,6 +37,10 @@ GoRouter createRouter(Ref ref) {
         builder: (context, state) => ChatScreen(
           chatId: state.pathParameters['id']!,
         ),
+      ),
+      GoRoute(
+        path: '/scan',
+        builder: (context, state) => const ScanToJoinScreen(),
       ),
       GoRoute(
         path: '/profile',

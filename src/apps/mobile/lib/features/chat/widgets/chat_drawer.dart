@@ -9,6 +9,7 @@ class ChatDrawer extends ConsumerWidget {
   final ValueChanged<String> onChatSelected;
   final VoidCallback onNewChat;
   final VoidCallback onSettings;
+  final VoidCallback onScanToJoin;
 
   const ChatDrawer({
     super.key,
@@ -16,6 +17,7 @@ class ChatDrawer extends ConsumerWidget {
     required this.onChatSelected,
     required this.onNewChat,
     required this.onSettings,
+    required this.onScanToJoin,
   });
 
   Widget _buildEmptyState(BuildContext context) {
@@ -127,6 +129,29 @@ class ChatDrawer extends ConsumerWidget {
                                 );
                               },
                             ),
+                    ),
+                  ),
+                  // Footer
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: TextButton.icon(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          onScanToJoin();
+                        },
+                        icon: const Icon(Icons.qr_code_scanner, size: 18),
+                        label: const Text('Scan to join chat'),
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppColors.textSecondary,
+                          alignment: Alignment.centerLeft,
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ],
