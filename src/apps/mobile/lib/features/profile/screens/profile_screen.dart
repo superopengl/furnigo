@@ -199,7 +199,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
               // Legal links
               Container(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 20),
                 decoration: BoxDecoration(
                   color: AppColors.white,
                   borderRadius: BorderRadius.circular(16),
@@ -209,6 +209,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     ListTile(
+                      contentPadding: EdgeInsets.zero,
                       title: const Text('Privacy Policy'),
                       trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                       onTap: () {
@@ -216,6 +217,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       },
                     ),
                     ListTile(
+                      contentPadding: EdgeInsets.zero,
                       title: const Text('Terms of Use'),
                       trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                       onTap: () {
