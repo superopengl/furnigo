@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useCallback, useState, useMemo } from "react";
-import { Drawer, Spin, Typography, Button, Tag, Input } from "antd";
-import { CloseOutlined, ReloadOutlined } from "@ant-design/icons";
+import { Drawer, Spin, Typography, Button, Tag, Input, Modal, Select, Avatar, App } from "antd";
+import { CloseOutlined, ReloadOutlined, PlusOutlined } from "@ant-design/icons";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { getSocket } from "@/lib/socket";
@@ -52,6 +52,7 @@ interface ChatDrawerProps {
 
 export function ChatDrawer({ chatId, onClose }: ChatDrawerProps) {
   const { user } = useAuth();
+  const { message: antMessage } = App.useApp();
   const queryClient = useQueryClient();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -59,6 +60,11 @@ export function ChatDrawer({ chatId, onClose }: ChatDrawerProps) {
   const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set());
   const [editingTitle, setEditingTitle] = useState(false);
   const [titleDraft, setTitleDraft] = useState("");
+  const [addUserOpen, setAddUserOpen] = useState(false);
+  const [searchOptions, setSearchOptions] = useState<{ label: React.ReactNode; value: string; email: string }[]>([]);
+  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
+  const [addingUsers, setAddingUsers] = useState(false);
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const { data: chat, isLoading } = useQuery({
     queryKey: ["admin-chat", chatId],
@@ -174,6 +180,62 @@ export function ChatDrawer({ chatId, onClose }: ChatDrawerProps) {
     return map;
   }, [chat?.participants]);
 
+  const existingUserIds = useMemo(
+    () => new Set(chat?.participants.map((p) => p.userId) ?? []),
+    [chat?.participants],
+  );
+
+  const handleUserSearch = (value: string) => {
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+    if (value.trim().length < 2) {
+      setSearchOptions([]);
+      return;
+    }
+    searchTimerRef.current = setTimeout(async () => {
+      const res = await api<{ id: string; email: string; displayName: string | null; avatarUrl: string | null; role: string }[]>(
+        `/admin/users/search?q=${encodeURIComponent(value.trim())}`,
+      );
+      if (!res.success) return;
+      const options = res.data
+        .filter((u) => !existingUserIds.has(u.id) && !selectedUserIds.includes(u.id))
+        .map((u) => ({
+          label: (
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <UserAvatar user={{ id: u.id, displayName: u.displayName, email: u.email, role: u.role as any, avatarUrl: u.avatarUrl }} size={24} tooltip={false} />
+              <span>{u.email}</span>
+              {u.displayName && <span style={{ color: colors.textSecondary }}>({u.displayName})</span>}
+            </div>
+          ),
+          value: u.id,
+          email: u.email,
+        }));
+      setSearchOptions(options);
+    }, 300);
+  };
+
+  const handleAddUsers = async () => {
+    if (!chatId || selectedUserIds.length === 0) return;
+    setAddingUsers(true);
+    try {
+      for (const userId of selectedUserIds) {
+        await api(`/chats/${chatId}/participants`, {
+          method: "POST",
+          body: JSON.stringify({ userId, role: "client" }),
+        });
+      }
+      antMessage.success(`Added ${selectedUserIds.length} user(s) to chat`);
+      queryClient.invalidateQueries({ queryKey: ["admin-chat", chatId] });
+      queryClient.invalidateQueries({ queryKey: ["admin-chats"] });
+      setAddUserOpen(false);
+      setSelectedUserIds([]);
+      setSearchOptions([]);
+    } catch {
+      antMessage.error("Failed to add users");
+    } finally {
+      setAddingUsers(false);
+    }
+  };
+
   return (
     <Drawer
       open={!!chatId}
@@ -227,7 +289,7 @@ export function ChatDrawer({ chatId, onClose }: ChatDrawerProps) {
               {chat?.title || "Untitled Chat"}
             </Text>
           )}
-          <div style={{ display: "flex", marginTop: 4 }}>
+          <div style={{ display: "flex", alignItems: "center", marginTop: 4 }}>
             {chat?.participants.map((p, i) => (
               <div key={p.userId} style={{ marginLeft: i > 0 ? -6 : 0 }}>
                 <UserAvatar
@@ -236,6 +298,19 @@ export function ChatDrawer({ chatId, onClose }: ChatDrawerProps) {
                 />
               </div>
             ))}
+            <Avatar
+              size={36}
+              style={{
+                marginLeft: -6,
+                backgroundColor: `${colors.secondary}20`,
+                color: colors.secondary,
+                cursor: "pointer",
+                border: `1.5px dashed ${colors.secondary}60`,
+                fontSize: 18,
+              }}
+              icon={<PlusOutlined />}
+              onClick={() => setAddUserOpen(true)}
+            />
           </div>
         </div>
         <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
@@ -312,6 +387,29 @@ export function ChatDrawer({ chatId, onClose }: ChatDrawerProps) {
       {chatId && (
         <MessageInput chatId={chatId} onSent={scrollToBottom} />
       )}
+
+      {/* Add Participant Modal */}
+      <Modal
+        title="Add Participants"
+        open={addUserOpen}
+        onOk={handleAddUsers}
+        onCancel={() => { setAddUserOpen(false); setSelectedUserIds([]); setSearchOptions([]); }}
+        okText="Add"
+        okButtonProps={{ disabled: selectedUserIds.length === 0, loading: addingUsers }}
+      >
+        <Select
+          mode="multiple"
+          showSearch
+          placeholder="Search by email..."
+          filterOption={false}
+          onSearch={handleUserSearch}
+          value={selectedUserIds}
+          onChange={setSelectedUserIds}
+          options={searchOptions}
+          style={{ width: "100%" }}
+          notFoundContent={null}
+        />
+      </Modal>
     </Drawer>
   );
 }

@@ -195,4 +195,43 @@ export async function chatRoutes(app: FastifyInstance) {
 
     return { success: true, data: { chatId, ...body } };
   });
+
+  // Join chat (self-join as client)
+  app.post("/:id/join", { onRequest: [app.authenticate] }, async (request, reply) => {
+    const { id: userId } = request.user as { id: string };
+    const { id: chatId } = request.params as { id: string };
+
+    const [found] = await db
+      .select()
+      .from(chat)
+      .where(eq(chat.id, chatId))
+      .limit(1);
+
+    if (!found) {
+      return reply.code(404).send({
+        success: false,
+        error: { code: "NOT_FOUND", message: "Chat not found" },
+      });
+    }
+
+    const [existing] = await db
+      .select()
+      .from(chatParticipant)
+      .where(and(eq(chatParticipant.chatId, chatId), eq(chatParticipant.userId, userId)))
+      .limit(1);
+
+    if (existing) {
+      return { success: true, data: { chatId, alreadyJoined: true } };
+    }
+
+    await db.insert(chatParticipant).values({ chatId, userId, role: "client" });
+
+    const io = getIO();
+    if (io) {
+      const [u] = await db.select({ displayName: user.displayName, email: user.email }).from(user).where(eq(user.id, userId)).limit(1);
+      io.to(chatId).emit("participant:joined", { chatId, userId, displayName: u?.displayName, email: u?.email });
+    }
+
+    return { success: true, data: { chatId, alreadyJoined: false } };
+  });
 }

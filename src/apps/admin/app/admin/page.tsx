@@ -272,8 +272,10 @@ function ChatsContent() {
             <div
               style={{
                 padding: "6px 10px",
-                borderRadius: 16,
-                ...(isOwn ? { borderBottomRightRadius: 4 } : { borderBottomLeftRadius: 4 }),
+                borderTopLeftRadius: 16,
+                borderTopRightRadius: 16,
+                borderBottomLeftRadius: isOwn ? 16 : 4,
+                borderBottomRightRadius: isOwn ? 4 : 16,
                 background: bubbleBg,
                 color: bubbleColor,
                 fontSize: 13,
