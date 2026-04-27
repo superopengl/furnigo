@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import '../../../theme/colors.dart';
 import '../services/chat_service.dart';
 import '../providers/chat_list_provider.dart';
+
+final _joinPattern = RegExp(
+  r'chats/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/join',
+  caseSensitive: false,
+);
 
 class ScanToJoinScreen extends ConsumerStatefulWidget {
   const ScanToJoinScreen({super.key});
@@ -27,38 +33,55 @@ class _ScanToJoinScreenState extends ConsumerState<ScanToJoinScreen> {
     if (_processing) return;
     final barcode = capture.barcodes.firstOrNull;
     if (barcode == null || barcode.rawValue == null) return;
+    await _handleScannedValue(barcode.rawValue!);
+  }
+
+  Future<void> _pickImage() async {
+    final image = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (image == null) return;
 
     setState(() => _processing = true);
 
-    final raw = barcode.rawValue!;
-    // Extract chat ID — accept raw UUID or a URL ending with the UUID
-    final uuidPattern = RegExp(r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}', caseSensitive: false);
-    final match = uuidPattern.firstMatch(raw);
-
-    if (match == null) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Invalid QR code')),
-        );
-        setState(() => _processing = false);
+    try {
+      final capture = await _controller.analyzeImage(image.path);
+      final barcode = capture?.barcodes.firstOrNull;
+      if (barcode == null || barcode.rawValue == null) {
+        _showError('No QR code found in the image');
+        return;
       }
+      await _handleScannedValue(barcode.rawValue!);
+    } catch (e) {
+      _showError('Failed to analyze image: $e');
+    }
+  }
+
+  Future<void> _handleScannedValue(String raw) async {
+    if (_processing) return;
+    setState(() => _processing = true);
+
+    final match = _joinPattern.firstMatch(raw);
+    if (match == null) {
+      _showError('Invalid QR code');
       return;
     }
 
-    final chatId = match.group(0)!;
+    final chatId = match.group(1)!;
 
     try {
       await ref.read(chatServiceProvider).joinChat(chatId);
       ref.read(chatListProvider.notifier).refresh();
       if (mounted) context.go('/chats/$chatId');
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to join chat: $e')),
-        );
-        setState(() => _processing = false);
-      }
+      _showError('Failed to join chat: $e');
     }
+  }
+
+  void _showError(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+    setState(() => _processing = false);
   }
 
   @override
@@ -69,6 +92,13 @@ class _ScanToJoinScreenState extends ConsumerState<ScanToJoinScreen> {
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
         title: const Text('Scan to join chat'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.photo_library_outlined),
+            tooltip: 'Pick from gallery',
+            onPressed: _processing ? null : _pickImage,
+          ),
+        ],
       ),
       body: Stack(
         children: [
@@ -103,7 +133,7 @@ class _ScanToJoinScreenState extends ConsumerState<ScanToJoinScreen> {
             left: 0,
             right: 0,
             child: Text(
-              'Point camera at chat QR code',
+              'Point camera at chat QR code\nor pick a photo from gallery',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Colors.white.withValues(alpha: 0.8),
