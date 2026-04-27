@@ -92,11 +92,11 @@ class ChatMessagesNotifier extends StateNotifier<List<MessageModel>> {
       );
       // Auto-clear after 3 seconds
       Future.delayed(const Duration(seconds: 3), () {
-        if (mounted) {
+        try {
           _ref.read(typingUsersProvider(chatId).notifier).update(
             (s) => s.difference({userId}),
           );
-        }
+        } catch (_) {}
       });
     });
   }
@@ -108,12 +108,21 @@ class ChatMessagesNotifier extends StateNotifier<List<MessageModel>> {
   }
 
   Future<void> send(String text) async {
-    await _chatService.sendMessage(chatId, text: text);
+    final message = await _chatService.sendMessage(chatId, text: text);
+    _addMessage(message);
   }
 
   Future<void> sendImage(String filePath) async {
     final url = await _chatService.uploadImage(filePath);
-    await _chatService.sendImage(chatId, url: url);
+    final message = await _chatService.sendImage(chatId, url: url);
+    _addMessage(message);
+  }
+
+  void _addMessage(MessageModel message) {
+    _messageCache.insertMessage(message);
+    if (!state.any((m) => m.id == message.id)) {
+      state = [...state, message];
+    }
   }
 
   @override

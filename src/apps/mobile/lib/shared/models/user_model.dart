@@ -1,5 +1,3 @@
-import '../../../config/env.dart';
-
 class UserModel {
   final String id;
   final String email;
@@ -20,8 +18,6 @@ class UserModel {
         email: json['email'] as String,
         displayName: json['displayName'] as String?,
         role: json['role'] as String,
-        avatarUrl: json['avatarUrl'] != null
-            ? Env.fixLocalhost(json['avatarUrl'] as String)
-            : null,
+        avatarUrl: json['avatarUrl'] as String?,
       );
 }
