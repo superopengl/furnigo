@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../../config/env.dart';
 import '../../../shared/services/api_client.dart';
 import '../../../theme/colors.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -81,7 +82,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           border: Border.all(color: AppColors.glassBorder),
                           image: user.avatarUrl != null
                               ? DecorationImage(
-                                  image: NetworkImage(user.avatarUrl!),
+                                  image: NetworkImage(Env.resolveUrl(user.avatarUrl!)),
                                   fit: BoxFit.cover,
                                 )
                               : null,

@@ -77,8 +77,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
     try {
       final data = await _authService.getMe();
       final user = UserModel.fromJson(data);
-      state = state.copyWith(status: AuthStatus.authenticated, user: user);
       await _socketService.connect();
+      state = state.copyWith(status: AuthStatus.authenticated, user: user);
     } catch (_) {
       // Token invalid and refresh also failed — force re-login.
       await _authStore.clear();

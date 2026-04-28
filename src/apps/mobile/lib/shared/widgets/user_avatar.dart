@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../config/env.dart';
 
 const _palette = [
   Color(0xFFC4713B),
@@ -57,7 +58,7 @@ class UserAvatar extends StatelessWidget {
     if (avatarUrl != null) {
       return CircleAvatar(
         radius: size / 2,
-        backgroundImage: NetworkImage(avatarUrl!),
+        backgroundImage: NetworkImage(Env.resolveUrl(avatarUrl!)),
         backgroundColor: color.withValues(alpha: 0.15),
       );
     }

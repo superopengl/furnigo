@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../config/env.dart';
 import '../../../theme/colors.dart';
 import '../../../shared/models/message_model.dart';
 import '../../../shared/models/user_model.dart';
@@ -107,7 +108,7 @@ class MessageBubble extends StatelessWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
                 child: Image.network(
-                  url, 
+                  Env.resolveUrl(url),
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
                     return Container(

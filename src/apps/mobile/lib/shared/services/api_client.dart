@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io' show Platform;
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/auth_store.dart';
@@ -26,17 +25,6 @@ final apiClientProvider = Provider<Dio>((ref) {
   ));
 
   Completer<String?>? refreshCompleter;
-
-  // On Android emulator, rewrite localhost URLs in API responses so that
-  // image/avatar URLs returned by the server resolve to the host machine.
-  if (Platform.isAndroid) {
-    dio.interceptors.add(InterceptorsWrapper(
-      onResponse: (response, handler) {
-        response.data = _fixLocalhostInData(response.data);
-        handler.next(response);
-      },
-    ));
-  }
 
   dio.interceptors.add(InterceptorsWrapper(
     onRequest: (options, handler) async {
@@ -110,15 +98,3 @@ final apiClientProvider = Provider<Dio>((ref) {
   return dio;
 });
 
-dynamic _fixLocalhostInData(dynamic data) {
-  if (data is String) {
-    return data.replaceAll('://localhost', '://10.0.2.2');
-  }
-  if (data is Map) {
-    return data.map((k, v) => MapEntry(k, _fixLocalhostInData(v)));
-  }
-  if (data is List) {
-    return data.map(_fixLocalhostInData).toList();
-  }
-  return data;
-}

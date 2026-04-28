@@ -28,6 +28,8 @@ class ChatMessagesNotifier extends StateNotifier<List<MessageModel>> {
   final MessageCache _messageCache;
   final String chatId;
   Timer? _typingDebounce;
+  StreamSubscription? _messageSub;
+  StreamSubscription? _typingSub;
 
   ChatMessagesNotifier(
       this._ref, this._chatService, this._socketService, this._messageCache, this.chatId)
@@ -67,7 +69,7 @@ class ChatMessagesNotifier extends StateNotifier<List<MessageModel>> {
 
   void _listen() {
     _socketService.joinChat(chatId);
-    _socketService.onNewMessage((data) {
+    _messageSub = _socketService.onMessage.listen((data) {
       final msg = data['message'] as Map<String, dynamic>;
       if (msg['chatId'] == chatId) {
         final message = MessageModel.fromJson(msg);
@@ -84,7 +86,7 @@ class ChatMessagesNotifier extends StateNotifier<List<MessageModel>> {
         }
       }
     });
-    _socketService.onTyping((data) {
+    _typingSub = _socketService.onTyping.listen((data) {
       if (data['chatId'] != chatId) return;
       final userId = data['userId'] as String;
       _ref.read(typingUsersProvider(chatId).notifier).update(
@@ -127,6 +129,8 @@ class ChatMessagesNotifier extends StateNotifier<List<MessageModel>> {
 
   @override
   void dispose() {
+    _messageSub?.cancel();
+    _typingSub?.cancel();
     _typingDebounce?.cancel();
     _socketService.leaveChat(chatId);
     super.dispose();

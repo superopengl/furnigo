@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 import '../providers/auth_store.dart';
@@ -10,6 +11,13 @@ final socketServiceProvider = Provider<SocketService>((ref) {
 class SocketService {
   final AuthStore _authStore;
   io.Socket? _socket;
+
+  /// Broadcast streams that survive socket reconnections.
+  final _messageController = StreamController<dynamic>.broadcast();
+  final _typingController = StreamController<dynamic>.broadcast();
+
+  Stream<dynamic> get onMessage => _messageController.stream;
+  Stream<dynamic> get onTyping => _typingController.stream;
 
   SocketService(this._authStore);
 
@@ -31,6 +39,8 @@ class SocketService {
           .build(),
     );
 
+    _socket!.on('message:new', (data) => _messageController.add(data));
+    _socket!.on('typing', (data) => _typingController.add(data));
     _socket!.connect();
   }
 
@@ -50,14 +60,6 @@ class SocketService {
 
   void sendTyping(String chatId) {
     _socket?.emit('typing', {'chatId': chatId});
-  }
-
-  void onNewMessage(void Function(dynamic data) callback) {
-    _socket?.on('message:new', callback);
-  }
-
-  void onTyping(void Function(dynamic data) callback) {
-    _socket?.on('typing', callback);
   }
 
   void disconnect() {
