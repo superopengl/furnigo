@@ -17,7 +17,7 @@ import { Logo } from "@/components/Logo";
 const { Title, Text, Paragraph } = Typography;
 
 const IMAGES = {
-  hero: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=800&q=80",
+  hero: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=1920&q=80",
   livingRoom:
     "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=600&q=80",
   dining:
@@ -106,12 +106,6 @@ export default function HomePage() {
           transform: translateY(-3px);
           box-shadow: 0 16px 48px rgba(61,50,40,0.12) !important;
         }
-        .hero-image-main {
-          transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        }
-        .hero-image-main:hover {
-          transform: scale(1.02);
-        }
       `}</style>
 
       {/* Background orbs */}
@@ -142,10 +136,14 @@ export default function HomePage() {
         }}
       />
 
-      {/* Header */}
+      {/* Header — overlays the hero */}
       <header
         style={{
-          position: "relative",
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 10,
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
@@ -154,47 +152,84 @@ export default function HomePage() {
           margin: "0 auto",
         }}
       >
-        <Logo size={40} showText textColor={colors.text} />
+        <Logo size={40} showText textColor={colors.white} />
 
         <Button
           type="text"
           onClick={() => router.push("/admin/login")}
-          style={{ color: colors.textSecondary, fontSize: 14 }}
+          style={{ color: "rgba(255,255,255,0.7)", fontSize: 14 }}
         >
           Admin Portal <ArrowRightOutlined />
         </Button>
       </header>
 
-      {/* Hero — split layout with image */}
+      {/* Hero — full-width banner with background image */}
       <section
         style={{
           position: "relative",
-          maxWidth: 1200,
-          margin: "0 auto",
-          padding: "60px 32px 80px",
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: 60,
+          width: "100%",
+          minHeight: "80vh",
+          display: "flex",
           alignItems: "center",
+          justifyContent: "center",
+          overflow: "hidden",
         }}
       >
-        {/* Left: text content */}
-        <div>
+        {/* Background image */}
+        <img
+          src={IMAGES.hero}
+          alt=""
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            objectPosition: "center 40%",
+          }}
+        />
+        {/* Dark warm overlay */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background: `linear-gradient(
+              180deg,
+              ${colors.primary}e0 0%,
+              ${colors.primary}a0 40%,
+              ${colors.primary}80 70%,
+              ${colors.primary}c0 100%
+            )`,
+          }}
+        />
+
+        {/* Content centered on top */}
+        <div
+          style={{
+            position: "relative",
+            textAlign: "center",
+            maxWidth: 720,
+            padding: "80px 32px",
+          }}
+        >
           <div
             style={{
               display: "inline-block",
-              padding: "6px 16px",
+              padding: "6px 18px",
               borderRadius: 20,
-              background: `${colors.accent}12`,
-              border: `1px solid ${colors.accent}20`,
+              background: "rgba(255,255,255,0.1)",
+              border: "1px solid rgba(255,255,255,0.15)",
               marginBottom: 28,
+              backdropFilter: "blur(8px)",
+              WebkitBackdropFilter: "blur(8px)",
             }}
           >
             <Text
               style={{
-                color: colors.secondary,
+                color: "rgba(255,255,255,0.85)",
                 fontSize: 13,
                 fontWeight: 500,
+                letterSpacing: 0.5,
               }}
             >
               Australian Furniture, Direct from Foshan
@@ -203,17 +238,17 @@ export default function HomePage() {
 
           <Title
             style={{
-              color: colors.text,
-              fontSize: "clamp(32px, 4vw, 52px)",
+              color: colors.white,
+              fontSize: "clamp(36px, 5vw, 60px)",
               fontWeight: 700,
-              lineHeight: 1.12,
+              lineHeight: 1.1,
               margin: "0 0 20px",
             }}
           >
             Premium furniture,{" "}
             <span
               style={{
-                background: `linear-gradient(135deg, ${colors.secondary}, ${colors.accent})`,
+                background: `linear-gradient(135deg, ${colors.accent}, #d4a84a)`,
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
               }}
@@ -224,18 +259,25 @@ export default function HomePage() {
 
           <Paragraph
             style={{
-              color: colors.textSecondary,
-              fontSize: 17,
-              maxWidth: 480,
+              color: "rgba(255,255,255,0.7)",
+              fontSize: "clamp(15px, 2vw, 18px)",
+              maxWidth: 540,
+              margin: "0 auto 40px",
               lineHeight: 1.7,
-              margin: "0 0 36px",
             }}
           >
             We connect Australian home buyers with Foshan manufacturers. From
             factory tours to customs clearance and setup — we handle everything.
           </Paragraph>
 
-          <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+          <div
+            style={{
+              display: "flex",
+              gap: 16,
+              justifyContent: "center",
+              flexWrap: "wrap",
+            }}
+          >
             <a
               href="#"
               className="download-btn"
@@ -245,12 +287,12 @@ export default function HomePage() {
                 gap: 10,
                 padding: "14px 28px",
                 borderRadius: 14,
-                background: colors.primary,
-                color: colors.white,
+                background: colors.white,
+                color: colors.primary,
                 textDecoration: "none",
                 fontSize: 15,
                 fontWeight: 600,
-                boxShadow: `0 4px 16px ${colors.primary}40`,
+                boxShadow: "0 4px 24px rgba(0,0,0,0.2)",
               }}
             >
               <AppleOutlined style={{ fontSize: 22 }} />
@@ -265,115 +307,19 @@ export default function HomePage() {
                 gap: 10,
                 padding: "14px 28px",
                 borderRadius: 14,
-                background: colors.white,
-                color: colors.text,
+                background: "rgba(255,255,255,0.12)",
+                backdropFilter: "blur(12px)",
+                WebkitBackdropFilter: "blur(12px)",
+                color: colors.white,
                 textDecoration: "none",
                 fontSize: 15,
                 fontWeight: 600,
-                border: `1px solid ${colors.border}`,
-                boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+                border: "1px solid rgba(255,255,255,0.2)",
               }}
             >
               <AndroidOutlined style={{ fontSize: 22 }} />
               Google Play
             </a>
-          </div>
-        </div>
-
-        {/* Right: hero image composition */}
-        <div style={{ position: "relative" }}>
-          {/* Main image */}
-          <div
-            className="hero-image-main"
-            style={{
-              borderRadius: 24,
-              overflow: "hidden",
-              boxShadow: `0 24px 64px ${colors.primary}18, 0 8px 24px ${colors.primary}0c`,
-              aspectRatio: "4/3",
-              position: "relative",
-            }}
-          >
-            <img
-              src={IMAGES.hero}
-              alt="Modern furniture showroom"
-              style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-                display: "block",
-              }}
-            />
-            {/* Warm overlay tint */}
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                background: `linear-gradient(135deg, ${colors.secondary}08, ${colors.accent}06)`,
-                pointerEvents: "none",
-              }}
-            />
-          </div>
-
-          {/* Decorative accent frame */}
-          <div
-            style={{
-              position: "absolute",
-              width: "70%",
-              height: "70%",
-              border: `2px solid ${colors.accent}30`,
-              borderRadius: 24,
-              top: -16,
-              right: -16,
-              zIndex: -1,
-            }}
-          />
-
-          {/* Floating stat badge */}
-          <div
-            className="glass-strong"
-            style={{
-              position: "absolute",
-              bottom: -20,
-              left: -20,
-              padding: "16px 24px",
-              borderRadius: 16,
-              display: "flex",
-              alignItems: "center",
-              gap: 12,
-              zIndex: 2,
-            }}
-          >
-            <div
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: 12,
-                background: `linear-gradient(135deg, ${colors.secondary}, ${colors.accent})`,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: colors.white,
-                fontSize: 18,
-                fontWeight: 700,
-              }}
-            >
-              ✓
-            </div>
-            <div>
-              <Text
-                style={{
-                  display: "block",
-                  fontSize: 14,
-                  fontWeight: 700,
-                  color: colors.text,
-                }}
-              >
-                Factory Direct
-              </Text>
-              <Text style={{ fontSize: 12, color: colors.textSecondary }}>
-                Save up to 60%
-              </Text>
-            </div>
           </div>
         </div>
       </section>
