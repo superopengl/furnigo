@@ -15,7 +15,7 @@ export function Logo({ size = 40, showText = false, textColor, textSize = 18 }: 
           width: size,
           height: size,
           borderRadius: size * 0.3,
-          background: "#fff",
+          background: "#F0EBE3",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",

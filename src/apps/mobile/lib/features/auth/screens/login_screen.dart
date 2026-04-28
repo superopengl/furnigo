@@ -17,6 +17,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _otpFocusNodes = List.generate(6, (_) => FocusNode());
   String? _otpId;
   bool _loading = false;
+  bool _googleLoading = false;
   String? _error;
 
   String get _otpCode => _otpControllers.map((c) => c.text).join();
@@ -39,7 +40,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       _otpFocusNodes[0].requestFocus();
     } catch (e) {
       setState(() {
-        _error = 'Failed to send OTP. Please try again.';
+        _error = 'Failed to send verification code. Please try again.';
         _loading = false;
       });
     }
@@ -86,6 +87,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
+  Future<void> _signInWithGoogle() async {
+    setState(() {
+      _googleLoading = true;
+      _error = null;
+    });
+
+    try {
+      await ref.read(authProvider.notifier).signInWithGoogle();
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = 'Google sign-in failed. Please try again.';
+          _googleLoading = false;
+        });
+      }
+    }
+  }
+
   void _clearOtp() {
     for (final c in _otpControllers) {
       c.clear();
@@ -119,7 +138,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   width: 72,
                   height: 72,
                   decoration: BoxDecoration(
-                    color: AppColors.white,
+                    color: AppColors.surface,
                     borderRadius: BorderRadius.circular(20),
                   ),
                   clipBehavior: Clip.antiAlias,
@@ -259,18 +278,36 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         const SizedBox(height: 20),
                         SizedBox(
                           width: double.infinity,
-                          child: FilledButton(
-                            onPressed: _loading ? null : _sendOtp,
-                            child: _loading
-                                ? const SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                : const Text('Continue'),
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [
+                                  AppColors.secondary,
+                                  AppColors.accent,
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: FilledButton(
+                              onPressed: _loading ? null : _sendOtp,
+                              style: FilledButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                disabledBackgroundColor: Colors.transparent,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                              ),
+                              child: _loading
+                                  ? const SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : const Text('Send Verification Code'),
+                            ),
                           ),
                         ),
                       ],
@@ -286,6 +323,56 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                       ],
                     ],
+                  ),
+                ),
+
+                // Divider
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    const Expanded(child: Divider(color: AppColors.border)),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        'or',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                      ),
+                    ),
+                    const Expanded(child: Divider(color: AppColors.border)),
+                  ],
+                ),
+                const SizedBox(height: 24),
+
+                // Google Sign-In button
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed:
+                        (_googleLoading || _loading) ? null : _signInWithGoogle,
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      side: const BorderSide(color: AppColors.border),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    icon: _googleLoading
+                        ? const SizedBox(
+                            height: 18,
+                            width: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Text(
+                            'G',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF4285F4),
+                            ),
+                          ),
+                    label: const Text('Continue with Google'),
                   ),
                 ),
               ],
