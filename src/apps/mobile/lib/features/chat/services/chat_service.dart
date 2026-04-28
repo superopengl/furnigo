@@ -58,7 +58,7 @@ class ChatService {
   }
 
   Future<Map<String, dynamic>> joinChat(String chatId) async {
-    final res = await _dio.post('/chats/$chatId/join');
+    final res = await _dio.post('/chats/$chatId/join', data: {});
     return res.data['data'] as Map<String, dynamic>;
   }
 
