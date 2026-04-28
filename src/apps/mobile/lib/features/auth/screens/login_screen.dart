@@ -181,24 +181,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
                 const SizedBox(height: 40),
 
-                // Glass card
-                Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: AppColors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: AppColors.glassBorder),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Color(0x08000000),
-                        blurRadius: 20,
-                        offset: Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
+                // Login form
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
                       TextField(
                         controller: _emailController,
                         decoration: const InputDecoration(
@@ -378,8 +364,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           child: const Text('Use a different email'),
                         ),
                       ],
-                    ],
-                  ),
+                  ],
                 ),
                 if (_error != null) ...[
                   const SizedBox(height: 12),
