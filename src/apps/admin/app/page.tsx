@@ -156,7 +156,7 @@ export default function HomePage() {
         style={{
           position: "relative",
           width: "100%",
-          minHeight: "55vh",
+          minHeight: "40vh",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
