@@ -16,9 +16,24 @@ const { Title, Text, Paragraph } = Typography;
 
 const IMAGES = {
   hero: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=1920&q=80",
+  livingRoom:
+    "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=600&q=80",
+  dining:
+    "https://images.unsplash.com/photo-1617806118233-18e1de247200?auto=format&fit=crop&w=600&q=80",
+  bedroom:
+    "https://images.unsplash.com/photo-1616594039964-ae9021a400a0?auto=format&fit=crop&w=600&q=80",
+  workspace:
+    "https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?auto=format&fit=crop&w=600&q=80",
   lifestyle:
     "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1400&q=80",
 };
+
+const categories = [
+  { label: "Living Room", image: IMAGES.livingRoom },
+  { label: "Dining", image: IMAGES.dining },
+  { label: "Bedroom", image: IMAGES.bedroom },
+  { label: "Workspace", image: IMAGES.workspace },
+];
 
 const features = [
   {
@@ -66,6 +81,19 @@ export default function HomePage() {
         .download-btn:hover {
           transform: translateY(-3px);
           box-shadow: 0 12px 32px rgba(0,0,0,0.15) !important;
+        }
+        .category-card {
+          transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .category-card:hover {
+          transform: translateY(-6px);
+          box-shadow: 0 20px 60px rgba(61,50,40,0.18) !important;
+        }
+        .category-card:hover .category-overlay {
+          background: linear-gradient(180deg, transparent 30%, rgba(44,36,32,0.7) 100%) !important;
+        }
+        .category-card:hover .category-label {
+          transform: translateY(-4px);
         }
         .feature-card {
           transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -284,13 +312,88 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Showcase — furniture categories */}
+      <section
+        style={{
+          position: "relative",
+          maxWidth: 1200,
+          margin: "0 auto",
+          padding: "60px 32px 80px",
+        }}
+      >
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(4, 1fr)",
+            gap: 20,
+          }}
+        >
+          {categories.map((cat) => (
+            <div
+              key={cat.label}
+              className="category-card"
+              style={{
+                borderRadius: 20,
+                overflow: "hidden",
+                position: "relative",
+                aspectRatio: "3/4",
+                cursor: "pointer",
+                boxShadow: `0 8px 32px ${colors.primary}0c`,
+              }}
+            >
+              <img
+                src={cat.image}
+                alt={cat.label}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  display: "block",
+                }}
+              />
+              <div
+                className="category-overlay"
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  background:
+                    "linear-gradient(180deg, transparent 40%, rgba(44,36,32,0.55) 100%)",
+                  transition: "background 0.4s",
+                }}
+              />
+              <div
+                className="category-label"
+                style={{
+                  position: "absolute",
+                  bottom: 20,
+                  left: 20,
+                  right: 20,
+                  transition: "transform 0.4s",
+                }}
+              >
+                <Text
+                  style={{
+                    color: colors.white,
+                    fontSize: 18,
+                    fontWeight: 600,
+                    textShadow: "0 1px 4px rgba(0,0,0,0.3)",
+                  }}
+                >
+                  {cat.label}
+                </Text>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* Features */}
       <section
         style={{
           position: "relative",
           maxWidth: 1000,
           margin: "0 auto",
-          padding: "60px 24px 80px",
+          padding: "0 24px 80px",
           display: "grid",
           gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
           gap: 20,
