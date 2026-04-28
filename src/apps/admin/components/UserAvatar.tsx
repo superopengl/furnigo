@@ -2,6 +2,7 @@
 
 import { Avatar, Tooltip } from "antd";
 import type { User } from "@furnigo/types";
+import { toRelativeUrl } from "@/lib/url";
 
 interface UserAvatarProps {
   user: Pick<User, "id" | "displayName" | "email" | "role" | "avatarUrl">;
@@ -47,8 +48,10 @@ export function UserAvatar({ user, size = 32, tooltip = true }: UserAvatarProps)
     </div>
   );
 
-  const avatar = user.avatarUrl ? (
-    <Avatar size={size} src={user.avatarUrl} />
+  const avatarSrc = user.avatarUrl ? toRelativeUrl(user.avatarUrl) : null;
+
+  const avatar = avatarSrc ? (
+    <Avatar size={size} src={avatarSrc} />
   ) : (
     <Avatar
       size={size}

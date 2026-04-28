@@ -3,6 +3,7 @@
 import { Image, Typography } from "antd";
 import { FileOutlined, PlayCircleOutlined } from "@ant-design/icons";
 import { colors } from "@/lib/theme";
+import { toRelativeUrl } from "@/lib/url";
 import { UserAvatar } from "./UserAvatar";
 import type { Message, UserRole } from "@furnigo/types";
 
@@ -38,7 +39,7 @@ export function MessageBubble({ message: msg, isOwn, sender }: MessageBubbleProp
         return (
           <div style={{ display: 'inline-block' }}>
             <Image
-              src={msg.content.url as string}
+              src={toRelativeUrl(msg.content.url as string)}
               alt="image"
               style={{ maxWidth: 240, borderRadius: 8 }}
               preview={{ mask: null }}
@@ -49,7 +50,7 @@ export function MessageBubble({ message: msg, isOwn, sender }: MessageBubbleProp
       case "video":
         return (
           <a
-            href={msg.content.url as string}
+            href={toRelativeUrl(msg.content.url as string)}
             target="_blank"
             rel="noopener noreferrer"
             style={{ display: "flex", alignItems: "center", gap: 8, color: isOwn ? colors.white : colors.text }}
@@ -61,7 +62,7 @@ export function MessageBubble({ message: msg, isOwn, sender }: MessageBubbleProp
       case "attachment":
         return (
           <a
-            href={msg.content.url as string}
+            href={toRelativeUrl(msg.content.url as string)}
             target="_blank"
             rel="noopener noreferrer"
             style={{ display: "flex", alignItems: "center", gap: 8, color: isOwn ? colors.white : colors.text }}

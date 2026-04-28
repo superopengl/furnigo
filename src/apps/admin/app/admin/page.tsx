@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Typography, Input, Button, Tag, Table, ConfigProvider, Dropdown, Modal, Upload, theme as antTheme } from "antd";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { Typography, Input, Button, Tag, Table, ConfigProvider, Dropdown, Modal, Upload, QRCode, App, theme as antTheme } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import {
   SearchOutlined,
@@ -10,6 +10,8 @@ import {
   SettingOutlined,
   CameraOutlined,
   LoadingOutlined,
+  QrcodeOutlined,
+  CopyOutlined,
 } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
@@ -116,6 +118,7 @@ const darkTheme = {
 
 function ChatsContent() {
   const [modal, contextHolder] = Modal.useModal();
+  const { message: antMessage } = App.useApp();
   const { user, logout } = useAuth();
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [newMessageChatIds, setNewMessageChatIds] = useState<Set<string>>(new Set());
@@ -125,6 +128,22 @@ function ChatsContent() {
   const [savingName, setSavingName] = useState(false);
   const [editAvatarUrl, setEditAvatarUrl] = useState<string | null>(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [qrChatId, setQrChatId] = useState<string | null>(null);
+  const qrRef = useRef<HTMLDivElement>(null);
+
+  const copyQrImage = useCallback(async () => {
+    const el = qrRef.current;
+    if (!el) return;
+    try {
+      const { toBlob } = await import("html-to-image");
+      const blob = await toBlob(el, { pixelRatio: 2, backgroundColor: "#faf8f5" });
+      if (!blob) return;
+      await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+      antMessage.success("QR code copied to clipboard");
+    } catch {
+      antMessage.error("Failed to copy");
+    }
+  }, [antMessage]);
 
   const { data: chats, isLoading, refetch } = useQuery({
     queryKey: ["admin-chats"],
@@ -172,17 +191,23 @@ function ChatsContent() {
       render: (title: string | null, record) => {
         const hasNew = newMessageChatIds.has(record.id);
         return (
-        <div>
-          <Text strong={hasNew} style={{ color: hasNew ? "#fff" : dk.textSecondary, display: "block", lineHeight: 1.3 }}>
-            {title || "Untitled Chat"}
-          </Text>
-          <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 2 }}>
-            <Text style={{ fontSize: 11, color: dk.textSecondary, lineHeight: 1.3 }}>
-              {formatDateTime(record.createdAt)}
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <QrcodeOutlined
+            style={{ fontSize: 36, color: dk.textSecondary, cursor: "pointer", flexShrink: 0 }}
+            onClick={(e) => { e.stopPropagation(); setQrChatId(record.id); }}
+          />
+          <div style={{ minWidth: 0 }}>
+            <Text ellipsis strong={hasNew} style={{ color: hasNew ? "#fff" : dk.textSecondary, display: "block", lineHeight: 1.3 }}>
+              {title || "Untitled Chat"}
             </Text>
-            <Tag style={{ fontSize: 11, lineHeight: "18px", margin: 0, border: "none", color: "#fff", background: getAgeColor(record.createdAt) }}>
-              {timeago(record.createdAt)}
-            </Tag>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 2 }}>
+              <Text style={{ fontSize: 11, color: dk.textSecondary, lineHeight: 1.3 }}>
+                {formatDateTime(record.createdAt)}
+              </Text>
+              <Tag style={{ fontSize: 11, lineHeight: "18px", margin: 0, border: "none", color: "#fff", background: getAgeColor(record.createdAt) }}>
+                {timeago(record.createdAt)}
+              </Tag>
+            </div>
           </div>
         </div>
         );
@@ -534,6 +559,41 @@ function ChatsContent() {
             placeholder="Enter display name"
           />
         </Modal>
+
+        <ConfigProvider theme={{ algorithm: antTheme.defaultAlgorithm, token: { colorBgElevated: "#faf8f5", colorText: "#2c2420", colorTextSecondary: "#8c8178" } }}>
+          <Modal
+            title={filtered?.find((c) => c.id === qrChatId)?.title || "Untitled Chat"}
+            open={!!qrChatId}
+            onCancel={() => setQrChatId(null)}
+            footer={null}
+            centered
+            width={320}
+          >
+            {qrChatId && (
+              <>
+                <div ref={qrRef} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16, padding: "32px 24px", backgroundColor: "#faf8f5" }}>
+                  <Text style={{ color: "#8c8178" }}>Scan to join chat at Furnigo</Text>
+                  <QRCode
+                    value={`${window.location.origin}/api/chats/${qrChatId}/join`}
+                    size={220}
+                    color="#2c2420"
+                    icon="/logo.png"
+                    iconSize={44}
+                    errorLevel="H"
+                  />
+                  <Text style={{ fontSize: 11, color: "#8c8178", textAlign: "center", wordBreak: "break-all" }}>
+                    {`${window.location.origin}/api/chats/${qrChatId}/join`}
+                  </Text>
+                </div>
+                <div style={{ textAlign: "center", paddingTop: 8 }}>
+                  <Button type="text" icon={<CopyOutlined />} onClick={copyQrImage} style={{ color: "#8c8178" }}>
+                    Copy QR code
+                  </Button>
+                </div>
+              </>
+            )}
+          </Modal>
+        </ConfigProvider>
 
         <style>{`
           .admin-dark .ant-table-wrapper .ant-table {
