@@ -56,13 +56,14 @@ The core UX is a WeChat-style group chat chat per order/inquiry:
 
 ## Authentication & Access
 
-- **Unified passwordless auth:** Users enter their email and verify via OTP. If the email is new, an account is created automatically. No separate registration or login flow.
+- **Unified passwordless auth:** Users sign in via email OTP or Google SSO. If the email is new, an account is created automatically. No separate registration or login flow.
 - **Stateless JWT:** Token contains user ID and expiry (12 months), signed server-side. No backend token storage. Users stay signed in until the token expires.
 
 ## User Stories
 
 ### Client
 - As a client, I want to enter my email and verify via OTP to sign in or create my account automatically
+- As a client, I want to sign in with my Google account for a faster login experience
 - As a client, I want to stay signed in on my phone without re-authenticating frequently
 - As a client, I want to chat with a human agent
 

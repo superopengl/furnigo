@@ -44,14 +44,14 @@
   - Live chat messaging via right-side drawer (real-time via Socket.io)
   - File/image/video upload in chat
   - Mobile responsive layout
-  - Privacy policy and terms of usage pages for legal compliance
+  - Privacy policy and terms of use pages for legal compliance
 - **Auth:** Same OTP flow as mobile app, restricted to agent/admin roles. JWT token stored in localStorage.
 - **Style:** ChatGPT-inspired floating glass design with Furnigo color palette
 
 ### 3. Fastify API Server
 - **Purpose:** Core backend handling all business logic
 - **Responsibilities:**
-  - Stateless JWT auth for mobile and admin (OTP + JWT, 12h expiry, 7-day refresh grace window, no backend token storage)
+  - Stateless JWT auth for mobile and admin (OTP or Google SSO + JWT, 12h expiry, 7-day refresh grace window, no backend token storage)
   - REST API for CRUD operations
   - Socket.io server for real-time chat
   - File upload handling (images, documents)

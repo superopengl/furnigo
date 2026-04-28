@@ -25,6 +25,7 @@
 | Validation | Zod |
 | WebSocket | Socket.io (in-memory adapter, single instance) |
 | Email OTP | AWS SES |
+| Google SSO | google_sign_in (Flutter), Google tokeninfo API (backend) |
 | File uploads | fastify-multipart + Cloudflare R2 |
 | DB migrations | Drizzle Kit |
 | API docs | Fastify OpenAPI (auto-generated from Zod schemas) |
