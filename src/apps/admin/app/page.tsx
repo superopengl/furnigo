@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { Typography } from "antd";
 import {
-  CustomerServiceOutlined,
-  ShopOutlined,
-  GlobalOutlined,
+  MessageOutlined,
+  StarOutlined,
+  CompassOutlined,
+  HomeOutlined,
   AppleOutlined,
   AndroidOutlined,
 } from "@ant-design/icons";
@@ -37,22 +38,36 @@ const categories = [
 
 const features = [
   {
-    icon: <CustomerServiceOutlined style={{ fontSize: 28 }} />,
-    title: "Live Chat Support",
+    icon: <MessageOutlined style={{ fontSize: 28 }} />,
+    title: "AI-Assisted Private Chat",
     description:
-      "Respond to customer inquiries in real-time with our integrated messaging system.",
+      "One-to-one conversation through a dedicated app with AI support — no social media noise, just focused service.",
+    image:
+      "https://images.unsplash.com/photo-1577563908411-5077b6dc7624?auto=format&fit=crop&w=600&q=80",
   },
   {
-    icon: <ShopOutlined style={{ fontSize: 28 }} />,
-    title: "Order Management",
+    icon: <StarOutlined style={{ fontSize: 28 }} />,
+    title: "Curated Selection for You",
     description:
-      "Track orders from Foshan manufacturers through shipping, customs, and delivery.",
+      "Personalised product recommendations tailored to your style, space, and budget — handpicked by our experts.",
+    image:
+      "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=600&q=80",
   },
   {
-    icon: <GlobalOutlined style={{ fontSize: 28 }} />,
-    title: "End-to-End Service",
+    icon: <CompassOutlined style={{ fontSize: 28 }} />,
+    title: "Guided Factory Tours",
     description:
-      "Manage trip arrangements, purchase guidance, and door-to-door delivery.",
+      "Optional overseas trip to Foshan for hands-on, one-stop shopping — see, touch, and choose in person.",
+    image:
+      "https://images.unsplash.com/photo-1565793298595-6a879b1d9492?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    icon: <HomeOutlined style={{ fontSize: 28 }} />,
+    title: "Factory-to-Door Delivery",
+    description:
+      "Complete logistics from packing and shipping to customs clearance and white-glove setup in your home.",
+    image:
+      "https://images.unsplash.com/photo-1600585152220-90363fe7e115?auto=format&fit=crop&w=600&q=80",
   },
 ];
 
@@ -391,58 +406,83 @@ export default function HomePage() {
       <section
         style={{
           position: "relative",
-          maxWidth: 1000,
+          maxWidth: 1200,
           margin: "0 auto",
-          padding: "0 24px 80px",
+          padding: "0 32px 80px",
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-          gap: 20,
+          gridTemplateColumns: "repeat(2, 1fr)",
+          gap: 24,
         }}
       >
         {features.map((f) => (
           <div
             key={f.title}
-            className="glass feature-card"
+            className="feature-card"
             style={{
-              padding: "32px 28px",
               borderRadius: 20,
+              overflow: "hidden",
+              display: "flex",
+              background: colors.white,
+              border: `1px solid ${colors.border}60`,
+              boxShadow: `0 4px 20px ${colors.primary}08`,
             }}
           >
             <div
               style={{
-                width: 48,
-                height: 48,
-                borderRadius: 14,
-                background: `linear-gradient(135deg, ${colors.secondary}18, ${colors.accent}12)`,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: colors.secondary,
-                marginBottom: 20,
+                width: 200,
+                minHeight: 200,
+                flexShrink: 0,
+                position: "relative",
               }}
             >
-              {f.icon}
+              <img
+                src={f.image}
+                alt={f.title}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  display: "block",
+                }}
+              />
             </div>
-            <Text
-              strong
-              style={{
-                color: colors.text,
-                fontSize: 17,
-                display: "block",
-                marginBottom: 8,
-              }}
-            >
-              {f.title}
-            </Text>
-            <Text
-              style={{
-                color: colors.textSecondary,
-                fontSize: 14,
-                lineHeight: 1.6,
-              }}
-            >
-              {f.description}
-            </Text>
+            <div style={{ padding: "28px 32px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+              <div
+                style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: 12,
+                  background: `linear-gradient(135deg, ${colors.secondary}18, ${colors.accent}12)`,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: colors.secondary,
+                  marginBottom: 16,
+                }}
+              >
+                {f.icon}
+              </div>
+              <Text
+                strong
+                style={{
+                  color: colors.text,
+                  fontSize: 18,
+                  display: "block",
+                  marginBottom: 8,
+                }}
+              >
+                {f.title}
+              </Text>
+              <Text
+                style={{
+                  color: colors.textSecondary,
+                  fontSize: 14,
+                  lineHeight: 1.7,
+                }}
+              >
+                {f.description}
+              </Text>
+            </div>
           </div>
         ))}
       </section>
