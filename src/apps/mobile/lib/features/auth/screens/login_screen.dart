@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import '../../../theme/colors.dart';
 import '../providers/auth_provider.dart';
 
@@ -95,7 +96,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     try {
       await ref.read(authProvider.notifier).signInWithGoogle();
+    } on GoogleSignInException catch (e) {
+      if (e.code == GoogleSignInExceptionCode.canceled) {
+        if (mounted) setState(() => _googleLoading = false);
+        return;
+      }
+      debugPrint('[GoogleSignIn] error: ${e.code} — ${e.description}');
+      if (mounted) {
+        setState(() {
+          _error = 'Google sign-in failed. Please try again.';
+          _googleLoading = false;
+        });
+      }
     } catch (e) {
+      debugPrint('[GoogleSignIn] unexpected error: $e');
       if (mounted) {
         setState(() {
           _error = 'Google sign-in failed. Please try again.';
@@ -160,7 +174,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'Factory-direct furniture from Foshan',
+                  'Premium furniture, factory to your door',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: AppColors.textSecondary,
                       ),
