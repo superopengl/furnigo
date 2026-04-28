@@ -5,11 +5,12 @@ interface LogoProps {
   showText?: boolean;
   textColor?: string;
   textSize?: number;
+  vertical?: boolean;
 }
 
-export function Logo({ size = 40, showText = false, textColor, textSize = 18 }: LogoProps) {
+export function Logo({ size = 40, showText = false, textColor, textSize = 18, vertical = false }: LogoProps) {
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+    <div style={{ display: "flex", flexDirection: vertical ? "column" : "row", alignItems: "center", gap: vertical ? 6 : 10 }}>
       <div
         style={{
           width: size,

@@ -148,7 +148,7 @@ export default function HomePage() {
           margin: "0 auto",
         }}
       >
-        <Logo size={40} showText textColor={colors.white} />
+        <Logo size={40} showText textColor={colors.white} vertical />
       </header>
 
       {/* Hero — full-width banner with background image */}
