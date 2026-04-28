@@ -142,13 +142,13 @@ export default function HomePage() {
           zIndex: 10,
           display: "flex",
           alignItems: "center",
-          justifyContent: "center",
+          justifyContent: "flex-start",
           padding: "20px 32px",
           maxWidth: 1200,
           margin: "0 auto",
         }}
       >
-        <Logo size={40} showText textColor={colors.white} vertical />
+        <Logo size={40} showText textColor={colors.white} />
       </header>
 
       {/* Hero — full-width banner with background image */}
