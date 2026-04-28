@@ -389,8 +389,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       body: Column(
         children: [
           Expanded(
-            child: _buildMessageArea(
-                effectiveChatId, messages, chatsAsync.isLoading, topPadding, participants),
+            child: GestureDetector(
+              onTap: () => FocusScope.of(context).unfocus(),
+              child: _buildMessageArea(
+                  effectiveChatId, messages, chatsAsync.isLoading, topPadding, participants),
+            ),
           ),
           if (effectiveChatId != null) _buildTypingIndicator(effectiveChatId),
           _buildInputBar(),
