@@ -26,6 +26,8 @@ const envSchema = z.object({
 
   FURNIGO_OTP_BYPASS_DOMAIN: z.string().optional(),
 
+  FURNIGO_GOOGLE_CLIENT_ID: z.string().optional(),
+
   FURNIGO_WS_URL: z.string().url().optional(),
   FURNIGO_BLOB_BASE_URL: z.string().url().optional(),
 });

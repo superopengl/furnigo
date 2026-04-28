@@ -21,6 +21,7 @@ export const user = schema.table("user", {
   avatarUrl: text("avatar_url"),
   locale: varchar("locale", { length: 10 }).default("en-AU"),
   isActive: boolean("is_active").default(true),
+  googleId: text("google_id").unique(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });

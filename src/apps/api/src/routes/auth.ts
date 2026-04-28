@@ -7,9 +7,11 @@ import { createOtp } from "../services/createOtp";
 import { verifyOtp } from "../services/verifyOtp";
 import { sendOtpEmail } from "../services/sendOtpEmail";
 import { createAuthToken } from "../services/createAuthToken";
+import { verifyGoogleToken } from "../services/verifyGoogleToken";
 
 const sendSchema = z.object({ email: z.string().email() });
 const verifySchema = z.object({ otp_id: z.string().uuid(), code: z.string().length(6) });
+const googleSchema = z.object({ id_token: z.string().min(1) });
 
 const TOKEN_EXPIRY_MS = 12 * 60 * 60 * 1000;
 const REFRESH_GRACE_SECONDS = 7 * 24 * 60 * 60; // 7 days
@@ -76,6 +78,84 @@ export async function authRoutes(app: FastifyInstance) {
         .update(user)
         .set({ isActive: true })
         .where(eq(user.id, existing.id))
+        .returning();
+    }
+
+    const token = createAuthToken(app, { id: existing.id, role: existing.role });
+    const expiresAt = new Date(Date.now() + TOKEN_EXPIRY_MS);
+
+    return {
+      success: true,
+      data: {
+        user: {
+          id: existing.id,
+          email: existing.email,
+          displayName: existing.displayName,
+          role: existing.role,
+        },
+        is_new_user: isNewUser,
+        token,
+        expires_at: expiresAt.toISOString(),
+      },
+    };
+  });
+
+  app.post("/google", async (request, reply) => {
+    const body = googleSchema.parse(request.body);
+
+    let payload;
+    try {
+      payload = await verifyGoogleToken(body.id_token);
+    } catch {
+      return reply.code(401).send({
+        success: false,
+        error: { code: "INVALID_GOOGLE_TOKEN", message: "Google sign-in failed" },
+      });
+    }
+
+    // Find existing user by google_id or email
+    let [existing] = await db
+      .select()
+      .from(user)
+      .where(eq(user.googleId, payload.sub))
+      .limit(1);
+
+    if (!existing) {
+      [existing] = await db
+        .select()
+        .from(user)
+        .where(eq(user.email, payload.email))
+        .limit(1);
+    }
+
+    const isNewUser = !existing;
+
+    if (existing) {
+      // Link google_id if not yet linked
+      if (!existing.googleId) {
+        [existing] = await db
+          .update(user)
+          .set({ googleId: payload.sub, isActive: true })
+          .where(eq(user.id, existing.id))
+          .returning();
+      } else if (!existing.isActive) {
+        [existing] = await db
+          .update(user)
+          .set({ isActive: true })
+          .where(eq(user.id, existing.id))
+          .returning();
+      }
+    } else {
+      [existing] = await db
+        .insert(user)
+        .values({
+          email: payload.email,
+          role: "client",
+          googleId: payload.sub,
+          displayName: payload.name ?? null,
+          avatarUrl: payload.picture ?? null,
+          isActive: true,
+        })
         .returning();
     }
 

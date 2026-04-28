@@ -28,15 +28,16 @@ All responses follow this format:
 
 Stateless JWT auth for mobile and admin. Token contains user ID and role, signed with a server secret. Tokens expire after **12 hours**. No token storage on the backend — the server verifies the signature on each request. To block a user, set `isActive=false` on the user table.
 
-Unified auth flow: enter email → verify OTP → if new user, account is created automatically.
+Two auth flows: email OTP (enter email → verify OTP) and Google SSO (send Google ID token). Both auto-create accounts for new users.
 
 Token in `Authorization: Bearer <jwt>` header.
 
-**Token refresh:** Clients automatically call `POST /auth/token/refresh` when a 401 is received. The server accepts expired tokens within a **7-day grace window**, verifies the user is still active, and issues a fresh token. Tokens expired beyond 7 days require re-authentication via OTP.
+**Token refresh:** Clients automatically call `POST /auth/token/refresh` when a 401 is received. The server accepts expired tokens within a **7-day grace window**, verifies the user is still active, and issues a fresh token. Tokens expired beyond 7 days require re-authentication via OTP or Google SSO.
 
 ```
 POST   /auth/otp/send           — Send OTP to email
 POST   /auth/otp/verify         — Verify OTP, login or create account, returns JWT
+POST   /auth/google             — Sign in with Google ID token, login or create account, returns JWT
 GET    /auth/token/verify       — Check if current token is valid, returns user profile
 POST   /auth/token/refresh      — Refresh an expired token (within 7-day grace window)
 ```
@@ -92,6 +93,39 @@ Verify OTP. If existing user, logs in. If new user, activates account. Returns s
 {
   "success": false,
   "error": { "code": "INVALID_OTP", "message": "Invalid or expired OTP" }
+}
+```
+
+### POST /auth/google
+
+Sign in with a Google ID token. Verifies the token with Google, finds or creates the user by email, links the Google account, and returns a JWT.
+
+```json
+// Request
+{
+  "id_token": "eyJhbGciOiJSUzI1NiIs..."
+}
+
+// Response
+{
+  "success": true,
+  "data": {
+    "user": {
+      "id": "uuid",
+      "email": "john@example.com",
+      "displayName": "John Doe",
+      "role": "client"
+    },
+    "is_new_user": false,
+    "token": "eyJhbGciOiJIUzI1NiIs...",
+    "expires_at": "2027-04-22T00:00:00Z"
+  }
+}
+
+// Invalid token — 401
+{
+  "success": false,
+  "error": { "code": "INVALID_GOOGLE_TOKEN", "message": "Google sign-in failed" }
 }
 ```
 

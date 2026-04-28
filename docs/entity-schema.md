@@ -31,9 +31,11 @@ These fields are omitted from individual entity tables below for brevity.
 | avatar_url | string | optional |
 | locale | string | default `en-AU` |
 | is_active | boolean | default true; soft deactivation for all roles |
+| google_id | string | optional; Google account subject ID for SSO |
 
 ### Business Rules
 - `email` is required for all users
+- `google_id` is set when a user signs in via Google; links the Google account to the user
 - A user cannot change their own role
 - Deactivation is soft — set `is_active=false`, never hard delete
 

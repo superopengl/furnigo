@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import '../../../shared/models/user_model.dart';
 import '../../../shared/providers/auth_store.dart';
 import '../../../shared/services/auth_event_bus.dart';
@@ -102,6 +104,22 @@ class AuthNotifier extends StateNotifier<AuthState> {
     } catch (e) {
       state = state.copyWith(error: 'Invalid OTP. Please try again.');
     }
+  }
+
+  Future<void> signInWithGoogle() async {
+    final account = await GoogleSignIn.instance.authenticate();
+    final idToken = account.authentication.idToken;
+    if (idToken == null) throw Exception('Failed to get Google ID token');
+
+    debugPrint('[Auth] Google ID token obtained, sending to backend...');
+    final data = await _authService.signInWithGoogle(idToken);
+    final user = UserModel.fromJson(data['user'] as Map<String, dynamic>);
+    final token = data['token'] as String;
+
+    await _authStore.save(token: token, userId: user.id);
+    await _socketService.connect();
+
+    state = state.copyWith(status: AuthStatus.authenticated, user: user);
   }
 
   Future<void> logout() async {

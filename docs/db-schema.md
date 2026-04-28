@@ -11,7 +11,7 @@ user ─┬─< chat_participant >─┬─ chat ─< message
 ## Tables
 
 ### user
-Core user table for both clients and human agents. No password — authentication is via OTP sent to email.
+Core user table for both clients and human agents. Authentication is via OTP sent to email or Google SSO.
 
 ```sql
 CREATE TABLE "user" (
@@ -22,6 +22,7 @@ CREATE TABLE "user" (
     avatar_url      TEXT,
     locale          VARCHAR(10) DEFAULT 'en-AU',
     is_active       BOOLEAN DEFAULT true,
+    google_id       TEXT UNIQUE,
     -- Metadata
     created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
