@@ -240,7 +240,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'Scan to join chat',
+                'Scan to join chat at Furnigo',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 20),
