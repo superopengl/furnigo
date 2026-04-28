@@ -10,4 +10,10 @@ class ChatModel {
         title: json['title'] as String?,
         createdAt: json['createdAt'] as String,
       );
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'title': title,
+        'createdAt': createdAt,
+      };
 }

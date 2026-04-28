@@ -5,6 +5,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import '../../../shared/models/user_model.dart';
 import '../../../shared/providers/auth_store.dart';
 import '../../../shared/services/auth_event_bus.dart';
+import '../../../shared/services/chat_cache.dart';
 import '../../../shared/services/message_cache.dart';
 import '../../../shared/services/socket_service.dart';
 import '../services/auth_service.dart';
@@ -35,6 +36,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   final AuthStore _authStore;
   final SocketService _socketService;
   final MessageCache _messageCache;
+  final ChatCache _chatCache;
   StreamSubscription<AuthEvent>? _authEventSub;
 
   AuthNotifier(
@@ -42,6 +44,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     this._authStore,
     this._socketService,
     this._messageCache,
+    this._chatCache,
     AuthEventBus authEventBus,
   ) : super(const AuthState()) {
     _authEventSub = authEventBus.stream.listen(_onAuthEvent);
@@ -61,6 +64,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     if (state.status == AuthStatus.unauthenticated) return;
     _socketService.disconnect();
     _messageCache.clearAll();
+    _chatCache.clearAll();
     state = const AuthState(status: AuthStatus.unauthenticated);
   }
 
@@ -126,6 +130,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     _socketService.disconnect();
     await _authStore.clear();
     await _messageCache.clearAll();
+    await _chatCache.clearAll();
     state = const AuthState(status: AuthStatus.unauthenticated);
   }
 
@@ -142,6 +147,7 @@ final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
     ref.read(authStoreProvider),
     ref.read(socketServiceProvider),
     ref.read(messageCacheProvider),
+    ref.read(chatCacheProvider),
     ref.read(authEventBusProvider),
   );
 });

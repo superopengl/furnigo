@@ -13,7 +13,12 @@ class LocalDb {
 
   Future<Database> _open() async {
     final dbPath = await getDatabasesPath();
-    return openDatabase('$dbPath/furnigo.db', version: 1, onCreate: _onCreate);
+    return openDatabase(
+      '$dbPath/furnigo.db',
+      version: 2,
+      onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
+    );
   }
 
   Future<void> _onCreate(Database db, int version) async {
@@ -30,11 +35,29 @@ class LocalDb {
     ''');
     await db.execute(
         'CREATE INDEX idx_message_chat_created ON message (chat_id, created_at)');
+    await _createChatTable(db);
+  }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await _createChatTable(db);
+    }
+  }
+
+  Future<void> _createChatTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE chat (
+        id TEXT PRIMARY KEY,
+        title TEXT,
+        created_at TEXT NOT NULL
+      )
+    ''');
   }
 
   Future<void> deleteAll() async {
     final db = await database;
     await db.delete('message');
+    await db.delete('chat');
   }
 
   Future<void> close() async {
