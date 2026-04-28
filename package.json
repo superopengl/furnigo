@@ -5,6 +5,7 @@
     "start:api": "pnpm --filter @furnigo/api dev",
     "start:portal": "pnpm --filter @furnigo/admin start:dev",
     "start:ios": "bash scripts/run-ios.sh",
+    "start:physical": "bash scripts/run-ios-physical.sh",
     "start:android": "bash scripts/run-android.sh",
     "start:mobile": "bash scripts/run-mobile.sh",
     "build": "pnpm -r build",

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
@@ -36,6 +37,8 @@ class _ScanToJoinScreenState extends ConsumerState<ScanToJoinScreen> {
     await _handleScannedValue(barcode.rawValue!);
   }
 
+  static const _qrChannel = MethodChannel('furnigo/qr_reader');
+
   Future<void> _pickImage() async {
     final image = await ImagePicker().pickImage(source: ImageSource.gallery);
     if (image == null) return;
@@ -43,21 +46,27 @@ class _ScanToJoinScreenState extends ConsumerState<ScanToJoinScreen> {
     setState(() => _processing = true);
 
     try {
-      final capture = await _controller.analyzeImage(image.path);
-      final barcode = capture?.barcodes.firstOrNull;
-      if (barcode == null || barcode.rawValue == null) {
+      // Try mobile_scanner first, fall back to native CIDetector
+      String? value;
+      try {
+        final capture = await _controller.analyzeImage(image.path);
+        value = capture?.barcodes.firstOrNull?.rawValue;
+      } on UnsupportedError {
+        value = await _qrChannel.invokeMethod<String>('detectQrCode', {'path': image.path});
+      }
+
+      if (value == null) {
         _showError('No QR code found in the image');
         return;
       }
-      await _handleScannedValue(barcode.rawValue!);
+      await _handleScannedValue(value);
     } catch (e) {
       _showError('Failed to analyze image: $e');
     }
   }
 
   Future<void> _handleScannedValue(String raw) async {
-    if (_processing) return;
-    setState(() => _processing = true);
+    if (!_processing) setState(() => _processing = true);
 
     final match = _joinPattern.firstMatch(raw);
     if (match == null) {
