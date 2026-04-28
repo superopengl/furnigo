@@ -90,6 +90,10 @@ export default function HomePage() {
           0%, 100% { transform: translate(0, 0) scale(1); }
           50% { transform: translate(15px, -20px) scale(1.06); }
         }
+        @keyframes homeFloat3 {
+          0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.4; }
+          50% { transform: translate(-12px, -18px) scale(1.08); opacity: 0.8; }
+        }
         .download-btn {
           transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
@@ -98,24 +102,28 @@ export default function HomePage() {
           box-shadow: 0 12px 32px rgba(0,0,0,0.15) !important;
         }
         .category-card {
-          transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+          transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
         .category-card:hover {
-          transform: translateY(-6px);
-          box-shadow: 0 20px 60px rgba(61,50,40,0.18) !important;
+          transform: translateY(-6px) scale(1.02);
+          box-shadow: 0 24px 64px rgba(61,50,40,0.2) !important;
         }
         .category-card:hover .category-overlay {
-          background: linear-gradient(180deg, transparent 30%, rgba(44,36,32,0.7) 100%) !important;
+          background: linear-gradient(180deg, transparent 20%, rgba(44,36,32,0.65) 100%) !important;
         }
         .category-card:hover .category-label {
           transform: translateY(-4px);
         }
+        .category-card:hover .category-glass {
+          opacity: 1 !important;
+          transform: translateY(0) !important;
+        }
         .feature-card {
-          transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+          transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
         .feature-card:hover {
-          transform: translateY(-3px);
-          box-shadow: 0 16px 48px rgba(61,50,40,0.12) !important;
+          transform: translateY(-4px);
+          box-shadow: 0 20px 60px rgba(61,50,40,0.12), 0 0 0 1px rgba(255,255,255,0.5) inset !important;
         }
       `}</style>
 
@@ -123,10 +131,10 @@ export default function HomePage() {
       <div
         style={{
           position: "absolute",
-          width: 800,
-          height: 800,
+          width: 900,
+          height: 900,
           borderRadius: "50%",
-          background: `radial-gradient(circle, ${colors.secondary}14 0%, transparent 70%)`,
+          background: `radial-gradient(circle, ${colors.secondary}16 0%, ${colors.secondary}06 40%, transparent 70%)`,
           top: "-25%",
           right: "-20%",
           filter: "blur(100px)",
@@ -136,34 +144,50 @@ export default function HomePage() {
       <div
         style={{
           position: "absolute",
-          width: 600,
-          height: 600,
+          width: 700,
+          height: 700,
           borderRadius: "50%",
-          background: `radial-gradient(circle, ${colors.accent}10 0%, transparent 70%)`,
-          bottom: "20%",
+          background: `radial-gradient(circle, ${colors.accent}12 0%, ${colors.accent}04 40%, transparent 70%)`,
+          bottom: "15%",
           left: "-10%",
           filter: "blur(80px)",
           animation: "homeFloat2 14s ease-in-out infinite",
         }}
       />
+      <div
+        style={{
+          position: "absolute",
+          width: 500,
+          height: 500,
+          borderRadius: "50%",
+          background: `radial-gradient(circle, ${colors.secondary}0c 0%, transparent 70%)`,
+          top: "45%",
+          left: "35%",
+          filter: "blur(70px)",
+          animation: "homeFloat3 16s ease-in-out infinite",
+        }}
+      />
 
-      {/* Header — overlays the hero */}
+      {/* Header — overlays the hero with glass */}
       <header
         style={{
           position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
+          top: 12,
+          left: 32,
           zIndex: 10,
           display: "flex",
           alignItems: "center",
           justifyContent: "flex-start",
-          padding: "20px 32px",
-          maxWidth: 1200,
-          margin: "0 auto",
+          padding: "10px 20px",
+          borderRadius: 16,
+          background: "rgba(255,255,255,0.08)",
+          backdropFilter: "blur(20px) saturate(180%)",
+          WebkitBackdropFilter: "blur(20px) saturate(180%)",
+          border: "1px solid rgba(255,255,255,0.12)",
+          boxShadow: "0 4px 24px rgba(0,0,0,0.08)",
         }}
       >
-        <Logo size={40} showText textColor={colors.white} />
+        <Logo size={36} showText textColor={colors.white} />
       </header>
 
       {/* Hero — full-width banner with background image */}
@@ -372,26 +396,34 @@ export default function HomePage() {
                   position: "absolute",
                   inset: 0,
                   background:
-                    "linear-gradient(180deg, transparent 40%, rgba(44,36,32,0.55) 100%)",
-                  transition: "background 0.4s",
+                    "linear-gradient(180deg, transparent 40%, rgba(44,36,32,0.45) 100%)",
+                  transition: "background 0.5s",
                 }}
               />
               <div
-                className="category-label"
+                className="category-glass"
                 style={{
                   position: "absolute",
-                  bottom: 20,
-                  left: 20,
-                  right: 20,
-                  transition: "transform 0.4s",
+                  bottom: 16,
+                  left: 16,
+                  right: 16,
+                  padding: "10px 16px",
+                  borderRadius: 12,
+                  background: "rgba(255,255,255,0.15)",
+                  backdropFilter: "blur(16px) saturate(180%)",
+                  WebkitBackdropFilter: "blur(16px) saturate(180%)",
+                  border: "1px solid rgba(255,255,255,0.2)",
+                  opacity: 0.85,
+                  transform: "translateY(4px)",
+                  transition: "all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
                 }}
               >
                 <Text
                   style={{
                     color: colors.white,
-                    fontSize: 18,
+                    fontSize: 15,
                     fontWeight: 600,
-                    textShadow: "0 1px 4px rgba(0,0,0,0.3)",
+                    letterSpacing: 0.3,
                   }}
                 >
                   {cat.label}
@@ -422,9 +454,11 @@ export default function HomePage() {
               borderRadius: 20,
               overflow: "hidden",
               display: "flex",
-              background: colors.white,
-              border: `1px solid ${colors.border}60`,
-              boxShadow: `0 4px 20px ${colors.primary}08`,
+              background: "rgba(255,255,255,0.55)",
+              backdropFilter: "blur(24px) saturate(180%)",
+              WebkitBackdropFilter: "blur(24px) saturate(180%)",
+              border: "1px solid rgba(255,255,255,0.6)",
+              boxShadow: "0 8px 32px rgba(61,50,40,0.06), 0 0 0 0.5px rgba(255,255,255,0.4) inset",
             }}
           >
             <div
@@ -452,7 +486,11 @@ export default function HomePage() {
                   width: 44,
                   height: 44,
                   borderRadius: 12,
-                  background: `linear-gradient(135deg, ${colors.secondary}18, ${colors.accent}12)`,
+                  background: "rgba(255,255,255,0.6)",
+                  backdropFilter: "blur(12px)",
+                  WebkitBackdropFilter: "blur(12px)",
+                  border: "1px solid rgba(255,255,255,0.7)",
+                  boxShadow: "0 2px 8px rgba(61,50,40,0.06)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -518,20 +556,26 @@ export default function HomePage() {
             style={{
               position: "absolute",
               inset: 0,
-              background: `linear-gradient(135deg, ${colors.primary}d0 0%, ${colors.primary}60 50%, transparent 100%)`,
+              background: "linear-gradient(135deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.1) 50%, transparent 100%)",
             }}
           />
           <div
             style={{
               position: "absolute",
-              top: 0,
-              left: 0,
-              bottom: 0,
+              top: 32,
+              left: 32,
+              bottom: 32,
               display: "flex",
               flexDirection: "column",
               justifyContent: "center",
-              padding: "48px 56px",
-              maxWidth: 520,
+              padding: "32px 40px",
+              maxWidth: 480,
+              borderRadius: 20,
+              background: "rgba(255,255,255,0.12)",
+              backdropFilter: "blur(20px) saturate(180%)",
+              WebkitBackdropFilter: "blur(20px) saturate(180%)",
+              border: "1px solid rgba(255,255,255,0.18)",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
             }}
           >
             <Title
@@ -567,8 +611,14 @@ export default function HomePage() {
         style={{
           position: "relative",
           textAlign: "center",
-          padding: "24px",
-          borderTop: `1px solid ${colors.border}`,
+          padding: "24px 24px",
+          margin: "0 32px 24px",
+          borderRadius: 16,
+          background: "rgba(255,255,255,0.45)",
+          backdropFilter: "blur(20px) saturate(180%)",
+          WebkitBackdropFilter: "blur(20px) saturate(180%)",
+          border: "1px solid rgba(255,255,255,0.5)",
+          boxShadow: "0 4px 20px rgba(61,50,40,0.04)",
         }}
       >
         <div
